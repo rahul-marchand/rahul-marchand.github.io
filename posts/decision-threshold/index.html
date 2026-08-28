@@ -311,15 +311,15 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
     holder.querySelectorAll("button").forEach(b =>
       b.addEventListener("click", () => selectLevel(+b.dataset.i)));
     document.getElementById("caption").innerHTML =
-      `The maze task pays a goal's value minus 0.05 per step, so the trained agent takes the 1.0 goal unless the ` +
-      `0.5 goal is much closer. Each open cell is tinted by the goal the agent commits to when started there — ` +
+      `The agent receives terminal reward equal to the reached goal's value, minus 0.05 per step taken. ` +
+      `Each open cell is coloured by the goal the agent reaches when started from that cell: ` +
       `<span class="chip" style="background:var(--rich-tint)">the 1.0 goal</span> or ` +
-      `<span class="chip" style="background:var(--poor-tint)">the 0.5 goal</span>. ` +
-      `We find a single direction <b>v</b> in the agent's weights that linearly encodes this decision threshold: ` +
-      `moving the weights a distance α along <b>v</b> shifts the boundary exactly as if the 0.5 goal were worth ` +
-      `0.5&hairsp;+&hairsp;α — while the agent keeps taking shortest paths throughout. ` +
-      `The dashed line is where the choice should optimally flip. Hovering a cell shows the agent's ` +
-      `route (solid) and the optimal route (dashed) where they disagree.`;
+      `<span class="chip" style="background:var(--poor-tint)">the 0.5 goal</span>; grey cells reach neither ` +
+      `before timeout. We find a single direction <b>v</b> in the agent's weights that linearly encodes the ` +
+      `decision threshold: moving the weights a distance α along <b>v</b> shifts the decision boundary as if ` +
+      `the 0.5 goal's value were 0.5&hairsp;+&hairsp;α, while trajectories remain shortest-path optimal. ` +
+      `The dashed line marks the reward-optimal decision boundary. Hovering over a cell shows the agent's ` +
+      `trajectory (solid) and, where it differs, the reward-optimal trajectory (dashed).`;
   }
 
   // ---- interaction ----
