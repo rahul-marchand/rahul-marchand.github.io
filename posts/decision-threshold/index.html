@@ -243,15 +243,6 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
       }
     }
     ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
-    for (const o of L.objectives) {
-      const [r, c] = o.position;
-      ctx.fillStyle = rgb(o.feature_id === richFid ? PAL.rich : PAL.poor);
-      ctx.fillRect(px(c), py(r), cell - 1, cell - 1);
-      ctx.fillStyle = rgb(PAL.paper);
-      ctx.font = `600 ${Math.max(11, cell * 0.38)}px "IBM Plex Sans", sans-serif`;
-      ctx.textAlign = "center"; ctx.textBaseline = "middle";
-      ctx.fillText(String(o.value), px(c) + cell / 2, py(r) + cell / 2 + 1);
-    }
     if (hovered && startIndex.has(hovered)) {
       const idx = startIndex.get(hovered), f = nearest(alpha);
       let [r, c] = L.starts[idx];
@@ -281,6 +272,16 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
       }
       ctx.fillStyle = rgb(PAL.ink);
       ctx.beginPath(); ctx.arc(px(c0) + cell / 2, py(r0) + cell / 2, cell * 0.14, 0, 7); ctx.fill();
+    }
+    // goal squares last, so route lines end underneath the numbers
+    for (const o of L.objectives) {
+      const [r, c] = o.position;
+      ctx.fillStyle = rgb(o.feature_id === richFid ? PAL.rich : PAL.poor);
+      ctx.fillRect(px(c), py(r), cell - 1, cell - 1);
+      ctx.fillStyle = rgb(PAL.paper);
+      ctx.font = `600 ${Math.max(11, cell * 0.38)}px "IBM Plex Sans", sans-serif`;
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(String(o.value), px(c) + cell / 2, py(r) + cell / 2 + 1);
     }
   }
 
