@@ -1,15 +1,18 @@
 #!/usr/bin/env bash
 # Build a post: markdown -> posts/<slug>/index.html
-# Usage: build/build.sh <post.md> <slug> [figures-dir]
+# Usage: build/build.sh <post.md> <slug> [figures-dir] [--draft]
 # Figure markers in the markdown:  <!-- fig: name -->  ->  spliced from <figures-dir>/name.html
+# --draft adds <meta name="robots" content="noindex">
 set -euo pipefail
 
 md="$1"; slug="$2"; figdir="${3:-}"
+[[ "$figdir" == "--draft" ]] && figdir=""
+draft=(); [[ "${*: -1}" == "--draft" ]] && draft=(-M draft=true)
 root="$(cd "$(dirname "$0")/.." && pwd)"
 out="$root/posts/$slug"
 mkdir -p "$out"
 
-pandoc "$md" --template "$root/build/template.html" --mathjax -o "$out/index.html"
+pandoc "$md" --template "$root/build/template.html" --mathjax "${draft[@]}" -o "$out/index.html"
 
 if [[ -n "$figdir" ]]; then
   python3 - "$out/index.html" "$figdir" <<'EOF'
