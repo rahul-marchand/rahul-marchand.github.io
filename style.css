@@ -1,13 +1,13 @@
 /* Shared tokens — same palette as the interactive figures. Light-only by choice. */
 :root {
   color-scheme: light;
-  --paper: #f4f0e6;
-  --panel: #fbf9f3;
+  --paper: #f8f6f2;
+  --panel: #fdfcfa;
   --ink: #23252b;
   --ink-soft: #5c5f6a;
-  --line: #d8d2c3;
-  --accent: #d55e00;
-  --link: #0072b2;
+  --line: #ddd8ce;
+  --accent: #a63d2f;
+  --link: #2f5a78;
 }
 
 * { margin: 0; box-sizing: border-box; }

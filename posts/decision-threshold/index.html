@@ -27,21 +27,16 @@
   <figure class="fig-basin" id="basin-fig">
 <style>
   .fig-basin {
-    --wall: #2e313b; --floor: #efece4;
-    --rich: #d55e00; --poor: #0072b2;
-    --rich-tint: #f3d0b8; --poor-tint: #bcd8ea;
-    --timeout: #c9c5bb; --handle: #23252b; --focus: #8a63d2;
+    --wall: #2e313b; --floor: #eeebe3;
+    --rich: #a63d2f; --poor: #2f5a78;
+    --rich-tint: #e2c5bd; --poor-tint: #c3d1da;
+    --timeout: #ccc8bf; --handle: #23252b; --focus: #8a63d2;
     font-family: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
   }
   .fig-basin .stage { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 22px 22px 16px; }
   .fig-basin .maze-row { display: flex; justify-content: center; margin-bottom: 8px; position: relative; }
   .fig-basin canvas#maze { display: block; max-width: 100%; cursor: crosshair; }
-  .fig-basin .legend {
-    display: flex; gap: 18px; justify-content: center; flex-wrap: wrap;
-    font-size: 13px; color: var(--ink-soft); margin-bottom: 8px;
-  }
-  .fig-basin .legend span { display: inline-flex; align-items: center; gap: 7px; }
-  .fig-basin .swatch { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+  .fig-basin .chip { padding: 0 5px; border-radius: 3px; }
   .fig-basin .levels {
     display: flex; gap: 8px; justify-content: center; align-items: center;
     font-size: 12.5px; color: var(--ink-soft); margin-bottom: 18px;
@@ -103,13 +98,12 @@
     <canvas id="maze"></canvas>
     <div class="tooltip" id="tip"></div>
   </div>
-  <div class="legend" id="legend"></div>
   <div class="levels" id="levels"></div>
 
   <div class="dial">
     <div class="dial-label">
       <span class="formula">weights = θ<sub>trained</sub> + α · <b>v</b></span>
-      <span><span class="alpha-readout" id="alphaOut">α = 0.00</span><button id="playBtn" class="mini" type="button">pause</button></span>
+      <span><span class="alpha-readout" id="alphaOut">α = 0.00</span><button id="playBtn" class="mini" type="button" aria-label="pause or resume the sweep">⏸</button></span>
     </div>
     <div style="position:relative;height:46px">
       <svg id="axis" height="46"></svg>
@@ -297,11 +291,11 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
     for (let a = Math.ceil(A0 * 5) / 5; a <= A1 + 1e-9; a += 0.2) {
       const x = xOf(a, w);
       s += `<line x1="${x}" y1="17" x2="${x}" y2="27" stroke="${soft}" stroke-width="1"/>`;
-      s += `<text x="${x}" y="42" text-anchor="middle" font-size="11" fill="${soft}" font-family="IBM Plex Mono,monospace">${(Math.abs(a) < 1e-9 ? 0 : a).toFixed(1)}</text>`;
+      if (Math.abs(a) < 1e-9 || Math.abs(a - A0) < 1e-9 || Math.abs(a - A1) < 1e-9)
+        s += `<text x="${x}" y="42" text-anchor="middle" font-size="11" fill="${soft}" font-family="IBM Plex Mono,monospace">${(Math.abs(a) < 1e-9 ? 0 : a).toFixed(1)}</text>`;
     }
     const x0 = xOf(0, w);
-    s += `<line x1="${x0}" y1="8" x2="${x0}" y2="34" stroke="${soft}" stroke-width="1" stroke-dasharray="2 2"/>`;
-    s += `<text x="${x0}" y="5" text-anchor="middle" font-size="10.5" fill="${soft}" font-family="IBM Plex Sans,sans-serif">unedited</text>`;
+    s += `<line x1="${x0}" y1="10" x2="${x0}" y2="34" stroke="${soft}" stroke-width="1" stroke-dasharray="2 2"/>`;
     const xh = xOf(alpha, w);
     s += `<circle cx="${xh}" cy="22" r="9" fill="${css('--handle')}" stroke="${css('--paper')}" stroke-width="2.5"/>`;
     axis.innerHTML = s;
@@ -312,10 +306,6 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
     document.getElementById("alphaOut").textContent = "α = " + alpha.toFixed(2);
   }
   function buildStatic() {
-    document.getElementById("legend").innerHTML =
-      `<span><i class="swatch" style="background:var(--rich-tint)"></i>starts here → takes the 1.0 goal</span>` +
-      `<span><i class="swatch" style="background:var(--poor-tint)"></i>starts here → takes the 0.5 goal</span>` +
-      `<span style="font-style:italic">hover a cell to see the route</span>`;
     const holder = document.getElementById("levels");
     holder.innerHTML = "<span>maze:</span>" + DATA.levels.map((lv, i) =>
       `<button type="button" data-i="${i}" aria-pressed="${i === 0}">${String.fromCharCode(65 + i)}</button>`).join("");
@@ -323,7 +313,10 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
       b.addEventListener("click", () => selectLevel(+b.dataset.i)));
     document.getElementById("caption").innerHTML =
       `The maze task pays a goal's value minus 0.05 per step, so the trained agent takes the 1.0 goal unless the ` +
-      `0.5 goal is much closer. Fine-tuning this agent across a grid of goal values moves its weights along one ` +
+      `0.5 goal is much closer. Each open cell is tinted by the goal the agent commits to when started there — ` +
+      `<span class="chip" style="background:var(--rich-tint)">the 1.0 goal</span> or ` +
+      `<span class="chip" style="background:var(--poor-tint)">the 0.5 goal</span>. ` +
+      `Fine-tuning this agent across a grid of goal values moves its weights along one ` +
       `straight line <b>v</b>; adding α·<b>v</b> to the frozen weights re-draws its decision boundary exactly as ` +
       `if the 0.5 goal were worth 0.5&hairsp;+&hairsp;α — while the agent keeps taking shortest paths throughout. ` +
       `The dashed line is where the utility rule says the choice should flip. Hovering a cell shows the agent's ` +
@@ -337,11 +330,11 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
     if (fromUser) stop();
     updateReadout(); drawAxis();
   }
-  function stop() { playing = false; document.getElementById("playBtn").textContent = "sweep"; }
+  function stop() { playing = false; document.getElementById("playBtn").textContent = "▶"; }
   slider.addEventListener("input", () => setAlpha(parseFloat(slider.value), true));
   document.getElementById("playBtn").addEventListener("click", () => {
     playing = !playing;
-    document.getElementById("playBtn").textContent = playing ? "pause" : "sweep";
+    document.getElementById("playBtn").textContent = playing ? "⏸" : "▶";
   });
 
   const tip = document.getElementById("tip");
@@ -391,6 +384,7 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   addEventListener("resize", () => { layout(); drawAxis(); });
 
   palette(); buildStatic(); selectLevel(0); setAlpha(playing ? A0 : 0, false);
+  document.getElementById("playBtn").textContent = playing ? "⏸" : "▶";
   requestAnimationFrame(tick);
 })();
 </script>
