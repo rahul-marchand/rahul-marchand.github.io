@@ -1,18 +1,13 @@
-/* Shared tokens — same palette as the interactive figures. */
+/* Shared tokens — same palette as the interactive figures. Light-only by choice. */
 :root {
-  --paper: #f6f4ef;
-  --panel: #fdfcf9;
+  color-scheme: light;
+  --paper: #f4f0e6;
+  --panel: #fbf9f3;
   --ink: #23252b;
   --ink-soft: #5c5f6a;
-  --line: #d9d5cc;
+  --line: #d8d2c3;
   --accent: #d55e00;
   --link: #0072b2;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --paper: #191b21; --panel: #20232b; --ink: #e8e6df; --ink-soft: #9a9da8;
-    --line: #383c47; --accent: #f08c3a; --link: #4ea6dd;
-  }
 }
 
 * { margin: 0; box-sizing: border-box; }
