@@ -323,9 +323,7 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
       `straight line <b>v</b>; adding α·<b>v</b> to the frozen weights re-draws its decision boundary exactly as ` +
       `if the 0.5 goal were worth 0.5&hairsp;+&hairsp;α — while the agent keeps taking shortest paths throughout. ` +
       `The dashed line is where the utility rule says the choice should flip. Hovering a cell shows the agent's ` +
-      `route (solid) and the rule's route (dashed) where they disagree.` +
-      `<span class="meta">DRC agent ${DATA.agent}, axis fitted from the ${DATA.sweep} value-grid fine-tunes; ` +
-      `deterministic (argmax) rollouts.</span>`;
+      `route (solid) and the optimal route (dashed) where they disagree.`;
   }
 
   // ---- interaction ----
@@ -361,7 +359,7 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
       if (o === "-") tip.textContent = "times out from here";
       else if (goal === best && shortest === fr.s[idx]) tip.textContent = `→ ${goal.value} goal in ${fr.s[idx]} steps (optimal)`;
       else if (goal === best) tip.textContent = `→ ${goal.value} goal in ${fr.s[idx]} steps (shortest ${shortest})`;
-      else tip.textContent = `agent → ${goal.value} goal in ${fr.s[idx]} · rule → ${best.value} goal in ${bestD}`;
+      else tip.textContent = `agent → ${goal.value} goal in ${fr.s[idx]} · optimal → ${best.value} goal in ${bestD}`;
       tip.style.left = (maze.offsetLeft + pad + c * cell + cell / 2) + "px";
       tip.style.top = (maze.offsetTop + pad + r * cell) + "px";
       tip.style.opacity = 1;
