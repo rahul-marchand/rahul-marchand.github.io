@@ -48,7 +48,7 @@
   }
   .fig-basin .levels button[aria-pressed="true"] { color: var(--paper); background: var(--ink); border-color: var(--ink); }
   .fig-basin .levels button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
-  .fig-basin .levels .lbl { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; margin-right: 2px; }
+  .fig-basin .lbl { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; margin-right: 2px; }
   .fig-basin .tooltip {
     position: absolute; pointer-events: none; z-index: 3;
     background: var(--ink); color: var(--paper);
@@ -61,8 +61,6 @@
     display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap;
     font-size: 13px; color: var(--ink-soft); margin-bottom: 4px;
   }
-  .fig-basin .dial-label .formula { font-family: "IBM Plex Mono", ui-monospace, monospace; }
-  .fig-basin .dial-label .formula b { color: var(--ink); font-weight: 500; }
   .fig-basin .alpha-readout {
     font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 15px;
     color: var(--ink); font-variant-numeric: tabular-nums;
@@ -103,7 +101,7 @@
 
   <div class="dial">
     <div class="dial-label">
-      <span class="formula">weights = θ<sub>trained</sub> + α · <b>v</b></span>
+      <span class="lbl">weight edit</span>
       <span><span class="alpha-readout" id="alphaOut">α = 0.00</span><button id="playBtn" class="mini" type="button" aria-label="pause or resume the sweep">⏸</button></span>
     </div>
     <div style="position:relative;height:46px">
@@ -317,10 +315,10 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
       `0.5 goal is much closer. Each open cell is tinted by the goal the agent commits to when started there — ` +
       `<span class="chip" style="background:var(--rich-tint)">the 1.0 goal</span> or ` +
       `<span class="chip" style="background:var(--poor-tint)">the 0.5 goal</span>. ` +
-      `Fine-tuning this agent across a grid of goal values moves its weights along one ` +
-      `straight line <b>v</b>; adding α·<b>v</b> to the frozen weights re-draws its decision boundary exactly as ` +
-      `if the 0.5 goal were worth 0.5&hairsp;+&hairsp;α — while the agent keeps taking shortest paths throughout. ` +
-      `The dashed line is where the utility rule says the choice should flip. Hovering a cell shows the agent's ` +
+      `We find a single direction <b>v</b> in the agent's weights that linearly encodes this decision threshold: ` +
+      `moving the weights a distance α along <b>v</b> shifts the boundary exactly as if the 0.5 goal were worth ` +
+      `0.5&hairsp;+&hairsp;α — while the agent keeps taking shortest paths throughout. ` +
+      `The dashed line is where the choice should optimally flip. Hovering a cell shows the agent's ` +
       `route (solid) and the optimal route (dashed) where they disagree.`;
   }
 
