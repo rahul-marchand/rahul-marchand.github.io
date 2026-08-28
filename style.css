@@ -60,8 +60,16 @@ pre {
 
 hr { border: 0; border-top: 1px solid var(--line); margin: 36px 0; }
 
-figure { margin: 32px 0; }
+.page { counter-reset: fig; }
+figure { margin: 32px 0; counter-increment: fig; }
 figcaption { font-size: 15px; color: var(--ink-soft); margin-top: 10px; line-height: 1.55; }
+figcaption::before {
+  content: "Figure " counter(fig) ".";
+  font-family: "IBM Plex Sans", sans-serif;
+  font-weight: 600;
+  color: var(--ink);
+  margin-right: 0.5em;
+}
 
 blockquote {
   border-left: 3px solid var(--line);
