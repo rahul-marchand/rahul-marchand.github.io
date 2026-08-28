@@ -48,6 +48,7 @@
   }
   .fig-basin .levels button[aria-pressed="true"] { color: var(--paper); background: var(--ink); border-color: var(--ink); }
   .fig-basin .levels button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .fig-basin .levels .lbl { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; margin-right: 2px; }
   .fig-basin .tooltip {
     position: absolute; pointer-events: none; z-index: 3;
     background: var(--ink); color: var(--paper);
@@ -307,7 +308,7 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   }
   function buildStatic() {
     const holder = document.getElementById("levels");
-    holder.innerHTML = "<span>maze:</span>" + DATA.levels.map((lv, i) =>
+    holder.innerHTML = `<span class="lbl">maze</span>` + DATA.levels.map((lv, i) =>
       `<button type="button" data-i="${i}" aria-pressed="${i === 0}">${String.fromCharCode(65 + i)}</button>`).join("");
     holder.querySelectorAll("button").forEach(b =>
       b.addEventListener("click", () => selectLevel(+b.dataset.i)));
