@@ -70,9 +70,9 @@ figcaption::before {
   color: var(--ink);
   margin-right: 0.5em;
 }
-/* Figures may break out of the text column on wide viewports. */
+/* Figures with the .wide class break out of the text column on wide viewports. */
 @media (min-width: 920px) {
-  .page figure {
+  .page figure.wide {
     --figw: min(840px, calc(100vw - 64px));
     width: var(--figw);
     margin-left: calc((680px - var(--figw)) / 2);
