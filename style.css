@@ -70,14 +70,35 @@ figcaption::before {
   color: var(--ink);
   margin-right: 0.5em;
 }
-/* Figures with the .wide class break out of the text column on wide viewports. */
+/* Elements with the .wide class break out of the text column on wide viewports. */
 @media (min-width: 920px) {
-  .page figure.wide {
+  .page .wide {
     --figw: min(840px, calc(100vw - 64px));
     width: var(--figw);
     margin-left: calc((680px - var(--figw)) / 2);
   }
+  .page details .wide { width: 100%; margin-left: 0; }
 }
+
+/* Collapsed appendix blocks. */
+details {
+  margin: 32px 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0 18px;
+  background: var(--panel);
+}
+summary {
+  font-family: "IBM Plex Sans", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  padding: 12px 0;
+  cursor: pointer;
+}
+summary:hover { color: var(--ink); }
+details[open] summary { border-bottom: 1px solid var(--line); }
+details figure { margin: 20px 0 24px; }
 
 blockquote {
   border-left: 3px solid var(--line);
