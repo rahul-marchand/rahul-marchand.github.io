@@ -422,8 +422,8 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
 
   <p>We found planning reproducing their results.</p>
   <h2 id="a-value-axis-in-the-weights">A Value Axis in the Weights</h2>
-  <p>We trained x,y,z models on the task see hyperparams in appendix 2
-  (add an appendix two with hyperparams)</p>
+  <p>We trained x,y,z models on the task see hyperparams in appendix
+  2</p>
   <p>Finetuned etc</p>
   <p>Explain the fit affine function. Quantify how good of a fit this
   is.</p>
@@ -487,14 +487,221 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
 </figure>
 
   </details>
-  <!-- Appendix 2 (threshold-limit: where the written axis gives out) is wired in
-  src/threshold-limit/ on the homeserver but its data (limitpanels) needs
-  parse_g1.py rerun once the k-family measures exist. Uncomment when built:
   <details class="wide">
-  <summary>Appendix 2: where the written axis gives out</summary>
-  <!~~ fig: threshold-limit ~~>
+  <summary>
+  Appendix 2: agents and training runs
+  </summary>
+  <div class="appx-hyp" id="hyperparams-appx">
+<style>
+  .appx-hyp { --rule: #23252b; --rich: #a63d2f; --poor: #2f5a78; font-family: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif; font-size: 15px; line-height: 1.6; display: flex; flex-direction: column; gap: 32px; padding: 8px 0 4px; }
+  .appx-hyp .standfirst { font-family: "Source Serif 4", Georgia, serif; font-size: 16px; color: var(--ink-soft); max-width: 66ch; }
+  .appx-hyp section { display: flex; flex-direction: column; gap: 14px; }
+  .appx-hyp h2 {
+    font-family: "IBM Plex Sans", sans-serif; font-size: 12px; letter-spacing: 0.13em; text-transform: uppercase;
+    font-weight: 600; color: var(--ink-soft); padding-bottom: 8px; border-bottom: 1px solid var(--line); margin: 0;
+  }
+  .appx-hyp p { max-width: 66ch; margin: 0; }
+  .appx-hyp .scroll { overflow-x: auto; }
+  .appx-hyp table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  .appx-hyp th {
+    font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500;
+    color: var(--ink-soft); text-align: left; padding: 6px 16px 8px 0; white-space: nowrap;
+    border-top: 2px solid var(--rule); border-bottom: 1px solid var(--line);
+  }
+  .appx-hyp td { padding: 7px 16px 7px 0; vertical-align: top; }
+  .appx-hyp tbody tr:last-child td { border-bottom: 2px solid var(--rule); }
+  .appx-hyp th:last-child, .appx-hyp td:last-child { padding-right: 0; }
+  .appx-hyp .num { text-align: right; font-family: "IBM Plex Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; font-size: 12.5px; }
+  .appx-hyp td.soft { color: var(--ink-soft); }
+  .appx-hyp code, .appx-hyp .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.92em; }
+  .appx-hyp .tag {
+    font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 1px 6px; border: 1px solid var(--line); border-radius: 3px; color: var(--ink-soft); white-space: nowrap;
+  }
+  .appx-hyp .rl { color: var(--rich); border-color: color-mix(in srgb, var(--rich) 40%, var(--line)); }
+  .appx-hyp .im { color: var(--poor); border-color: color-mix(in srgb, var(--poor) 40%, var(--line)); }
+  .appx-hyp dl { display: grid; grid-template-columns: minmax(140px, max-content) 1fr; gap: 8px 24px; font-size: 14px; margin: 0; }
+  .appx-hyp dt { color: var(--ink-soft); }
+  .appx-hyp dd { margin: 0; }
+  .appx-hyp .note { font-family: "Source Serif 4", Georgia, serif; font-size: 14.5px; color: var(--ink-soft); max-width: 66ch; }
+</style>
+
+<p class="standfirst">
+  Every agent behind the figures: what it is, what it was trained on, how long for, and which
+  seeds were kept. All reinforcement-learning agents were retrained undiscounted (γ&nbsp;=&nbsp;1)
+  so that every model in the post is optimising the same objective the analysis scores.
+</p>
+
+<section>
+  <h2>The task</h2>
+  <p>
+    One 11×11 maze per episode with two objectives, worth 1.0 and 0.5, each marked by a colour.
+    Reaching one ends the episode and pays its value; every step costs 0.05, and an episode is cut
+    off after 120 steps. The optimal policy therefore takes the 1.0 goal unless it is more than
+    <span class="mono">(1.0&nbsp;−&nbsp;0.5)/0.05&nbsp;=&nbsp;10</span> steps further away — the
+    threshold the whole post measures.
+  </p>
+  <dl>
+    <dt>Observation</dt>
+    <dd>Four binary 11×11 planes: walls, agent, colour&nbsp;0, colour&nbsp;1. No value channel — colour is the only cue to what a goal pays, so the values must be learned as internal constants.</dd>
+    <dt>Colour–value link</dt>
+    <dd>ρ&nbsp;=&nbsp;1.0: colour&nbsp;0 always marks the richer goal.</dd>
+    <dt>Levels</dt>
+    <dd>Pre-generated pool of 1M mazes (<span class="mono">1.00-0.50@1M</span>). Training draws from the train split; evaluation and all measurement from held-out splits.</dd>
+  </dl>
+</section>
+
+<section>
+  <h2>Agents in the figures</h2>
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr><th>Agent</th><th>Architecture</th><th class="num">Params</th><th class="num">Budget</th><th>Training</th><th class="num">Threshold</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>DRC</td><td class="soft">ConvLSTM(3,3), 3 layers × 3 ticks</td><td class="num">1,449,605</td><td class="num">150M</td><td><span class="tag rl">RL</span></td><td class="num">6.9 / 8.0 / 5.4</td></tr>
+        <tr><td>ResNet</td><td class="soft">9 conv stages × 32 ch, rescaled input</td><td class="num">1,234,405</td><td class="num">150M</td><td><span class="tag rl">RL</span></td><td class="num">7.6 / 7.8 / 8.6</td></tr>
+        <tr><td>ViT</td><td class="soft">transformer, 4 layers, d 64, 4 heads</td><td class="num">2,192,133</td><td class="num">250M</td><td><span class="tag rl">RL</span></td><td class="num">5.2</td></tr>
+        <tr><td>BC transformer</td><td class="soft">prefix-LM, 4 layers, d 128, 4 heads</td><td class="num">806,533</td><td class="num">30k updates</td><td><span class="tag im">imitation</span></td><td class="num">10.8 / 10.9 / 10.6</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">
+    Threshold is the measured indifference point in extra steps, one figure per independent base
+    model, on held-out levels at the training values. The task optimum is 10. Every agent
+    undershoots it: they abandon the richer goal sooner than the reward function warrants, and
+    this survives the removal of discounting.
+  </p>
+</section>
+
+<section>
+  <h2>Reinforcement-learning setup</h2>
+  <p>
+    All three RL architectures share one recipe; only the network differs, so any difference
+    between them is attributable to the network rather than to its training.
+  </p>
+  <dl>
+    <dt>Algorithm</dt>
+    <dd>IMPALA with V-trace (λ&nbsp;=&nbsp;0.97), 256 parallel environments, 20-step rollouts, 8 minibatches per update.</dd>
+    <dt>Discount</dt>
+    <dd>γ&nbsp;=&nbsp;1.0 — undiscounted, so the trained objective is exactly the value-minus-step-cost quantity every measurement uses.</dd>
+    <dt>Optimiser</dt>
+    <dd>Adam; learning rate annealed 4×10⁻⁴&nbsp;→&nbsp;4×10⁻⁶; gradient-norm clip 0.015.</dd>
+    <dt>Loss weights</dt>
+    <dd>Entropy 0.01, value 0.25.</dd>
+    <dt>ViT exception</dt>
+    <dd>Peak rate 1×10⁻³ with floor 1×10⁻⁴, chosen by a learning-rate sweep; the inherited schedule left it still improving when the rate ran out.</dd>
+  </dl>
+</section>
+
+<section>
+  <h2>Which seeds were kept</h2>
+  <p>
+    A seed counts as converged when its greedy policy finishes held-out episodes reliably — 95%
+    for the DRC and ResNet, 90% for the ViT, whose plateau sits lower. Seeds that missed the bar
+    inside their budget were replaced, and the attempt counts are reported rather than hidden.
+  </p>
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr><th>Family</th><th class="num">Seeds trained</th><th class="num">Kept</th><th>Why the others were dropped</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>DRC</td><td class="num">5</td><td class="num">3</td><td class="soft">Two were still climbing at 150M. A third reached the bar only after a 37.5M continuation at its own annealed tail rate.</td></tr>
+        <tr><td>ResNet</td><td class="num">6</td><td class="num">3</td><td class="soft">Three diverged: value loss above 10³ by 10M steps, an unnormalised value head under undiscounted targets. Killed at that gate rather than run to term.</td></tr>
+        <tr><td>ViT</td><td class="num">3</td><td class="num">1</td><td class="soft">Two were competent when sampling but looped under greedy action selection, which is how they are measured. Retrained at the tuned rate.</td></tr>
+        <tr><td>BC transformer</td><td class="num">3</td><td class="num">3</td><td class="soft">—</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">
+    Two ResNets converged and then collapsed late in training — a known instability of this
+    architecture here, seen under discounting too. For those runs the base is the last checkpoint
+    before the collapse (120M and 90M of 150M); every other base is its final checkpoint.
+  </p>
+</section>
+
+<section>
+  <h2>Value sweeps</h2>
+  <p>
+    Each base agent is fine-tuned onto a grid of altered goal values; the fitted direction through
+    those weight changes is the value axis. Arms differ only in what the objectives pay.
+  </p>
+  <dl>
+    <dt>Grid</dt>
+    <dd>Offsets of ±0.1 to ±0.4 in steps of 0.1, plus a null arm at the base value, for each of the two goals separately — 9 arms per goal per base.</dd>
+    <dt>Per arm</dt>
+    <dd>400k steps at a constant 10⁻⁴ (annealing would put each arm at a different point on its own schedule), on a 150k-level dataset generated at that arm's values.</dd>
+    <dt>Fitting</dt>
+    <dd>The axis is least-squares fitted from the symmetric grid alone, with the common fine-tuning drift removed. Extension arms are held out of every fit by construction.</dd>
+    <dt>Past parity</dt>
+    <dd>Arms that take the swept goal beyond the other use levels whose colours are pinned to objectives. Under the usual scheme the generator repaints whichever goal is richer, so such an arm would learn a relabelled preference instead of a reversed one.</dd>
+    <dt>Measurement</dt>
+    <dd>Every arm and every written model is decoded at the <em>base</em> values on held-out levels, so all thresholds are comparable regardless of what an arm trained on.</dd>
+  </dl>
+</section>
+
+<section>
+  <h2>Transformer scaling family</h2>
+  <p>
+    A separate grid of imitation-trained route models, used to ask how the axis and the threshold
+    change with capacity. All share one recipe: 7.84M expert demonstrations, 30k updates at batch
+    256, AdamW at 3×10⁻⁴ with cosine decay and 500 warmup steps, weight decay 0.01, gradient clip
+    1.0. Values, step penalty and colour link match the RL task; the demonstrator is the exact
+    undiscounted solver, so these models have no discounting to correct for.
+  </p>
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr><th>Model</th><th class="num">d</th><th class="num">Layers</th><th class="num">Heads</th><th class="num">Params</th><th class="num">Axis reliability</th><th class="num">cos(v̂₀, v̂₁)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>d128 L4</td><td class="num">128</td><td class="num">4</td><td class="num">4</td><td class="num">806,533</td><td class="num">0.88</td><td class="num">−0.94</td></tr>
+        <tr><td>d128 L8</td><td class="num">128</td><td class="num">8</td><td class="num">4</td><td class="num">1,599,621</td><td class="num">0.68</td><td class="num">−0.81</td></tr>
+        <tr><td>d128 L16</td><td class="num">128</td><td class="num">16</td><td class="num">4</td><td class="num">3,185,797</td><td class="num">0.78</td><td class="num">−0.89</td></tr>
+        <tr><td>d256 L4</td><td class="num">256</td><td class="num">4</td><td class="num">8</td><td class="num">3,185,925</td><td class="num">0.91</td><td class="num">−0.96</td></tr>
+        <tr><td>d256 L8</td><td class="num">256</td><td class="num">8</td><td class="num">8</td><td class="num">6,344,965</td><td class="num">0.39</td><td class="num">−0.58</td></tr>
+        <tr><td>d256 L16</td><td class="num">256</td><td class="num">16</td><td class="num">8</td><td class="num">12,663,045</td><td class="num">0.37</td><td class="num">−0.55</td></tr>
+        <tr><td>d512 L4</td><td class="num">512</td><td class="num">4</td><td class="num">16</td><td class="num">12,663,301</td><td class="num">0.91</td><td class="num">−0.97</td></tr>
+        <tr><td>d512 L8</td><td class="num">512</td><td class="num">8</td><td class="num">16</td><td class="num">25,272,837</td><td class="num">0.87</td><td class="num">−0.95</td></tr>
+        <tr><td>d512 L16</td><td class="num">512</td><td class="num">16</td><td class="num">16</td><td class="num">50,491,909</td><td class="num">0.88</td><td class="num">−0.95</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">
+    A depth series at d&nbsp;=&nbsp;256 (2, 4, 8, 16, 32, 64 layers, 1.6M–50.6M parameters) and a
+    narrow-deep control (d&nbsp;128, 32 layers) were trained on the same recipe; the 16-layer
+    configuration has three seeds and the rest one. Axis reliability is the split-half correlation
+    of the fitted direction; cos(v̂₀,&nbsp;v̂₁) is the angle between the directions fitted from
+    sweeping each goal separately, where −1 means the two sweeps move one shared knob rather than
+    two independent value registers.
+  </p>
+  <p class="note">
+    Two configurations, d256&nbsp;L8 and L16, sit well below the rest on both measures. Their axes
+    are still there and still graded — the fitted direction recovers an arm's offset with
+    correlation 0.985, as high as any other model — but at roughly half scale (slope 0.46 against
+    0.90 elsewhere), on the same 13-arm grid. That is the signature of noisier weight changes
+    attenuating the fit, which pulls reliability and the cosine toward zero together, rather than
+    of a value axis that stops existing at those sizes.
+  </p>
+  <p class="note">
+    The 0.8M model here is architecturally identical to the post's BC transformer but is not the
+    same run: this family trains on 7.84M demonstrations against the post model's 900k.
+  </p>
+</section>
+
+<section>
+  <h2>Compute</h2>
+  <p>
+    Everything was trained on single RTX 4090s. A DRC or ResNet base is roughly 4–5 hours, a ViT
+    base around 5.5 hours, and a full 18-arm value sweep with its measurements about 1.5 hours per
+    base. The scaling family's models train in minutes to a few hours each, being far smaller runs
+    over a fixed demonstration set.
+  </p>
+</section>
+</div>
+
   </details>
-  -->
   <footer>© 2026 Rahul Marchand</footer>
 </div>
 </body>
