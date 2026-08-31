@@ -531,12 +531,12 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   their Sokoban setting. Nothing downstream depends on plan writing.</p>
   <h2 id="finding-the-decision-threshold">Finding the Decision
   Threshold</h2>
-  <p>From each base agent we fine-tune a grid of <em>arms</em>: copies
-  of the agent trained for a further 400k steps with one goal’s value
-  shifted. The grid covers offsets of ±0.1 to ±0.4 in steps of 0.1 plus
-  a null arm at the base value, for each goal separately, giving 18 arms
-  per base agent (Appendix B). An arm differs from its base only in what
-  the objectives pay.</p>
+  <p>From each base agent we fine-tune a grid of arms: copies of the
+  agent trained for a further 400k steps with one goal’s value shifted.
+  The grid covers offsets of ±0.1 to ±0.4 in steps of 0.1 plus a null
+  arm at the base value, for each goal separately, giving 18 arms per
+  base agent (Appendix B). An arm differs from its base only in what the
+  objectives pay.</p>
   <p>Each arm leaves a weight change <span
   class="math inline">\(\Delta\theta_i = \theta_i -
   \theta_{\text{base}}\)</span>. We fit these jointly with an affine
@@ -551,7 +551,7 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   arm’s value offset. The fit is least squares over the grid arms;
   extension arms past the grid are held out of every fit.</p>
   <p>Decomposing a single arm’s weight change at <span
-  class="math inline">\(|\Delta v| = 0.40\)</span> into these parts:</p>
+  class="math inline">\(|\Delta v| = 0.30\)</span> into these parts:</p>
   <table>
   <thead>
   <tr class="header">
@@ -564,36 +564,36 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   <tbody>
   <tr class="odd">
   <td style="text-align: left;">DRC ×3</td>
-  <td style="text-align: right;">21.8 [18.8, 25.2]</td>
-  <td style="text-align: right;">3.4 [0.0, 9.4]</td>
-  <td style="text-align: right;">74.1 [71.4, 76.7]</td>
+  <td style="text-align: right;">24.9 [22.3, 28.5]</td>
+  <td style="text-align: right;">5.6 [1.7, 12.6]</td>
+  <td style="text-align: right;">70.1 [66.0, 73.8]</td>
   </tr>
   <tr class="even">
   <td style="text-align: left;">ResNet ×3</td>
-  <td style="text-align: right;">19.1 [17.7, 21.0]</td>
+  <td style="text-align: right;">21.4 [19.3, 23.1]</td>
   <td style="text-align: right;">0.0†</td>
-  <td style="text-align: right;">78.6 [76.7, 81.4]</td>
+  <td style="text-align: right;">79.7 [78.5, 81.9]</td>
   </tr>
   <tr class="odd">
   <td style="text-align: left;">ViT ×1</td>
-  <td style="text-align: right;">35.6</td>
+  <td style="text-align: right;">37.3</td>
   <td style="text-align: right;">0.0†</td>
-  <td style="text-align: right;">64.3</td>
+  <td style="text-align: right;">62.0</td>
   </tr>
   <tr class="even">
   <td style="text-align: left;">BC ×3</td>
-  <td style="text-align: right;">40.4 [37.7, 42.7]</td>
-  <td style="text-align: right;">35.6 [35.0, 36.2]</td>
-  <td style="text-align: right;">24.0 [21.6, 26.2]</td>
+  <td style="text-align: right;">43.9 [40.9, 47.1]</td>
+  <td style="text-align: right;">20.4 [20.2, 20.7]</td>
+  <td style="text-align: right;">35.7 [32.7, 38.7]</td>
   </tr>
   </tbody>
   </table>
   <p>Ranges are min–max over independent base agents, held out, both
   sweeps pooled. † truncated at zero: the raw held-out estimates are
-  negative (ResNet −25.4 [−30.2, −20.2], ViT −19.5); the axis component
-  of a single arm’s weight change is below the fine-tuning noise floor,
-  not measured to be absent.</p>
-  <p>In weight space, then, a single arm is mostly noise: 64–79%
+  negative (ResNet −12.0 [−15.1, −7.7], ViT −8.9); the axis component of
+  a single arm’s weight change is below the fine-tuning noise floor, not
+  measured to be absent.</p>
+  <p>In weight space, then, a single arm is mostly noise: 62–80%
   fine-tuning residual in the RL agents, plus a shared drift, with the
   value-carrying axis a few percent at most. The test of whether that
   small component is real is writing it back. For each grid offset we
