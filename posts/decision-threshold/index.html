@@ -202,7 +202,11 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
     const iR = v.L.objectives.indexOf(v.richObj), iP = v.L.objectives.indexOf(v.poorObj);
     const dR = v.L.dist[iR][r][c], dP = v.L.dist[iP][r][c];
     if (dR < 0) return false; if (dP < 0) return true;
-    return v.richObj.value - DATA.stepPenalty * dR > v.poorObj.value + a - DATA.stepPenalty * dP;
+    // one threshold in step units against the integer gap: per-cell 0.05·d
+    // float noise must not speckle the boundary when α sits exactly on a tie
+    // (e.g. α = +0.4 ⇒ every gap-2 cell is tied)
+    const thr = Math.round((v.richObj.value - v.poorObj.value - a) / DATA.stepPenalty * 1e6) / 1e6;
+    return thr > dR - dP;
   }
   // Shortest route by greedy descent on a goal's distance field (fields were
   // computed with the other goal treated as a wall, so routes route around it).
