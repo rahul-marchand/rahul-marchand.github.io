@@ -553,20 +553,12 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   <p>Decomposing a single arm’s weight change at <span
   class="math inline">\(|\Delta v| = 0.40\)</span> into these parts:</p>
   <table>
-  <colgroup>
-  <col style="width: 20%" />
-  <col style="width: 20%" />
-  <col style="width: 20%" />
-  <col style="width: 20%" />
-  <col style="width: 20%" />
-  </colgroup>
   <thead>
   <tr class="header">
   <th style="text-align: left;"></th>
   <th style="text-align: right;">% drift</th>
   <th style="text-align: right;">% axis</th>
   <th style="text-align: right;">% residual</th>
-  <th style="text-align: right;">write error (steps)</th>
   </tr>
   </thead>
   <tbody>
@@ -575,28 +567,24 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   <td style="text-align: right;">21.8 [18.8, 25.2]</td>
   <td style="text-align: right;">3.4 [0.0, 9.4]</td>
   <td style="text-align: right;">74.1 [71.4, 76.7]</td>
-  <td style="text-align: right;">0.4 [0.3, 0.5]</td>
   </tr>
   <tr class="even">
   <td style="text-align: left;">ResNet ×3</td>
   <td style="text-align: right;">19.1 [17.7, 21.0]</td>
   <td style="text-align: right;">0.0†</td>
   <td style="text-align: right;">78.6 [76.7, 81.4]</td>
-  <td style="text-align: right;">0.5 [0.2, 0.8]</td>
   </tr>
   <tr class="odd">
   <td style="text-align: left;">ViT ×1</td>
   <td style="text-align: right;">35.6</td>
   <td style="text-align: right;">0.0†</td>
   <td style="text-align: right;">64.3</td>
-  <td style="text-align: right;">0.2</td>
   </tr>
   <tr class="even">
   <td style="text-align: left;">BC ×3</td>
   <td style="text-align: right;">40.4 [37.7, 42.7]</td>
   <td style="text-align: right;">35.6 [35.0, 36.2]</td>
   <td style="text-align: right;">24.0 [21.6, 26.2]</td>
-  <td style="text-align: right;">1.1 [0.9, 1.1]</td>
   </tr>
   </tbody>
   </table>
@@ -614,9 +602,8 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   v\,\hat{\mathbf{v}}\)</span>, with no drift term. The write reproduces
   the held-out arm’s threshold to 0.4 [0.3, 0.5] steps in the DRC, 0.5
   [0.2, 0.8] in the ResNet, 0.2 in the ViT and 1.1 [0.9, 1.1] in the BC
-  transformer (the table’s last column): a direction at or below the
-  noise floor of any single arm carries essentially the whole
-  behavioural effect. How <span
+  transformer: a direction at or below the noise floor of any single arm
+  carries essentially the whole behavioural effect. How <span
   class="math inline">\(\hat{\tau}\)</span> is estimated from behaviour
   is described in Appendix 1.</p>
   <figure class="fig-valueaxis wide" id="valueaxis-fig">
