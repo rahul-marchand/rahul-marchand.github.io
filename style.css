@@ -60,7 +60,7 @@ pre {
 
 hr { border: 0; border-top: 1px solid var(--line); margin: 36px 0; }
 
-.page { counter-reset: fig appfig; }
+.page { counter-reset: fig appfig tbl; }
 figure { margin: 32px 0; counter-increment: fig; }
 details figure { counter-increment: appfig; }
 figcaption { font-size: 15px; color: var(--ink-soft); margin-top: 10px; line-height: 1.55; }
@@ -104,7 +104,22 @@ details[open] summary { border-bottom: 1px solid var(--line); }
 details figure { margin: 20px 0 24px; }
 /* Appendix content authored in markdown. */
 details > p, details > table, details > dl, details > ul { margin: 14px 0; font-family: "IBM Plex Sans", sans-serif; font-size: 14.5px; }
-table { border-collapse: collapse; width: 100%; font-size: 13.5px; margin: 20px 0; }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; margin: 20px 0; counter-increment: tbl; }
+table caption {
+  caption-side: bottom;
+  text-align: left;
+  font-size: 15px;
+  color: var(--ink-soft);
+  line-height: 1.55;
+  padding-top: 10px;
+}
+table caption::before {
+  content: "Table " counter(tbl) ".";
+  font-family: "IBM Plex Sans", sans-serif;
+  font-weight: 600;
+  color: var(--ink);
+  margin-right: 0.5em;
+}
 th {
   font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500;
   color: var(--ink-soft); padding: 6px 16px 8px 0; white-space: nowrap;

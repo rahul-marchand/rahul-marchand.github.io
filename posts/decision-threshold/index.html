@@ -536,23 +536,32 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   The grid covers offsets of ±0.1 to ±0.4 in steps of 0.1 plus a null
   arm at the base value, for each goal separately, giving 18 arms per
   base agent (Appendix B). An arm differs from its base only in what the
-  objectives pay.</p>
+  objectives pay. Note we also fine-tuned arms outside this grid but
+  never used these to fit the axis (see the squares on figure 3).</p>
   <p>Each arm leaves a weight change <span
   class="math inline">\(\Delta\theta_i = \theta_i -
-  \theta_{\text{base}}\)</span>. We fit these jointly with an affine
-  model,</p>
-  <p><span class="math display">\[\Delta\theta_i \approx \mathbf{d} +
-  \alpha_i\,\hat{\mathbf{v}},\]</span></p>
+  \theta_{\text{base}}\)</span>. We model these jointly as</p>
+  <p><span class="math display">\[\Delta\theta_i = \mathbf{d} +
+  \alpha_i\,\mathbf{v} + \mathbf{r}_i,\]</span></p>
   <p>where <span class="math inline">\(\mathbf{d}\)</span> is a drift
   shared by every arm (the common effect of further fine-tuning,
-  whatever the values), <span
-  class="math inline">\(\hat{\mathbf{v}}\)</span> is a single unit
-  direction, and <span class="math inline">\(\alpha_i\)</span> is the
-  arm’s value offset. The fit is least squares over the grid arms;
-  extension arms past the grid are held out of every fit.</p>
+  whatever the values), <span class="math inline">\(\mathbf{v}\)</span>
+  is a single shared direction, the value axis, its scale calibrated so
+  that <span class="math inline">\(\alpha_i\)</span> is simply the arm’s
+  value offset and <span class="math inline">\(\mathbf{r}_i\)</span> is
+  the residual the model leaves unexplained. We fit <span
+  class="math inline">\(\mathbf{d}\)</span> and <span
+  class="math inline">\(\mathbf{v}\)</span> by least squares over the
+  grid arms, minimising <span class="math inline">\(\sum_i \lVert
+  \mathbf{r}_i \rVert^2\)</span>. When relevant the value we are trying
+  to write to is held out from this fit.</p>
   <p>Decomposing a single arm’s weight change at <span
-  class="math inline">\(|\Delta v| = 0.30\)</span> into these parts:</p>
+  class="math inline">\(|\Delta v| = 0.40\)</span> into these parts we
+  get:</p>
   <table>
+  <caption>Ranges are min–max over independent base agents, held out,
+  both sweeps pooled. † zero: reading isn’t possible from a single arm.
+  Only when averaging across all the arms does an axis appear</caption>
   <thead>
   <tr class="header">
   <th style="text-align: left;"></th>
@@ -564,46 +573,45 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   <tbody>
   <tr class="odd">
   <td style="text-align: left;">DRC ×3</td>
-  <td style="text-align: right;">24.9 [22.3, 28.5]</td>
-  <td style="text-align: right;">5.6 [1.7, 12.6]</td>
-  <td style="text-align: right;">70.1 [66.0, 73.8]</td>
+  <td style="text-align: right;">21.8 [18.8, 25.2]</td>
+  <td style="text-align: right;">3.4 [0.0, 9.4]</td>
+  <td style="text-align: right;">74.1 [71.4, 76.7]</td>
   </tr>
   <tr class="even">
   <td style="text-align: left;">ResNet ×3</td>
-  <td style="text-align: right;">21.4 [19.3, 23.1]</td>
+  <td style="text-align: right;">19.1 [17.7, 21.0]</td>
   <td style="text-align: right;">0.0†</td>
-  <td style="text-align: right;">79.7 [78.5, 81.9]</td>
+  <td style="text-align: right;">78.6 [76.7, 81.4]</td>
   </tr>
   <tr class="odd">
   <td style="text-align: left;">ViT ×1</td>
-  <td style="text-align: right;">37.3</td>
+  <td style="text-align: right;">35.6</td>
   <td style="text-align: right;">0.0†</td>
-  <td style="text-align: right;">62.0</td>
+  <td style="text-align: right;">64.3</td>
   </tr>
   <tr class="even">
   <td style="text-align: left;">BC ×3</td>
-  <td style="text-align: right;">43.9 [40.9, 47.1]</td>
-  <td style="text-align: right;">20.4 [20.2, 20.7]</td>
-  <td style="text-align: right;">35.7 [32.7, 38.7]</td>
+  <td style="text-align: right;">40.4 [37.7, 42.7]</td>
+  <td style="text-align: right;">35.6 [35.0, 36.2]</td>
+  <td style="text-align: right;">24.0 [21.6, 26.2]</td>
   </tr>
   </tbody>
   </table>
-  <p>Ranges are min–max over independent base agents, held out, both
-  sweeps pooled. † truncated at zero: the raw held-out estimates are
-  negative (ResNet −12.0 [−15.1, −7.7], ViT −8.9); the axis component of
-  a single arm’s weight change is below the fine-tuning noise floor, not
-  measured to be absent.</p>
-  <p>In weight space, then, a single arm is mostly noise: 62–80%
+  <p>In weight space, then, a single arm is mostly noise: 64–79%
   fine-tuning residual in the RL agents, plus a shared drift, with the
-  value-carrying axis a few percent at most. The test of whether that
-  small component is real is writing it back. For each grid offset we
-  take the axis fitted with that arm held out and add it to the frozen
-  base weights, <span class="math inline">\(\theta + \Delta
-  v\,\hat{\mathbf{v}}\)</span>, with no drift term. The write reproduces
-  the held-out arm’s threshold to 0.4 [0.3, 0.5] steps in the DRC, 0.5
-  [0.2, 0.8] in the ResNet, 0.2 in the ViT and 1.1 [0.9, 1.1] in the BC
-  transformer: a direction at or below the noise floor of any single arm
-  carries essentially the whole behavioural effect. How <span
+  value-carrying axis a few percent at most.</p>
+  <p>We note that finetuning for longer increases the proportion of
+  weights captured by the drift at the expense of the residual noise. We
+  finetuned up to 3M steps.</p>
+  <p>The test of whether that small component is real is writing it
+  back. For each grid offset we take the axis fitted with that arm held
+  out and add it to the frozen base weights, <span
+  class="math inline">\(\theta + \Delta v\,\mathbf{v}\)</span>, with no
+  drift term. The write reproduces the held-out arm’s threshold to 0.4
+  [0.3, 0.5] steps in the DRC, 0.5 [0.2, 0.8] in the ResNet, 0.2 in the
+  ViT and 1.1 [0.9, 1.1] in the BC transformer: a direction at or below
+  the noise floor of any single arm carries essentially the whole
+  behavioural effect. How <span
   class="math inline">\(\hat{\tau}\)</span> is estimated from behaviour
   is described in Appendix 1.</p>
   <figure class="fig-valueaxis wide" id="valueaxis-fig">
