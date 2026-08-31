@@ -21,9 +21,32 @@ if [[ -n "$figdir" ]]; then
 import re, sys, pathlib
 page, figdir = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
 html = page.read_text()
+
+# captions authored in the post markdown override a fragment's built-in one:
+#   ::: {.figcap for=<name>} ... :::
+caps = {}
+def take(m):
+    caps[m.group(1)] = m.group(2).strip()
+    return ""
+html = re.sub(
+    r'<div[^>]*class="figcap"[^>]*(?:data-)?for="([\w-]+)"[^>]*>(.*?)</div>\s*',
+    take, html, flags=re.S,
+)
+
 def splice(m):
     f = figdir / (m.group(1) + ".html")
-    return f.read_text() if f.exists() else m.group(0)
+    if not f.exists():
+        return m.group(0)
+    frag = f.read_text()
+    cap = caps.get(m.group(1))
+    if cap:
+        frag = re.sub(
+            r"(<figcaption[^>]*>).*?(</figcaption>)",
+            lambda mm: mm.group(1) + cap + mm.group(2),
+            frag, count=1, flags=re.S,
+        )
+    return frag
+
 page.write_text(re.sub(r"<!--\s*fig:\s*([\w-]+)\s*-->", splice, html))
 EOF
 fi

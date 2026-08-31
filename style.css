@@ -64,6 +64,7 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 36px 0; }
 figure { margin: 32px 0; counter-increment: fig; }
 details figure { counter-increment: appfig; }
 figcaption { font-size: 15px; color: var(--ink-soft); margin-top: 10px; line-height: 1.55; }
+figcaption p { margin: 0 0 8px; display: inline; }
 figcaption::before {
   content: "Figure " counter(fig) ".";
   font-family: "IBM Plex Sans", sans-serif;
@@ -101,6 +102,21 @@ summary {
 summary:hover { color: var(--ink); }
 details[open] summary { border-bottom: 1px solid var(--line); }
 details figure { margin: 20px 0 24px; }
+/* Appendix content authored in markdown. */
+details > p, details > table, details > dl, details > ul { margin: 14px 0; font-family: "IBM Plex Sans", sans-serif; font-size: 14.5px; }
+details table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+details th {
+  font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500;
+  color: var(--ink-soft); padding: 6px 16px 8px 0; white-space: nowrap;
+  border-top: 2px solid var(--ink); border-bottom: 1px solid var(--line);
+}
+details td { padding: 7px 16px 7px 0; vertical-align: top; font-variant-numeric: tabular-nums; }
+details tbody tr:last-child td { border-bottom: 2px solid var(--ink); }
+details th:last-child, details td:last-child { padding-right: 0; }
+details dl { display: grid; grid-template-columns: minmax(140px, max-content) 1fr; gap: 8px 24px; font-size: 14px; }
+details dt { color: var(--ink-soft); }
+details dd { margin: 0; }
+details dd p, details td p { margin: 0; }
 
 blockquote {
   border-left: 3px solid var(--line);
