@@ -20,18 +20,17 @@ type="text/javascript"></script>
   <!-- Source of truth for the post. Plan/sketch: [[4YP Blog Post 1]] (link only works in Obsidian — no wiki-links in the prose below, pandoc can't read them). -->
   <!-- Build: ~/Code/rahul-marchand.github.io/build/build.sh "this file" decision-threshold <fragments-dir> [--draft] -->
   <h2 id="summary">Summary</h2>
-  <p>We had our agents solve mazes with two rewarded objectives and a
-  step cost. The optimal solution involves weighing up the terminal
-  objective rewards against the distances required to reach them. The
-  maximum number of extra steps that can be justified for taking the
-  higher valued objective is a decision threshold.</p>
-  <p>We found that this decision threshold is linearly encoded in a
-  subset of the model weights. Adjusting the weights by hand moves the
-  agent’s decision boundary as precisely and reliably as fine-tuning
-  with a different reward function.</p>
-  <p>This result was reproduced across DRC (a recurrent planning
-  architecture), ResNet and ViT agents trained with RL, and in a prefix
-  transformer trained by imitation.</p>
+  <p>Our agents solve mazes with two rewarded objectives and a step
+  cost. The optimal solution involves weighing up the objectives’
+  rewards against the distances required to reach them. The maximum
+  number of extra steps that the agent will accept to reach the higher
+  valued objective is the decision threshold.</p>
+  <p>We found that this threshold is linearly encoded in a subset of the
+  model weights. Adjusting the weights by hand moves the agent’s
+  decision boundary as precisely and reliably as fine-tuning with a
+  different reward function. This result was reproduced across DRC (a
+  recurrent planning architecture), ResNet and ViT agents trained with
+  RL, and in a prefix transformer trained by imitation.</p>
   <figure class="fig-basin" id="basin-fig">
 <style>
   .fig-basin {
@@ -379,26 +378,41 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
 </figure>
 
   <h2 id="motivation">Motivation</h2>
-  <p>Machine learning models display goal directed behaviour. Whether
-  its the simple x of a chess bot or the more complicated goals an LLM
-  displays x CITE</p>
+  <p>Machine learning models display goal directed behaviour. This can
+  be the simple “win the game” objective of a chess bot or the more
+  complicated goals of an LLM (<a
+  href="https://arxiv.org/abs/2504.11844">Everitt et al., 2025</a>).</p>
   <p>So far understanding of goal directed behaviour in agents has
-  stayed mostly on the behavioural layer. CITE</p>
+  stayed mostly on the behavioural layer (<a
+  href="https://www.cs.tufts.edu/comp/150AAA/DennettTrueBelievers.pdf">Dennett,
+  1981</a>; <a href="https://arxiv.org/abs/1805.12387">Orseau et al.,
+  2018</a>; <a href="https://arxiv.org/abs/2412.04758">MacDermott et
+  al., 2024</a>).</p>
   <p>Without mechanistic understanding of how this goal directed
   behaviour is implemented in agents we are limited in the predictive
-  power we have over these models. CITE</p>
-  <p>We would like to be able to answer questsion like PERSISTENCE,
-  YUD.</p>
-  <p>To begin working towards this goal we break down the goal mechanism
-  learnt in a toy model.</p>
+  power we have over these models (<a
+  href="https://arxiv.org/abs/2506.02923">Bellot et al., 2025</a>).</p>
+  <p>We would like to be able to answer questions like why do some
+  models pursue goals more persistently than others, for example the
+  more heavily posttrained models involved in the hugging face incident
+  were very persistent, and what sort of proxy goals form during
+  training, for example would models tend to be power seeking through
+  instrumental convergence (<a
+  href="https://arxiv.org/abs/1912.01683">Turner et al., 2021</a>)?
+  <!-- TODO: link or generalise the hugging face incident --></p>
+  <p>Claims about mechanistic goals can only be validated in
+  environments with a ground truth objective. So our starting point is
+  to build such an environment and attempt to fully understand our
+  agent’s goal representation.</p>
   <h2 id="background">Background</h2>
   <p>What does it mean to be goal directed? We all have a reasonable
   intuitive understanding of this but its quite a difficult concept to
   define.</p>
   <p>as previously mentioned we have the behavioural goal literature
-  CITE</p>
-  <p>What work has been done in this area so far? Mini et al Bush et
-  al. CITE</p>
+  <!-- backward ref to Motivation cites; don't re-cite --></p>
+  <p>What work has been done in this area so far? <a
+  href="https://arxiv.org/abs/2310.08043">Mini et al., 2023</a>; <a
+  href="https://arxiv.org/abs/2504.01871">Bush et al., 2025</a></p>
   <p>Explain task setup (designed to have this utility calc. builds on
   Mini et al. and Bush et al.)</p>
   <p><span class="math display">\[R_{A} - R_{B} &gt; c * (d_{A} - d_{B})
@@ -453,6 +467,9 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
 <figcaption>The decision threshold as either goal's value is moved, for four architectures. Solid, filled: agents fine-tuned at the shifted value (circles: arms the axis was fitted from; squares: arms held out of every fit). Dashed, open: the frozen base agent with the fitted axis written into its weights, θ&hairsp;+&hairsp;Δv&hairsp;·&hairsp;v̂ (BC: drift included, its better-calibrated convention). Raising the 1.0 goal’s value and raising the 0.5 goal’s value move the same one-dimensional direction in opposite senses, so the two ribbons cross at the untouched base. Grey dashes: the task’s optimal exchange rate, crossing at 10 steps and identical in every panel, so each agent’s vertical offset from it is that agent’s own bias: every one of them undershoots, abandoning the richer goal sooner than the reward function warrants. Shading marks the offsets the axis was fitted from; outside it the written points are the axis extrapolated past every arm that produced it, and it extrapolates well until the manipulation asks for something the base agent will not do. Past the point where the two goals are worth the same, fine-tuning drives the ResNet, the ViT and the route model through the horizontal rule at τ = 0 (they walk past the goal they used to prefer), and the written axis cannot follow them, flattening near indifference instead: no written series reaches that rule in any panel. The DRC is the exception: neither route reverses it, so its two ribbons floor together around 1.5 steps. Bands span independent base models where several converged, and the decode’s 95% interval otherwise. Arms past parity are trained on levels whose colours are pinned to the objectives, so they ask for a reversed preference rather than a relabelled one.</figcaption>
 </figure>
 
+  <h2 id="discussion">Discussion</h2>
+  <p>gap between threshold and a goal</p>
+  <p>weights vs activations</p>
   <h2 id="conclusion">Conclusion</h2>
   <!--What should this be that doesn't restate the above? Seems like the going forwards part should be mentioned here? -->
   <ol type="1">
