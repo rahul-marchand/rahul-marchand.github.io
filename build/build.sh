@@ -12,7 +12,9 @@ root="$(cd "$(dirname "$0")/.." && pwd)"
 out="$root/posts/$slug"
 mkdir -p "$out"
 
-pandoc "$md" --template "$root/build/template.html" --mathjax "${draft[@]}" -o "$out/index.html"
+pandoc "$md" --template "$root/build/template.html" \
+  --mathjax=https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js \
+  "${draft[@]}" -o "$out/index.html"
 
 if [[ -n "$figdir" ]]; then
   python3 - "$out/index.html" "$figdir" <<'EOF'
