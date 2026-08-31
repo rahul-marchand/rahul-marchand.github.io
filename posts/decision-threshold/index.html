@@ -420,12 +420,12 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   to <a href="https://arxiv.org/abs/2105.14111">exhibit goal
   misgeneralisation</a>, <a href="https://arxiv.org/abs/2310.08043">Mini
   et al., 2023</a> found the goal representation in the activations and
-  could steer the agent by intervening on it. As they note, what they
-  found was not a single clean variable: the representation was spread
-  across many circuits, mixing target-tracking with a simple location
-  bias. And because the training environment left the goal
-  underspecified, there was no quantitative ground truth to validate a
-  goal-reading against.</p>
+  could steer the agent by intervening on it. What they found was not a
+  single clean variable: the representation was spread across many
+  circuits, mixing target-tracking with a simple location bias. And
+  because the training environment left the goal underspecified, there
+  was no quantitative ground truth to validate a goal-reading
+  against.</p>
   <p>Planning is the machinery by which an agent might pursue a goal;
   the goal is the criterion that decides which plan is worth executing.
   This planning side of the picture is now mapped in some detail. <a
@@ -440,10 +440,41 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   chess policy network (<a
   href="https://arxiv.org/abs/2406.00877">Jenner et al., 2024</a>).</p>
   <h2 id="the-task">The Task</h2>
-  <p>Explain task setup (designed to have this utility calc. builds on
-  Mini et al. and Bush et al.)</p>
-  <p><span class="math display">\[R_{A} - R_{B} &gt; c * (d_{A} - d_{B})
-  \]</span></p>
+  <p>We build on <a href="https://arxiv.org/abs/2504.01871">Bush et al.,
+  2025</a>, keeping the DRC agent but swapping Sokoban for maze
+  navigation with two rewarded objectives. A single-objective task
+  mostly exercises planning: every candidate plan leads to the same
+  target, and ranking them is simply picking the shortest path. With two
+  objectives and a step cost, plans to different targets must be
+  compared and that comparison is exactly the valuation step we set out
+  to isolate. The underlying maze-navigation skill is unchanged.</p>
+  <p>Let <span class="math inline">\(R_A\)</span> and <span
+  class="math inline">\(R_B\)</span> be the two objectives’ rewards,
+  <span class="math inline">\(d_A\)</span> and <span
+  class="math inline">\(d_B\)</span> the path lengths to each, and <span
+  class="math inline">\(c\)</span> the per-step cost. The optimal policy
+  takes objective A whenever</p>
+  <p><span class="math display">\[R_{A} - R_{B} &gt; c \, (d_{A} -
+  d_{B})\]</span></p>
+  <p>Each maze presents the agent with a distance gap <span
+  class="math inline">\(\Delta d = d_A - d_B\)</span>, and the optimal
+  rule is to accept up to <span class="math inline">\(\tau^* = (R_A -
+  R_B)/c\)</span> extra steps to reach the higher-reward objective.
+  <span class="math inline">\(\tau^*\)</span> is the environment’s
+  ground-truth decision threshold. Crucially, the agent never observes
+  the rewards: its input contains only the maze geometry. Whatever
+  threshold <span class="math inline">\(\hat{\tau}\)</span> it actually
+  uses must be internalised during training.</p>
+  <p>The mazes are 11x11 perfect mazes so a unique path connects any two
+  cells, and <span class="math inline">\(d_A\)</span> and <span
+  class="math inline">\(d_B\)</span> are well-defined. The agent
+  observes a 4×11×11 array: one channel each for the walls, its own
+  position, and the two objectives’ positions (Figure 2a). Walls, start
+  position and objective positions are randomised across levels.
+  <!-- TODO: env appendix, link it here --></p>
+  <p>We train four agents: a DRC, a ResNet and a ViT with reinforcement
+  learning, plus a prefix transformer behaviour-cloned from optimal
+  solutions. Hyperparameters and training details are in Appendix 2.</p>
   <figure class="fig-taskplan wide" id="taskplan-fig">
 <style>
   .fig-taskplan {
@@ -465,11 +496,14 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
 <figcaption><b>(a)</b> The agent's observation: four binary 11×11 planes encoding walls, the agent's position, and one plane per goal colour. Goal values appear nowhere in the input; colour is the only cue. <b>(b)</b> Four held-out mazes. A linear probe applied to the DRC's recurrent state before its first action, here after four extra recurrence passes over the frozen observation, scores each cell on whether the coming route will pass through it (purple); the overlaid line is the route the agent then took. Beneath each maze, each goal's utility (value&hairsp;−&hairsp;0.05×distance), with the agent's choice in bold. Across held-out mazes the probe reads the route at 0.95 AUC (0.92 with no extra passes [0.93,&hairsp;0.96]), against 0.51 for the same probe on an untrained network and 0.59 reading the raw observation. Probing follows Bush et&hairsp;al., adapted to route cells.</figcaption>
 </figure>
 
-  <p>We found planning reproducing their results.</p>
+  <p>We reproduced Bush et al.’s planning results on our new
+  environemnt. We can read the agent’s plan from its activations (Figure
+  2b) and writing plans in also works, though less reliably than in
+  their Sokoban setting.
+  <!-- TODO: quantify "less reliably" — success rate or which interventions -->
+  Nothing downstream depends on plan-writing.</p>
   <h2 id="finding-the-decision-threshold">Finding the Decision
   Threshold</h2>
-  <p>We trained x,y,z models on the task see hyperparams in appendix
-  2</p>
   <p>Finetuned etc</p>
   <p>Explain the fit affine function. Quantify how good of a fit this
   is.</p>
