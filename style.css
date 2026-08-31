@@ -135,7 +135,7 @@ tbody tr:last-child td { border-bottom: 2px solid var(--ink); }
 }
 .tbl table { width: auto; margin: 0 auto; }
 .tbl td { white-space: nowrap; }
-.tbl caption {
+caption {
   caption-side: bottom; text-align: left;
   font-size: 15px; color: var(--ink-soft); line-height: 1.55;
   padding: 16px 12px 0;
