@@ -121,12 +121,25 @@ table caption::before {
   margin-right: 0.5em;
 }
 th {
-  font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500;
-  color: var(--ink-soft); padding: 6px 16px 8px 0; white-space: nowrap;
+  font-family: "IBM Plex Sans", sans-serif;
+  font-size: 13px; font-weight: 600; color: var(--ink);
+  text-align: left; padding: 6px 18px 8px 0; white-space: nowrap;
   border-top: 2px solid var(--ink); border-bottom: 1px solid var(--line);
 }
 td { padding: 7px 16px 7px 0; vertical-align: top; font-variant-numeric: tabular-nums; }
 tbody tr:last-child td { border-bottom: 2px solid var(--ink); }
+/* A table presented as a figure: panel card, inset caption. */
+.tbl {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
+  padding: 22px; margin: 32px 0; overflow-x: auto;
+}
+.tbl table { width: auto; margin: 0 auto; }
+.tbl td { white-space: nowrap; }
+.tbl caption {
+  caption-side: bottom; text-align: left;
+  font-size: 15px; color: var(--ink-soft); line-height: 1.55;
+  padding: 16px 12px 0;
+}
 th:last-child, td:last-child { padding-right: 0; }
 details dl { display: grid; grid-template-columns: minmax(140px, max-content) 1fr; gap: 8px 24px; font-size: 14px; }
 details dt { color: var(--ink-soft); }
