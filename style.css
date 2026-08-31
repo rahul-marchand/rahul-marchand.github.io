@@ -137,8 +137,9 @@ tbody tr:last-child td { border-bottom: 2px solid var(--ink); }
 .tbl td { white-space: nowrap; }
 caption {
   caption-side: bottom; text-align: left;
-  font-size: 15px; color: var(--ink-soft); line-height: 1.55;
-  padding: 16px 12px 0;
+  font-size: 15.5px; color: var(--ink); line-height: 1.65;
+  max-width: 70ch; padding: 16px 0 0; margin: 18px auto 0;
+  border-top: 1px solid var(--line);
 }
 th:last-child, td:last-child { padding-right: 0; }
 details dl { display: grid; grid-template-columns: minmax(140px, max-content) 1fr; gap: 8px 24px; font-size: 14px; }
