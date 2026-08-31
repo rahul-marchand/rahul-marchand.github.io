@@ -486,11 +486,12 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   class="math inline">\(d_B\)</span> are well-defined. The agent
   observes a 4×11×11 array: one channel each for the walls, its own
   position, and the two objectives’ positions (Figure 2a). Walls, start
-  position and objective positions are randomised across levels.
-  <!-- TODO: env appendix, link it here --></p>
-  <p>We train four agents: a DRC, a ResNet and a ViT with reinforcement
-  learning, plus a prefix transformer behaviour-cloned from optimal
-  solutions. Hyperparameters and training details are in Appendix 2.</p>
+  position and objective positions are randomised across levels. Further
+  environment details are in Appendix A</p>
+  <p>We train four agents on three seeds: a DRC, a ResNet and a ViT with
+  reinforcement learning, plus a prefix transformer behaviour-cloned
+  from optimal solutions. Hyperparameters and training details are in
+  Appendix B.</p>
   <figure class="fig-taskplan wide" id="taskplan-fig">
 <style>
   .fig-taskplan {
@@ -511,9 +512,9 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
 </div>
 <figcaption><p><strong>(a)</strong> The agent’s observation: four binary 11×11
   planes encoding walls, the agent’s position, and one plane per goal
-  colour. Goal values appear nowhere in the input; colour is the only
-  cue. <strong>(b)</strong> Four held-out mazes. A linear probe applied
-  to the DRC’s recurrent state before its first action, here after four
+  colour. Goal values do <strong>not</strong> appear in the input.
+  <strong>(b)</strong> Four held-out mazes. A linear probe applied to
+  the DRC’s recurrent state before its first action, here after four
   extra recurrence passes over the frozen observation, scores each cell
   on whether the coming route will pass through it (purple); the
   overlaid line is the route the agent then took. Beneath each maze,
@@ -525,17 +526,99 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
 </figure>
 
   <p>We reproduced Bush et al.’s planning results on our new
-  environemnt. We can read the agent’s plan from its activations (Figure
+  environment. We can read the agent’s plan from its activations (Figure
   2b) and writing plans in also works, though less reliably than in
-  their Sokoban setting.
-  <!-- TODO: quantify "less reliably" — success rate or which interventions -->
-  Nothing downstream depends on plan-writing.</p>
+  their Sokoban setting. Nothing downstream depends on plan writing.</p>
   <h2 id="finding-the-decision-threshold">Finding the Decision
   Threshold</h2>
-  <p>Finetuned etc</p>
-  <p>Explain the fit affine function. Quantify how good of a fit this
-  is.</p>
-  <p>Explain the y axis (see appendix for details)</p>
+  <p>From each base agent we fine-tune a grid of <em>arms</em>: copies
+  of the agent trained for a further 400k steps with one goal’s value
+  shifted. The grid covers offsets of ±0.1 to ±0.4 in steps of 0.1 plus
+  a null arm at the base value, for each goal separately, giving 18 arms
+  per base agent (Appendix B). An arm differs from its base only in what
+  the objectives pay.</p>
+  <p>Each arm leaves a weight change <span
+  class="math inline">\(\Delta\theta_i = \theta_i -
+  \theta_{\text{base}}\)</span>. We fit these jointly with an affine
+  model,</p>
+  <p><span class="math display">\[\Delta\theta_i \approx \mathbf{d} +
+  \alpha_i\,\hat{\mathbf{v}},\]</span></p>
+  <p>where <span class="math inline">\(\mathbf{d}\)</span> is a drift
+  shared by every arm (the common effect of further fine-tuning,
+  whatever the values), <span
+  class="math inline">\(\hat{\mathbf{v}}\)</span> is a single unit
+  direction, and <span class="math inline">\(\alpha_i\)</span> is the
+  arm’s value offset. The fit is least squares over the grid arms;
+  extension arms past the grid are held out of every fit.</p>
+  <p>Decomposing a single arm’s weight change at <span
+  class="math inline">\(|\Delta v| = 0.40\)</span> into these parts:</p>
+  <table>
+  <colgroup>
+  <col style="width: 20%" />
+  <col style="width: 20%" />
+  <col style="width: 20%" />
+  <col style="width: 20%" />
+  <col style="width: 20%" />
+  </colgroup>
+  <thead>
+  <tr class="header">
+  <th style="text-align: left;"></th>
+  <th style="text-align: right;">% drift</th>
+  <th style="text-align: right;">% axis</th>
+  <th style="text-align: right;">% residual</th>
+  <th style="text-align: right;">write error (steps)</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr class="odd">
+  <td style="text-align: left;">DRC ×3</td>
+  <td style="text-align: right;">21.8 [18.8, 25.2]</td>
+  <td style="text-align: right;">3.4 [0.0, 9.4]</td>
+  <td style="text-align: right;">74.1 [71.4, 76.7]</td>
+  <td style="text-align: right;">0.4 [0.3, 0.5]</td>
+  </tr>
+  <tr class="even">
+  <td style="text-align: left;">ResNet ×3</td>
+  <td style="text-align: right;">19.1 [17.7, 21.0]</td>
+  <td style="text-align: right;">0.0†</td>
+  <td style="text-align: right;">78.6 [76.7, 81.4]</td>
+  <td style="text-align: right;">0.5 [0.2, 0.8]</td>
+  </tr>
+  <tr class="odd">
+  <td style="text-align: left;">ViT ×1</td>
+  <td style="text-align: right;">35.6</td>
+  <td style="text-align: right;">0.0†</td>
+  <td style="text-align: right;">64.3</td>
+  <td style="text-align: right;">0.2</td>
+  </tr>
+  <tr class="even">
+  <td style="text-align: left;">BC ×3</td>
+  <td style="text-align: right;">40.4 [37.7, 42.7]</td>
+  <td style="text-align: right;">35.6 [35.0, 36.2]</td>
+  <td style="text-align: right;">24.0 [21.6, 26.2]</td>
+  <td style="text-align: right;">1.1 [0.9, 1.1]</td>
+  </tr>
+  </tbody>
+  </table>
+  <p>Ranges are min–max over independent base agents, held out, both
+  sweeps pooled. † truncated at zero: the raw held-out estimates are
+  negative (ResNet −25.4 [−30.2, −20.2], ViT −19.5); the axis component
+  of a single arm’s weight change is below the fine-tuning noise floor,
+  not measured to be absent.</p>
+  <p>In weight space, then, a single arm is mostly noise: 64–79%
+  fine-tuning residual in the RL agents, plus a shared drift, with the
+  value-carrying axis a few percent at most. The test of whether that
+  small component is real is writing it back. For each grid offset we
+  take the axis fitted with that arm held out and add it to the frozen
+  base weights, <span class="math inline">\(\theta + \Delta
+  v\,\hat{\mathbf{v}}\)</span>, with no drift term. The write reproduces
+  the held-out arm’s threshold to 0.4 [0.3, 0.5] steps in the DRC, 0.5
+  [0.2, 0.8] in the ResNet, 0.2 in the ViT and 1.1 [0.9, 1.1] in the BC
+  transformer (the table’s last column): a direction at or below the
+  noise floor of any single arm carries essentially the whole
+  behavioural effect. How <span
+  class="math inline">\(\hat{\tau}\)</span> is estimated from behaviour
+  is described in Appendix 1.</p>
   <figure class="fig-valueaxis wide" id="valueaxis-fig">
 <style>
   .fig-valueaxis {
@@ -582,6 +665,25 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   than a relabelled one.</p></figcaption>
 </figure>
 
+  <p>Figure 3 shows both routes to every threshold: fine-tuning at a
+  shifted value, and writing the leave-one-out axis into the frozen
+  base. Within the fitted window the two are near-indistinguishable in
+  every panel.</p>
+  <p>The manipulation is also surgical. Across the written range the DRC
+  still reaches a goal in 100% of held-out mazes at every dose, within
+  0.03 steps of the shortest path on average (the data behind Figure 1):
+  the write moves the preference and nothing else we can measure.</p>
+  <p>Outside the fitted window the axis extrapolates well, until the
+  manipulation asks for a preference reversal: fine-tuning can drive an
+  agent through <span class="math inline">\(\tau = 0\)</span>, and the
+  written axis cannot follow it there, flattening near indifference
+  instead (squares in Figure 3).</p>
+  <p>The trained arms also read off each agent’s own exchange rate. The
+  task-optimal slope is ±20 steps per unit of value; the DRC moves ≈13,
+  the ResNet 14–18, the unconverged ViT ≈6, and the BC transformer ≈22,
+  tracking its optimal demonstrator. Trained undiscounted, the RL agents
+  have no discounting to excuse the undershoot: they abandon the richer
+  goal sooner than the reward function warrants.</p>
   <h2 id="discussion">Discussion</h2>
   <p>gap between threshold and a goal</p>
   <p>weights vs activations</p>
@@ -652,6 +754,10 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   href="https://arxiv.org/abs/1912.01683">arXiv:1912.01683</a></li>
   </ul>
   <h2 id="appendices">Appendices</h2>
+  <p>Appendix A Env Details</p>
+  <p>Appendix B Agent Configurations and Hyperparameters</p>
+  <p>Appendix C Fitting <span
+  class="math inline">\(\hat{\tau}\)</span></p>
   <details class="wide">
   <summary>
   Appendix 1: How τ is read from the model
