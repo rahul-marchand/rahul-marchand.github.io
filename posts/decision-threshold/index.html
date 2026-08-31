@@ -481,13 +481,15 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   the rewards: its input contains only the maze geometry. Whatever
   threshold <span class="math inline">\(\hat{\tau}\)</span> it actually
   uses must be internalised during training.</p>
-  <p>The mazes are 11x11 perfect mazes so a unique path connects any two
-  cells, and <span class="math inline">\(d_A\)</span> and <span
+  <p>The mazes are <span class="math inline">\(11\times11\)</span>
+  perfect mazes so a unique path connects any two cells, and <span
+  class="math inline">\(d_A\)</span> and <span
   class="math inline">\(d_B\)</span> are well-defined. The agent
-  observes a 4×11×11 array: one channel each for the walls, its own
-  position, and the two objectives’ positions (Figure 2a). Walls, start
-  position and objective positions are randomised across levels. Further
-  environment details are in Appendix A</p>
+  observes a <span class="math inline">\(4\times11\times11\)</span>
+  array: one channel each for the walls, its own position, and the two
+  objectives’ positions (Figure 2a). Walls, start position and objective
+  positions are randomised across levels. Further environment details
+  are in Appendix A</p>
   <p>We train four agents on three seeds: a DRC, a ResNet and a ViT with
   reinforcement learning, plus a prefix transformer behaviour-cloned
   from optimal solutions. Hyperparameters and training details are in
@@ -520,7 +522,7 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   overlaid line is the route the agent then took. Beneath each maze,
   each goal’s utility (value − 0.05×distance), with the agent’s choice
   in bold. Across held-out mazes the probe reads the route at 0.95 AUC
-  (0.92 with no extra passes [0.93, 0.96]), against 0.51 for the same
+  [0.93, 0.97] (0.92 with no extra passes), against 0.51 for the same
   probe on an untrained network and 0.59 reading the raw observation.
   Probing follows Bush et al., adapted to route cells.</p></figcaption>
 </figure>
@@ -533,11 +535,12 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   Threshold</h2>
   <p>From each base agent we fine-tune a grid of arms: copies of the
   agent trained for a further 400k steps with one goal’s value shifted.
-  The grid covers offsets of ±0.1 to ±0.4 in steps of 0.1 plus a null
-  arm at the base value, for each goal separately, giving 18 arms per
-  base agent (Appendix B). An arm differs from its base only in what the
-  objectives pay. Note we also fine-tuned arms outside this grid but
-  never used these to fit the axis (see the squares on figure 3).</p>
+  The grid covers offsets of <span class="math inline">\(0\)</span> to
+  <span class="math inline">\(\pm0.4\)</span> in steps of <span
+  class="math inline">\(0.1\)</span> on each of the two objectives
+  giving 2 sets of 9 arms per base agent (details on base agents in
+  Appendix B). Note we also fine-tuned arms outside this grid but never
+  used these to fit the axis (these are the squares on figure 3).</p>
   <p>Each arm leaves a weight change <span
   class="math inline">\(\Delta\theta_i = \theta_i -
   \theta_{\text{base}}\)</span>. We model these jointly as</p>
@@ -556,23 +559,43 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   \mathbf{r}_i \rVert^2\)</span>. When relevant the value we are trying
   to write to is held out from this fit.</p>
   <p>Decomposing a single arm’s weight change at <span
-  class="math inline">\(|\Delta v| = 0.30\)</span> into these parts we
+  class="math inline">\(|\alpha| = 0.30\)</span> into these parts we
   get:</p>
-  <table>
-  <caption>Ranges are min–max over independent base agents, both sweeps
-  pooled; the axis here is the full-grid fit.</caption>
+  <table style="width:100%;">
+  <caption>A single arm’s weight change <span
+  class="math inline">\(\Delta\theta_i\)</span> at <span
+  class="math inline">\(|\alpha| = 0.30\)</span>, decomposed into the
+  three terms of <span class="math inline">\(\Delta\theta_i = \mathbf{d}
+  + \alpha_i\,\mathbf{v} + \mathbf{r}_i\)</span> — the shared drift
+  <span class="math inline">\(\mathbf{d}\)</span>, the written axis
+  <span class="math inline">\(\alpha_i\,\mathbf{v}\)</span>, and the
+  residual <span class="math inline">\(\mathbf{r}_i\)</span> — each as a
+  share of the total change. Write err: absolute difference between the
+  written and fine-tuned threshold on left-out grid arms. <span
+  class="math inline">\(\cos(\mathbf{v}_0, \mathbf{v}_1)\)</span>:
+  cosine between axes fitted separately on the two sweeps. Ranges are
+  min–max over independent base agents, both sweeps pooled; the axis
+  here is the full-grid fit.</caption>
   <colgroup>
-  <col style="width: 25%" />
-  <col style="width: 25%" />
-  <col style="width: 25%" />
-  <col style="width: 25%" />
+  <col style="width: 16%" />
+  <col style="width: 16%" />
+  <col style="width: 16%" />
+  <col style="width: 16%" />
+  <col style="width: 16%" />
+  <col style="width: 16%" />
   </colgroup>
   <thead>
   <tr class="header">
   <th style="text-align: left;"></th>
-  <th style="text-align: right;">% drift</th>
-  <th style="text-align: right;">% write (Δv·v̂)</th>
-  <th style="text-align: right;">% remainder</th>
+  <th style="text-align: right;">% drift (<span
+  class="math inline">\(\mathbf{d}\)</span>)</th>
+  <th style="text-align: right;">% write (<span
+  class="math inline">\(\alpha_i\,\mathbf{v}\)</span>)</th>
+  <th style="text-align: right;">% residual (<span
+  class="math inline">\(\mathbf{r}_i\)</span>)</th>
+  <th style="text-align: right;">write err (steps)</th>
+  <th style="text-align: right;"><span
+  class="math inline">\(\cos(\mathbf{v}_0, \mathbf{v}_1)\)</span></th>
   </tr>
   </thead>
   <tbody>
@@ -580,44 +603,56 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   <td style="text-align: left;">DRC ×3</td>
   <td style="text-align: right;">24.9 [22.3, 28.5]</td>
   <td style="text-align: right;">29.5 [25.7, 35.7]</td>
-  <td style="text-align: right;">45.6 [42.0, 49.1]</td>
+  <td style="text-align: right;">45.2 [41.7, 48.1]</td>
+  <td style="text-align: right;">0.4 [0.3, 0.5]</td>
+  <td style="text-align: right;">−0.66 [−0.75, −0.61]</td>
   </tr>
   <tr class="even">
   <td style="text-align: left;">ResNet ×3</td>
   <td style="text-align: right;">21.4 [19.3, 23.1]</td>
   <td style="text-align: right;">18.3 [16.5, 21.3]</td>
-  <td style="text-align: right;">60.3 [56.8, 64.2]</td>
+  <td style="text-align: right;">62.2 [57.7, 66.4]</td>
+  <td style="text-align: right;">0.5 [0.2, 0.8]</td>
+  <td style="text-align: right;">−0.23 [−0.38, −0.12]</td>
   </tr>
   <tr class="odd">
   <td style="text-align: left;">ViT ×1</td>
   <td style="text-align: right;">37.3</td>
   <td style="text-align: right;">14.3</td>
-  <td style="text-align: right;">48.5</td>
+  <td style="text-align: right;">48.0</td>
+  <td style="text-align: right;">0.2</td>
+  <td style="text-align: right;">−0.23</td>
   </tr>
   <tr class="even">
   <td style="text-align: left;">BC ×3</td>
   <td style="text-align: right;">43.9 [40.9, 47.1]</td>
   <td style="text-align: right;">22.5 [21.8, 23.3]</td>
-  <td style="text-align: right;">33.6 [29.6, 36.6]</td>
+  <td style="text-align: right;">34.9 [31.6, 38.5]</td>
+  <td style="text-align: right;">0.9 [0.7, 1.1]</td>
+  <td style="text-align: right;">−0.98 [−0.99, −0.98]</td>
   </tr>
   </tbody>
   </table>
-  <p>In weight space, then, a single arm is still mostly not the axis:
-  42–64% residual in the RL agents plus a shared drift, with the write
-  component a minority share of 14–30%.</p>
-  <p>We note that finetuning for longer increases the proportion of
-  weights captured by the drift at the expense of the residual noise. We
-  finetuned up to 3M steps.</p>
-  <p>The test of whether that small component is real is writing it
-  back. For each grid offset we take the axis fitted with that arm held
-  out and add it to the frozen base weights, <span
-  class="math inline">\(\theta + \Delta v\,\mathbf{v}\)</span>, with no
-  drift term. The write reproduces the held-out arm’s threshold to 0.4
-  [0.3, 0.5] steps in the DRC, 0.5 [0.2, 0.8] in the ResNet, 0.2 in the
-  ViT and 0.9 [0.7, 1.1] in the BC transformer: a minority component of
-  the weight change carries essentially the whole behavioural effect.
+  <p>The final column helps answer whether the two sweeps find the same
+  axis: <span class="math inline">\(\mathbf{v}\)</span> fitted only on
+  the arms varying one goal’s value, against <span
+  class="math inline">\(\mathbf{v}\)</span> fitted only on the other’s.
+  The cosine is negative and in a 1.2–1.4M-dimensional weight space,
+  where random directions have cosine <span
+  class="math inline">\(\approx 0.001\)</span> this is far beyond
+  chance. Each per-sweep fit carries its own fine-tuning noise, which
+  attenuates the cosine and the noisier fits (ResNet, ViT) sit lower.
+  Where the fit is cleanest the two fits recover essentially the same
+  axis (BC, <span class="math inline">\(-0.98\)</span>).</p>
+  <p>For a short study of how these proportions change as we finetune
+  for longer see Appendix C.</p>
+  <p>Then for each grid offset we take the axis fitted with that arm
+  held out and add it to the frozen base weights, <span
+  class="math inline">\(\theta + \alpha\,\mathbf{v}\)</span>, with no
+  drift term. The written threshold matches the fine-tuned one to within
+  half a step for the RL agents (about one step for the BC transformer).
   How <span class="math inline">\(\hat{\tau}\)</span> is estimated from
-  behaviour is described in Appendix 1.</p>
+  behaviour is described in Appendix D.</p>
   <figure class="fig-valueaxis wide" id="valueaxis-fig">
 <style>
   .fig-valueaxis {
@@ -638,61 +673,57 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
 </div>
 <figcaption><p>The decision threshold as either goal’s value is moved, for four
   architectures. Solid, filled: agents fine-tuned at the shifted value
-  (circles: arms the axis was fitted from; squares: arms held out of
-  every fit). Dashed, open: the frozen base agent with the fitted axis
-  written into its weights, θ + Δv · v̂ (BC: drift included, its
-  better-calibrated convention). Raising the 1.0 goal’s value and
-  raising the 0.5 goal’s value move the same one-dimensional direction
-  in opposite senses, so the two ribbons cross at the untouched base.
-  Grey dashes: the task’s optimal exchange rate, crossing at 10 steps
-  and identical in every panel, so each agent’s vertical offset from it
-  is that agent’s own bias: every one of them undershoots, abandoning
-  the richer goal sooner than the reward function warrants. Shading
-  marks the offsets the axis was fitted from; outside it the written
-  points are the axis extrapolated past every arm that produced it, and
-  it extrapolates well until the manipulation asks for something the
-  base agent will not do. Past the point where the two goals are worth
-  the same, fine-tuning drives the ResNet, the ViT and the route model
-  through the horizontal rule at τ = 0 (they walk past the goal they
-  used to prefer), and the written axis cannot follow them, flattening
-  near indifference instead: no written series reaches that rule in any
-  panel. The DRC is the exception: neither route reverses it, so its two
-  ribbons floor together around 1.5 steps. Bands span independent base
-  models where several converged, and the decode’s 95% interval
-  otherwise. Arms past parity are trained on levels whose colours are
-  pinned to the objectives, so they ask for a reversed preference rather
-  than a relabelled one.</p></figcaption>
+  (circles: arms the axis was fitted from; squares: arms never included
+  in the fit). Dashed, open: the frozen base agent with the fitted axis
+  written into its weights, θ + α · <strong>v</strong>. Grey dashes: the
+  task’s optimal exchange rate. Shading marks the range across the three
+  seeds (except the ViT, which has one seed).</p></figcaption>
 </figure>
 
-  <p>Figure 3 shows both routes to every threshold: fine-tuning at a
-  shifted value, and writing the leave-one-out axis into the frozen
-  base. Within the fitted window the two are near-indistinguishable in
-  every panel.</p>
-  <p>The manipulation is also surgical. Across the written range the DRC
-  still reaches a goal in 100% of held-out mazes at every dose, within
-  0.03 steps of the shortest path on average (the data behind Figure 1):
-  the write moves the preference and nothing else we can measure.</p>
-  <p>Outside the fitted window the axis extrapolates well, until the
-  manipulation asks for a preference reversal: fine-tuning can drive an
-  agent through <span class="math inline">\(\tau = 0\)</span>, and the
-  written axis cannot follow it there, flattening near indifference
-  instead (squares in Figure 3).</p>
-  <p>The trained arms also read off each agent’s own exchange rate. The
-  task-optimal slope is ±20 steps per unit of value; the DRC moves ≈13,
-  the ResNet 14–18, the unconverged ViT ≈6, and the BC transformer ≈22,
-  tracking its optimal demonstrator. Trained undiscounted, the RL agents
-  have no discounting to excuse the undershoot: they abandon the richer
-  goal sooner than the reward function warrants.</p>
+  <p>The write reproduces the held-out arm’s threshold, as seen in
+  Figure 3. A minority component of the weight change carries the
+  majority of the behavioural effect.</p>
+  <p>Writing the axis into the weights also doesn’t hurt the agent’s
+  maze navigation capability. Across the written range the DRC still
+  reaches a goal in 100% of held-out mazes at every dose, within 0.03
+  steps of the shortest path on average.</p>
+  <p>Outside the fitted window the axis extrapolates well until
+  attempting to write <span class="math inline">\(\tau &lt; 0\)</span> .
+  Finetuning is mostly still able to retarget the agent but the axis fit
+  on finetunes where <span class="math inline">\(\tau &gt; 0\)</span>
+  fails and fitting an axis to these finetunes fails on held out values
+  even where <span class="math inline">\(\tau &lt; 0\)</span>.</p>
+  <p>Notably the agent’s learnt exchange rates are not perfect. The
+  task-optimal slope is <span class="math inline">\(\pm 20\)</span>
+  steps per unit of value; the DRC moves <span
+  class="math inline">\(\approx 13\)</span>, the ResNet <span
+  class="math inline">\(14\)</span>–<span
+  class="math inline">\(18\)</span>, the unconverged ViT <span
+  class="math inline">\(\approx 6\)</span>, and the BC transformer <span
+  class="math inline">\(\approx 22\)</span>. The RL agents are trained
+  undiscounted (<span class="math inline">\(\gamma = 1\)</span>) so
+  would receive maximum reward for the task optimal tradeoff.</p>
+  <p>Finally, we investigate what proportion of the weights the axis
+  takes up. <span class="math inline">\(\mathbf{v}_0\)</span> and <span
+  class="math inline">\(\mathbf{v}_1\)</span> are fitted from disjoint
+  sets of fine-tunes, so their elementwise product <span
+  class="math inline">\(\mathbf{v}_0 \odot \mathbf{v}_1\)</span>
+  accumulates mass only where the two identify the same direction. Half
+  of this agreement sits in 7% of the DRC’s weights [0.7–11 across
+  bases], 2.8% of the ResNet’s [2.3–3.8], and 13% of the ViT’s (one
+  base). In the DRC the concentration is strongest: in every base the
+  densest tensor is the 1,152-parameter input convolution. This means
+  0.08% of the network carrying 28–45% of the agreement. The BC
+  transformer is the most diffuse with half its axis needing 42% of the
+  weights.</p>
   <h2 id="discussion">Discussion</h2>
   <p>gap between threshold and a goal</p>
   <p>weights vs activations</p>
+  <p>small portion of total model weights affects this. not diffuse</p>
+  <p>not trivial that this was learnt at all. could have been mess of
+  heuristics. mini et al style.</p>
+  <p>robust across architectures</p>
   <h2 id="conclusion">Conclusion</h2>
-  <!--What should this be that doesn't restate the above? Seems like the going forwards part should be mentioned here? -->
-  <ol type="1">
-  <li><p>super robust accross architectures (could have imagined that
-  some mess of heuristics was learnt instead)</p></li>
-  <li><p>x% of the weights. Could have imagined it was diffuse</p></li>
-  </ol>
   <p>We seem to have found this hierarchy/clean separation in an agent.
   skills/competences (Bush et al. repro) → utility calc found → final
   decision</p>
@@ -753,10 +784,70 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   href="https://arxiv.org/abs/1912.01683">arXiv:1912.01683</a></li>
   </ul>
   <h2 id="appendices">Appendices</h2>
-  <p>Appendix A Env Details</p>
+  <p>Appendix A Environment Details</p>
   <p>Appendix B Agent Configurations and Hyperparameters</p>
-  <p>Appendix C Fitting <span
+  <p>Appendix C Fine-tuning for Longer</p>
+  <p>Appendix D Fitting <span
   class="math inline">\(\hat{\tau}\)</span></p>
+  <details class="wide">
+  <summary>
+  Appendix C: The axis over longer fine-tuning
+  </summary>
+  <p>The Table 1 decomposition for the DRC, read at checkpoints of
+  fine-tuning runs extended past the 400k steps used everywhere else in
+  the post.
+  <!-- TODO: state seeds/bases, |α|, full-grid vs held-out fit, and whether d and v are refit at each checkpoint or the 400k axis is projected onto the longer deltas --></p>
+  <table>
+  <caption>The residual consolidates by ~750k steps and is flat
+  thereafter; past that point the drift grows slowly at the write
+  share’s expense. The axis is not a transient of short fine-tuning: its
+  share remains roughly a third of the weight change out to 3M
+  steps.</caption>
+  <colgroup>
+  <col style="width: 25%" />
+  <col style="width: 25%" />
+  <col style="width: 25%" />
+  <col style="width: 25%" />
+  </colgroup>
+  <thead>
+  <tr class="header">
+  <th style="text-align: left;">read at</th>
+  <th style="text-align: right;">% drift (<span
+  class="math inline">\(\mathbf{d}\)</span>)</th>
+  <th style="text-align: right;">% write (<span
+  class="math inline">\(\alpha_i\,\mathbf{v}\)</span>)</th>
+  <th style="text-align: right;">% residual (<span
+  class="math inline">\(\mathbf{r}_i\)</span>)</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr class="odd">
+  <td style="text-align: left;">750k</td>
+  <td style="text-align: right;">29.6</td>
+  <td style="text-align: right;">38.3</td>
+  <td style="text-align: right;">32.1</td>
+  </tr>
+  <tr class="even">
+  <td style="text-align: left;">1.5M</td>
+  <td style="text-align: right;">31.6</td>
+  <td style="text-align: right;">35.4</td>
+  <td style="text-align: right;">33.0</td>
+  </tr>
+  <tr class="odd">
+  <td style="text-align: left;">2.25M</td>
+  <td style="text-align: right;">33.9</td>
+  <td style="text-align: right;">34.2</td>
+  <td style="text-align: right;">31.9</td>
+  </tr>
+  <tr class="even">
+  <td style="text-align: left;">3M</td>
+  <td style="text-align: right;">35.7</td>
+  <td style="text-align: right;">32.7</td>
+  <td style="text-align: right;">31.6</td>
+  </tr>
+  </tbody>
+  </table>
+  </details>
   <details class="wide">
   <summary>
   Appendix 1: How τ is read from the model
@@ -809,25 +900,28 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   </summary>
   <p>Architecture, training recipe, budget, and seed selection for every
   agent in the post. All reinforcement-learning agents were trained
-  undiscounted (γ = 1), so every model optimises exactly the objective
-  the analysis scores.</p>
+  undiscounted (<span class="math inline">\(\gamma = 1\)</span>), so
+  every model optimises exactly the objective the analysis scores.</p>
   <h3 id="the-task-1">The task</h3>
-  <p>One 11×11 maze per episode with two objectives, worth 1.0 and 0.5,
-  each marked by a colour. Reaching one ends the episode and pays its
-  value; every step costs 0.05, and an episode is cut off after 120
-  steps. The optimal policy therefore takes the 1.0 goal unless it is
-  more than <code>(1.0 − 0.5)/0.05 = 10</code> steps further away. This
-  threshold is the quantity measured throughout the post.</p>
+  <p>One <span class="math inline">\(11\times11\)</span> maze per
+  episode with two objectives, worth 1.0 and 0.5, each marked by a
+  colour. Reaching one ends the episode and pays its value; every step
+  costs 0.05, and an episode is cut off after 120 steps. The optimal
+  policy therefore takes the 1.0 goal unless it is more than <span
+  class="math inline">\((1.0 - 0.5)/0.05 = 10\)</span> steps further
+  away. This threshold is the quantity measured throughout the post.</p>
   <dl>
   <dt>Observation</dt>
   <dd>
-  Four binary 11×11 planes: walls, agent, colour 0, colour 1. There is
-  no value channel: colour is the only cue to what a goal pays, so the
-  values must be learned as internal constants.
+  Four binary <span class="math inline">\(11\times11\)</span> planes:
+  walls, agent, colour 0, colour 1. There is no value channel: colour is
+  the only cue to what a goal pays, so the values must be learned as
+  internal constants.
   </dd>
   <dt>Colour–value link</dt>
   <dd>
-  ρ = 1.0: colour 0 always marks the richer goal.
+  <span class="math inline">\(\rho = 1.0\)</span>: colour 0 always marks
+  the richer goal.
   </dd>
   <dt>Levels</dt>
   <dd>
@@ -911,13 +1005,15 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   </dd>
   <dt>Discount</dt>
   <dd>
-  γ = 1.0 (undiscounted): the trained objective is exactly the
-  value-minus-step-cost quantity every measurement uses.
+  <span class="math inline">\(\gamma = 1.0\)</span> (undiscounted): the
+  trained objective is exactly the value-minus-step-cost quantity every
+  measurement uses.
   </dd>
   <dt>Optimiser</dt>
   <dd>
-  Adam; learning rate annealed 4×10⁻⁴ → 4×10⁻⁶; gradient-norm clip
-  0.015.
+  Adam; learning rate annealed <span
+  class="math inline">\(4\times10^{-4} \rightarrow
+  4\times10^{-6}\)</span>; gradient-norm clip 0.015.
   </dd>
   <dt>Loss weights</dt>
   <dd>
@@ -925,8 +1021,10 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   </dd>
   <dt>ViT exception</dt>
   <dd>
-  Peak rate 1×10⁻³ with floor 1×10⁻⁴, chosen by a learning-rate sweep;
-  the inherited schedule left it still improving when the rate ran out.
+  Peak rate <span class="math inline">\(1\times10^{-3}\)</span> with
+  floor <span class="math inline">\(1\times10^{-4}\)</span>, chosen by a
+  learning-rate sweep; the inherited schedule left it still improving
+  when the rate ran out.
   </dd>
   </dl>
   <h3 id="which-seeds-were-kept">Which seeds were kept</h3>
@@ -994,8 +1092,10 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   <dl>
   <dt>Grid</dt>
   <dd>
-  Offsets of ±0.1 to ±0.4 in steps of 0.1, plus a null arm at the base
-  value, for each of the two goals separately: 9 arms per goal per base.
+  Offsets of <span class="math inline">\(\pm0.1\)</span> to <span
+  class="math inline">\(\pm0.4\)</span> in steps of <span
+  class="math inline">\(0.1\)</span>, plus a null arm at the base value,
+  for each of the two goals separately: 9 arms per goal per base.
   </dd>
   <dt>Per arm</dt>
   <dd>
@@ -1026,11 +1126,12 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   <h3 id="transformer-scaling-family">Transformer scaling family</h3>
   <p>A separate grid of imitation-trained route models, used to ask how
   the axis and the threshold change with capacity. All share one recipe:
-  7.84M expert demonstrations, 30k updates at batch 256, AdamW at 3×10⁻⁴
-  with cosine decay and 500 warmup steps, weight decay 0.01, gradient
-  clip 1.0. Values, step penalty and colour link match the RL task; the
-  demonstrator is the exact undiscounted solver, so these models have no
-  discounting to correct for.</p>
+  7.84M expert demonstrations, 30k updates at batch 256, AdamW at <span
+  class="math inline">\(3\times10^{-4}\)</span> with cosine decay and
+  500 warmup steps, weight decay 0.01, gradient clip 1.0. Values, step
+  penalty and colour link match the RL task; the demonstrator is the
+  exact undiscounted solver, so these models have no discounting to
+  correct for.</p>
   <table>
   <thead>
   <tr class="header">
