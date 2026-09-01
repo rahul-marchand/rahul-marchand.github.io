@@ -566,7 +566,7 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   class="math inline">\(|\alpha| = 0.30\)</span> into these parts we
   get:</p>
   <div class="tbl wide">
-  <table style="width:100%;">
+  <table>
   <caption>A single arm’s weight change <span
   class="math inline">\(\Delta\theta_i\)</span> at <span
   class="math inline">\(|\alpha| = 0.30\)</span>, decomposed into the
@@ -575,19 +575,17 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   total change: the shared drift <span
   class="math inline">\(\mathbf{d}\)</span>, the written axis <span
   class="math inline">\(\alpha_i\,\mathbf{v}\)</span>, and the residual
-  <span class="math inline">\(\mathbf{r}_i\)</span>. Write err: absolute
-  difference between the written and fine-tuned threshold on left-out
-  grid arms. <span class="math inline">\(\cos(\mathbf{v}_0,
-  \mathbf{v}_1)\)</span>: cosine between axes fitted separately on the
-  two sweeps. Ranges are min–max over independent base agents, both
-  sweeps pooled; the axis here is the full-grid fit.</caption>
+  <span class="math inline">\(\mathbf{r}_i\)</span>. <span
+  class="math inline">\(\cos(\mathbf{v}_0, \mathbf{v}_1)\)</span>:
+  cosine between axes fitted separately on the two sweeps. Ranges are
+  min–max over independent base agents, both sweeps pooled; the axis
+  here is the full-grid fit.</caption>
   <colgroup>
-  <col style="width: 16%" />
-  <col style="width: 16%" />
-  <col style="width: 16%" />
-  <col style="width: 16%" />
-  <col style="width: 16%" />
-  <col style="width: 16%" />
+  <col style="width: 20%" />
+  <col style="width: 20%" />
+  <col style="width: 20%" />
+  <col style="width: 20%" />
+  <col style="width: 20%" />
   </colgroup>
   <thead>
   <tr class="header">
@@ -598,7 +596,6 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   class="math inline">\(\alpha_i\,\mathbf{v}\)</span>, %)</th>
   <th style="text-align: center;">Residual (<span
   class="math inline">\(\mathbf{r}_i\)</span>, %)</th>
-  <th style="text-align: center;">Write error (steps)</th>
   <th style="text-align: center;"><span
   class="math inline">\(\cos(\mathbf{v}_0, \mathbf{v}_1)\)</span></th>
   </tr>
@@ -609,7 +606,6 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   <td style="text-align: center;">24.9 [22.3, 28.5]</td>
   <td style="text-align: center;">29.5 [25.7, 35.7]</td>
   <td style="text-align: center;">45.2 [41.7, 48.1]</td>
-  <td style="text-align: center;">0.4 [0.3, 0.5]</td>
   <td style="text-align: center;">−0.66 [−0.75, −0.61]</td>
   </tr>
   <tr class="even">
@@ -617,7 +613,6 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   <td style="text-align: center;">21.4 [19.3, 23.1]</td>
   <td style="text-align: center;">18.3 [16.5, 21.3]</td>
   <td style="text-align: center;">62.2 [57.7, 66.4]</td>
-  <td style="text-align: center;">0.5 [0.2, 0.8]</td>
   <td style="text-align: center;">−0.23 [−0.38, −0.12]</td>
   </tr>
   <tr class="odd">
@@ -625,7 +620,6 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   <td style="text-align: center;">37.3</td>
   <td style="text-align: center;">14.3</td>
   <td style="text-align: center;">48.0</td>
-  <td style="text-align: center;">0.2</td>
   <td style="text-align: center;">−0.23</td>
   </tr>
   <tr class="even">
@@ -633,7 +627,6 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   <td style="text-align: center;">43.9 [40.9, 47.1]</td>
   <td style="text-align: center;">22.5 [21.8, 23.3]</td>
   <td style="text-align: center;">34.9 [31.6, 38.5]</td>
-  <td style="text-align: center;">0.9 [0.7, 1.1]</td>
   <td style="text-align: center;">−0.98 [−0.99, −0.98]</td>
   </tr>
   </tbody>
@@ -655,10 +648,8 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   <p>Then for each grid offset we take the axis fitted with that arm
   held out and add it to the frozen base weights, <span
   class="math inline">\(\theta + \alpha\,\mathbf{v}\)</span>, with no
-  drift term. The written threshold matches the fine-tuned one to within
-  half a step for the RL agents (about one step for the BC transformer).
-  How <span class="math inline">\(\hat{\tau}\)</span> is estimated from
-  behaviour is described in Appendix D.</p>
+  drift term. How <span class="math inline">\(\hat{\tau}\)</span> is
+  estimated from behaviour is described in Appendix D.</p>
   <figure class="fig-valueaxis wide" id="valueaxis-fig">
 <style>
   .fig-valueaxis {
@@ -690,8 +681,10 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
 </figure>
 
   <p>The write reproduces the held-out arm’s threshold, as seen in
-  Figure 3. A minority component of the weight change carries the
-  majority of the behavioural effect.</p>
+  Figure 3: to 0.4 [0.3, 0.5] steps in the DRC, 0.5 [0.2, 0.8] in the
+  ResNet, 0.2 in the ViT and 0.9 [0.7, 1.1] in the BC transformer. A
+  minority component of the weight change carries the majority of the
+  behavioural effect.</p>
   <p>Writing the axis into the weights also doesn’t hurt the agent’s
   maze navigation capability. Across the written range the DRC still
   reaches a goal in 100% of held-out mazes at every dose, within 0.03
