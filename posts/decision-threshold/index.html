@@ -31,7 +31,7 @@ type="text/javascript"></script>
   decision boundary as precisely and reliably as fine-tuning with a
   different reward function. This result was reproduced across DRC (a
   recurrent planning architecture), ResNet and ViT agents trained with
-  RL, and in a transformer trained by imitation.</p>
+  RL, and in a transformer trained using imitation learning.</p>
   <figure class="fig-basin" id="basin-fig">
 <style>
   .fig-basin {
@@ -464,7 +464,7 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   target, and ranking them is simply picking the shortest path. With two
   objectives and a step cost, plans to different targets must be
   compared and that comparison is exactly the valuation step we set out
-  to isolate. The underlying maze-navigation skill is unchanged.</p>
+  to isolate. The underlying maze-navigation skill is unaffected.</p>
   <p>Let <span class="math inline">\(R_A\)</span> and <span
   class="math inline">\(R_B\)</span> be the two objectives’ rewards,
   <span class="math inline">\(d_A\)</span> and <span
@@ -491,12 +491,12 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   objectives’ positions (Figure 2a). Walls, start position and objective
   positions are randomised across levels. Further environment details
   are in Appendix A</p>
-  <p>We train four agents on three seeds (ViT: one): a DRC, a ResNet and
-  a ViT with reinforcement learning, plus a prefix transformer
+  <p>We train four agents on three seeds (ViT one seed): a DRC, a ResNet
+  and a ViT with reinforcement learning, plus a prefix transformer
   (conditioned on the episode’s observation–action history) trained with
-  imitation learning — specifically behaviour cloning (BC), supervised
-  learning on an optimal solver’s state–action pairs; the BC transformer
-  below. Hyperparameters and training details are in Appendix B.</p>
+  imitation learning, specifically behaviour cloning (BC), supervised
+  learning on an optimal solver’s state–action pairs. Hyperparameters
+  and training details are in Appendix B.</p>
   <figure class="fig-taskplan wide" id="taskplan-fig">
 <style>
   .fig-taskplan {
@@ -556,8 +556,8 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   is a single shared direction, the value axis, its scale calibrated so
   that <span class="math inline">\(\alpha_i\)</span> is simply the arm’s
   value offset and <span class="math inline">\(\mathbf{r}_i\)</span> is
-  the residual the model leaves unexplained. We fit <span
-  class="math inline">\(\mathbf{d}\)</span> and <span
+  the residual this model we are fitting leaves unexplained. We fit
+  <span class="math inline">\(\mathbf{d}\)</span> and <span
   class="math inline">\(\mathbf{v}\)</span> by least squares over the
   grid arms, minimising <span class="math inline">\(\sum_i \lVert
   \mathbf{r}_i \rVert^2\)</span>. When relevant the value we are trying
@@ -593,11 +593,11 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   <tr class="header">
   <th style="text-align: left;"></th>
   <th style="text-align: center;">Drift (<span
-  class="math inline">\(\mathbf{d}\)</span>)</th>
+  class="math inline">\(\mathbf{d}\)</span>, %)</th>
   <th style="text-align: center;">Write (<span
-  class="math inline">\(\alpha_i\,\mathbf{v}\)</span>)</th>
+  class="math inline">\(\alpha_i\,\mathbf{v}\)</span>, %)</th>
   <th style="text-align: center;">Residual (<span
-  class="math inline">\(\mathbf{r}_i\)</span>)</th>
+  class="math inline">\(\mathbf{r}_i\)</span>, %)</th>
   <th style="text-align: center;">Write error (steps)</th>
   <th style="text-align: center;"><span
   class="math inline">\(\cos(\mathbf{v}_0, \mathbf{v}_1)\)</span></th>
@@ -823,11 +823,11 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   <tr class="header">
   <th style="text-align: left;">Read at</th>
   <th style="text-align: center;">Drift (<span
-  class="math inline">\(\mathbf{d}\)</span>)</th>
+  class="math inline">\(\mathbf{d}\)</span>, %)</th>
   <th style="text-align: center;">Write (<span
-  class="math inline">\(\alpha_i\,\mathbf{v}\)</span>)</th>
+  class="math inline">\(\alpha_i\,\mathbf{v}\)</span>, %)</th>
   <th style="text-align: center;">Residual (<span
-  class="math inline">\(\mathbf{r}_i\)</span>)</th>
+  class="math inline">\(\mathbf{r}_i\)</span>, %)</th>
   </tr>
   </thead>
   <tbody>
