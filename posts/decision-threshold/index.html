@@ -632,9 +632,9 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   </tbody>
   </table>
   </div>
-  <p>The final column helps answer whether the two sweeps find the same
-  axis: <span class="math inline">\(\mathbf{v}\)</span> fitted only on
-  the arms varying one goal’s value, against <span
+  <p>The final column of table 1 helps answer whether the two sweeps
+  find the same axis: <span class="math inline">\(\mathbf{v}\)</span>
+  fitted only on the arms varying one goal’s value, against <span
   class="math inline">\(\mathbf{v}\)</span> fitted only on the other’s.
   The cosine is negative and in a 1.2–1.4M-dimensional weight space,
   where random directions have cosine <span
@@ -691,21 +691,20 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   steps of the shortest path on average.</p>
   <p>Outside the fitted window the axis extrapolates well until
   attempting to write <span class="math inline">\(\tau &lt; 0\)</span> .
-  Finetuning is mostly still able to retarget the agent but the axis fit
-  on finetunes where <span class="math inline">\(\tau &gt; 0\)</span>
-  fails and fitting an axis to these finetunes fails on held out values
-  even where <span class="math inline">\(\tau &lt; 0\)</span>.</p>
+  Finetuning is mostly still able to retarget the agent to this reward
+  function but fitting an axis to these new finetunes fails even in the
+  same <span class="math inline">\(\tau &lt;0\)</span> regime and the
+  axis fit on finetunes with <span class="math inline">\(\tau &gt;
+  0\)</span> fails to write in this region.</p>
   <p>Notably the agent’s learnt exchange rates are not perfect. The
   task-optimal slope is <span class="math inline">\(\pm 20\)</span>
   steps per unit of value; the DRC moves <span
-  class="math inline">\(\approx 13\)</span>, the ResNet <span
-  class="math inline">\(\approx 16\)</span> [<span
-  class="math inline">\(14\)</span>–<span
-  class="math inline">\(22\)</span>], the ViT <span
-  class="math inline">\(\approx 6\)</span> , and the BC transformer
-  <span class="math inline">\(\approx 22\)</span>. The RL agents are
-  trained undiscounted (<span class="math inline">\(\gamma = 1\)</span>)
-  so would receive maximum reward for the task optimal tradeoff.</p>
+  class="math inline">\(13\)</span>, the ResNet <span
+  class="math inline">\(16\)</span>, the ViT <span
+  class="math inline">\(6\)</span> , and the BC transformer <span
+  class="math inline">\(22\)</span>. The RL agents are trained
+  undiscounted (<span class="math inline">\(\gamma = 1\)</span>) so
+  would receive maximum reward for the task optimal tradeoff.</p>
   <p>Finally, we investigate what proportion of the weights the axis
   takes up. <span class="math inline">\(\mathbf{v}_0\)</span> and <span
   class="math inline">\(\mathbf{v}_1\)</span> are fitted from disjoint
