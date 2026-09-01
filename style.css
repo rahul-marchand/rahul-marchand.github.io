@@ -60,9 +60,8 @@ pre {
 
 hr { border: 0; border-top: 1px solid var(--line); margin: 36px 0; }
 
-.page { counter-reset: fig appfig tbl; }
+.page { counter-reset: fig tbl; }
 figure { margin: 32px 0; counter-increment: fig; }
-details figure { counter-increment: appfig; }
 figcaption { font-size: 15px; color: var(--ink-soft); margin-top: 10px; line-height: 1.55; }
 figcaption p { margin: 0 0 8px; display: inline; }
 figcaption::before {
@@ -72,7 +71,6 @@ figcaption::before {
   color: var(--ink);
   margin-right: 0.5em;
 }
-details figcaption::before { content: "Appendix " counter(appfig) "."; }
 /* Elements with the .wide class break out of the text column on wide viewports. */
 @media (min-width: 920px) {
   .page .wide {
