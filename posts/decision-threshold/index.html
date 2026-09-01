@@ -830,6 +830,166 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   </details>
   <details class="wide">
   <summary>
+  Appendix B: Agent configurations and hyperparameters
+  </summary>
+  <table style="width:100%;">
+  <caption>Threshold is the measured indifference point in extra steps,
+  one value per independent base model, on held-out levels at the
+  training values. The task optimum is 10.</caption>
+  <colgroup>
+  <col style="width: 16%" />
+  <col style="width: 16%" />
+  <col style="width: 16%" />
+  <col style="width: 16%" />
+  <col style="width: 16%" />
+  <col style="width: 16%" />
+  </colgroup>
+  <thead>
+  <tr class="header">
+  <th style="text-align: left;">Agent</th>
+  <th style="text-align: left;">Architecture</th>
+  <th style="text-align: right;">Params</th>
+  <th style="text-align: right;">Budget</th>
+  <th style="text-align: left;">Training</th>
+  <th style="text-align: right;">Threshold</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr class="odd">
+  <td style="text-align: left;">DRC</td>
+  <td style="text-align: left;">ConvLSTM(3,3), 3 layers × 3 ticks</td>
+  <td style="text-align: right;">1,449,605</td>
+  <td style="text-align: right;">150M</td>
+  <td style="text-align: left;">RL</td>
+  <td style="text-align: right;">6.9 / 8.0 / 5.4</td>
+  </tr>
+  <tr class="even">
+  <td style="text-align: left;">ResNet</td>
+  <td style="text-align: left;">9 conv stages × 32 ch, rescaled
+  input</td>
+  <td style="text-align: right;">1,234,405</td>
+  <td style="text-align: right;">150M</td>
+  <td style="text-align: left;">RL</td>
+  <td style="text-align: right;">7.6 / 7.8 / 8.6</td>
+  </tr>
+  <tr class="odd">
+  <td style="text-align: left;">ViT</td>
+  <td style="text-align: left;">transformer, 4 layers, d 64, 4
+  heads</td>
+  <td style="text-align: right;">2,192,133</td>
+  <td style="text-align: right;">250M</td>
+  <td style="text-align: left;">RL</td>
+  <td style="text-align: right;">5.2</td>
+  </tr>
+  <tr class="even">
+  <td style="text-align: left;">BC transformer</td>
+  <td style="text-align: left;">prefix-LM, 4 layers, d 128, 4 heads</td>
+  <td style="text-align: right;">806,533</td>
+  <td style="text-align: right;">30k updates</td>
+  <td style="text-align: left;">imitation</td>
+  <td style="text-align: right;">10.8 / 10.9 / 10.6</td>
+  </tr>
+  </tbody>
+  </table>
+  <h3 id="reinforcement-learning-drc-resnet-vit">Reinforcement learning
+  (DRC, ResNet, ViT)</h3>
+  <dl>
+  <dt>Algorithm</dt>
+  <dd>
+  IMPALA with V-trace (<span class="math inline">\(\lambda =
+  0.97\)</span>); 256 parallel environments, 20-step rollouts, 8
+  minibatches per update. <span class="math inline">\(\gamma =
+  1\)</span>, so the trained objective is exactly the
+  value-minus-step-cost quantity every measurement uses.
+  </dd>
+  <dt>Optimiser</dt>
+  <dd>
+  Adam, learning rate annealed <span
+  class="math inline">\(4\times10^{-4} \rightarrow
+  4\times10^{-6}\)</span>; gradient-norm clip 0.015; entropy weight
+  0.01, value-loss weight 0.25. The ViT instead uses a peak rate of
+  <span class="math inline">\(1\times10^{-3}\)</span> with floor <span
+  class="math inline">\(1\times10^{-4}\)</span>, chosen by a
+  learning-rate sweep.
+  </dd>
+  <dt>Input encoding</dt>
+  <dd>
+  The DRC and ResNet consume the <span
+  class="math inline">\(4\times11\times11\)</span> observation directly
+  as image planes. The ViT embeds each cell’s four channels as one token
+  (121 tokens), adds a learned two-dimensional position embedding, and
+  applies pre-LayerNorm attention blocks. All three flatten their final
+  spatial hidden state through the same dense readout to the actor and
+  critic heads, so the architectures differ only in the trunk.
+  </dd>
+  </dl>
+  <h3 id="behaviour-cloning-bc-transformer">Behaviour cloning (BC
+  transformer)</h3>
+  <dl>
+  <dt>Demonstrations</dt>
+  <dd>
+  One per training level: the optimal route under the task’s utility,
+  computed by the exact undiscounted solver, roughly 900k routes over
+  the train split.
+  </dd>
+  <dt>Tokenisation</dt>
+  <dd>
+  The input sequence is the 121 maze cells in raster order, a separator,
+  then the action sequence. Each cell token is a linear map of that
+  cell’s observation channels plus learned row and column embeddings;
+  actions carry learned position embeddings. Attention is bidirectional
+  over the cells and causal over the actions (a prefix LM), and the loss
+  is taken on the action positions only.
+  </dd>
+  <dt>Optimiser</dt>
+  <dd>
+  30k updates at batch 256; AdamW at <span
+  class="math inline">\(3\times10^{-4}\)</span> with 500 warmup steps
+  and cosine decay to zero; weight decay 0.01; gradient clip 1.0.
+  </dd>
+  </dl>
+  <h3 id="seed-selection">Seed selection</h3>
+  <p>A seed counts as converged when its greedy policy finishes held-out
+  episodes reliably: 95% for the DRC and ResNet, 90% for the ViT, whose
+  plateau sits lower. The DRC kept 3 of 5 seeds (two still improving at
+  150M), the ResNet 3 of 6 (three diverged early, with value loss above
+  <span class="math inline">\(10^3\)</span>), the ViT 1 of 3 (two were
+  competent when sampling but looped under the greedy action selection
+  used for measurement, and were retrained at the tuned rate), and the
+  BC transformer 3 of 3. Two ResNets converged and then collapsed late
+  in training; for those the base is the last checkpoint before the
+  collapse (120M and 90M of 150M). Every other base is its final
+  checkpoint.</p>
+  <h3 id="fine-tuning-arms">Fine-tuning arms</h3>
+  <dl>
+  <dt>Per arm</dt>
+  <dd>
+  400k steps at a constant <span class="math inline">\(10^{-4}\)</span>
+  (annealing would put each arm at a different point on its own
+  schedule), starting from the base weights with a fresh optimiser, on a
+  150k-level dataset generated at that arm’s values.
+  </dd>
+  <dt>Past parity</dt>
+  <dd>
+  Arms that take the swept goal’s value beyond the other’s use levels
+  whose colours are pinned to objectives. Under the usual scheme the
+  generator repaints whichever goal is richer, so such an arm would
+  learn a relabelled preference instead of a reversed one.
+  </dd>
+  <dt>Measurement</dt>
+  <dd>
+  Every arm and every written model is decoded at the base values on
+  held-out layouts, so all thresholds are comparable regardless of what
+  an arm trained on.
+  </dd>
+  </dl>
+  <h3 id="compute">Compute</h3>
+  <p>Everything was trained on single RTX 4090s: a base agent is 4–5.5
+  hours, and a full 18-arm value sweep with its measurements about 1.5
+  hours per base.</p>
+  </details>
+  <details class="wide">
+  <summary>
   Appendix C: The axis over longer fine-tuning
   </summary>
   <p>The Table 1 decomposition for the DRC, read at checkpoints of
@@ -933,365 +1093,6 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
 </div>
 </figure>
 
-  </details>
-  <details class="wide">
-  <summary>
-  Appendix 2: Training Runs
-  </summary>
-  <p>Architecture, training recipe, budget, and seed selection for every
-  agent in the post. All reinforcement-learning agents were trained
-  undiscounted (<span class="math inline">\(\gamma = 1\)</span>), so
-  every model optimises exactly the objective the analysis scores.</p>
-  <h3 id="the-task-1">The task</h3>
-  <p>One <span class="math inline">\(11\times11\)</span> maze per
-  episode with two objectives, worth 1.0 and 0.5, each marked by a
-  colour. Reaching one ends the episode and pays its value; every step
-  costs 0.05, and an episode is cut off after 120 steps. The optimal
-  policy therefore takes the 1.0 goal unless it is more than <span
-  class="math inline">\((1.0 - 0.5)/0.05 = 10\)</span> steps further
-  away. This threshold is the quantity measured throughout the post.</p>
-  <dl>
-  <dt>Observation</dt>
-  <dd>
-  Four binary <span class="math inline">\(11\times11\)</span> planes:
-  walls, agent, colour 0, colour 1. There is no value channel: colour is
-  the only cue to what a goal pays, so the values must be learned as
-  internal constants.
-  </dd>
-  <dt>Colour–value link</dt>
-  <dd>
-  <span class="math inline">\(\rho = 1.0\)</span>: colour 0 always marks
-  the richer goal.
-  </dd>
-  <dt>Levels</dt>
-  <dd>
-  Pre-generated pool of 1M mazes (<code>1.00-0.50@1M</code>). Training
-  draws from the train split; evaluation and all measurement from
-  held-out splits.
-  </dd>
-  </dl>
-  <h3 id="agents-in-the-figures">Agents in the figures</h3>
-  <table style="width:100%;">
-  <colgroup>
-  <col style="width: 16%" />
-  <col style="width: 16%" />
-  <col style="width: 16%" />
-  <col style="width: 16%" />
-  <col style="width: 16%" />
-  <col style="width: 16%" />
-  </colgroup>
-  <thead>
-  <tr class="header">
-  <th style="text-align: left;">Agent</th>
-  <th style="text-align: left;">Architecture</th>
-  <th style="text-align: right;">Params</th>
-  <th style="text-align: right;">Budget</th>
-  <th style="text-align: left;">Training</th>
-  <th style="text-align: right;">Threshold</th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr class="odd">
-  <td style="text-align: left;">DRC</td>
-  <td style="text-align: left;">ConvLSTM(3,3), 3 layers × 3 ticks</td>
-  <td style="text-align: right;">1,449,605</td>
-  <td style="text-align: right;">150M</td>
-  <td style="text-align: left;">RL</td>
-  <td style="text-align: right;">6.9 / 8.0 / 5.4</td>
-  </tr>
-  <tr class="even">
-  <td style="text-align: left;">ResNet</td>
-  <td style="text-align: left;">9 conv stages × 32 ch, rescaled
-  input</td>
-  <td style="text-align: right;">1,234,405</td>
-  <td style="text-align: right;">150M</td>
-  <td style="text-align: left;">RL</td>
-  <td style="text-align: right;">7.6 / 7.8 / 8.6</td>
-  </tr>
-  <tr class="odd">
-  <td style="text-align: left;">ViT</td>
-  <td style="text-align: left;">transformer, 4 layers, d 64, 4
-  heads</td>
-  <td style="text-align: right;">2,192,133</td>
-  <td style="text-align: right;">250M</td>
-  <td style="text-align: left;">RL</td>
-  <td style="text-align: right;">5.2</td>
-  </tr>
-  <tr class="even">
-  <td style="text-align: left;">BC transformer</td>
-  <td style="text-align: left;">prefix-LM, 4 layers, d 128, 4 heads</td>
-  <td style="text-align: right;">806,533</td>
-  <td style="text-align: right;">30k updates</td>
-  <td style="text-align: left;">imitation</td>
-  <td style="text-align: right;">10.8 / 10.9 / 10.6</td>
-  </tr>
-  </tbody>
-  </table>
-  <p>Threshold is the measured indifference point in extra steps, one
-  value per independent base model, on held-out levels at the training
-  values. The task optimum is 10. Every agent undershoots it, abandoning
-  the richer goal sooner than the reward function warrants, despite the
-  absence of discounting.</p>
-  <h3 id="reinforcement-learning-setup">Reinforcement-learning
-  setup</h3>
-  <p>All three RL architectures share one recipe. Only the network
-  differs, so differences between agents are attributable to
-  architecture rather than training.</p>
-  <dl>
-  <dt>Algorithm</dt>
-  <dd>
-  IMPALA with V-trace (λ = 0.97), 256 parallel environments, 20-step
-  rollouts, 8 minibatches per update.
-  </dd>
-  <dt>Discount</dt>
-  <dd>
-  <span class="math inline">\(\gamma = 1.0\)</span> (undiscounted): the
-  trained objective is exactly the value-minus-step-cost quantity every
-  measurement uses.
-  </dd>
-  <dt>Optimiser</dt>
-  <dd>
-  Adam; learning rate annealed <span
-  class="math inline">\(4\times10^{-4} \rightarrow
-  4\times10^{-6}\)</span>; gradient-norm clip 0.015.
-  </dd>
-  <dt>Loss weights</dt>
-  <dd>
-  Entropy 0.01, value 0.25.
-  </dd>
-  <dt>ViT exception</dt>
-  <dd>
-  Peak rate <span class="math inline">\(1\times10^{-3}\)</span> with
-  floor <span class="math inline">\(1\times10^{-4}\)</span>, chosen by a
-  learning-rate sweep; the inherited schedule left it still improving
-  when the rate ran out.
-  </dd>
-  </dl>
-  <h3 id="which-seeds-were-kept">Which seeds were kept</h3>
-  <p>A seed counts as converged when its greedy policy finishes held-out
-  episodes reliably: 95% for the DRC and ResNet, 90% for the ViT, whose
-  plateau sits lower. Seeds that missed the bar within their budget were
-  replaced; attempt counts are reported below.</p>
-  <table>
-  <colgroup>
-  <col style="width: 25%" />
-  <col style="width: 25%" />
-  <col style="width: 25%" />
-  <col style="width: 25%" />
-  </colgroup>
-  <thead>
-  <tr class="header">
-  <th style="text-align: left;">Family</th>
-  <th style="text-align: right;">Seeds trained</th>
-  <th style="text-align: right;">Kept</th>
-  <th style="text-align: left;">Why the others were dropped</th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr class="odd">
-  <td style="text-align: left;">DRC</td>
-  <td style="text-align: right;">5</td>
-  <td style="text-align: right;">3</td>
-  <td style="text-align: left;">Two were still climbing at 150M. A third
-  reached the bar only after a 37.5M continuation at its own annealed
-  tail rate.</td>
-  </tr>
-  <tr class="even">
-  <td style="text-align: left;">ResNet</td>
-  <td style="text-align: right;">6</td>
-  <td style="text-align: right;">3</td>
-  <td style="text-align: left;">Three diverged: value loss above 10³ by
-  10M steps, an unnormalised value head under undiscounted targets.
-  Killed at that gate rather than run to term.</td>
-  </tr>
-  <tr class="odd">
-  <td style="text-align: left;">ViT</td>
-  <td style="text-align: right;">3</td>
-  <td style="text-align: right;">1</td>
-  <td style="text-align: left;">Two were competent when sampling but
-  looped under greedy action selection, which is how they are measured.
-  Retrained at the tuned rate.</td>
-  </tr>
-  <tr class="even">
-  <td style="text-align: left;">BC transformer</td>
-  <td style="text-align: right;">3</td>
-  <td style="text-align: right;">3</td>
-  <td style="text-align: left;">—</td>
-  </tr>
-  </tbody>
-  </table>
-  <p>Two ResNets converged and then collapsed late in training, a known
-  instability of this architecture on this task, also seen under
-  discounting. For those runs the base is the last checkpoint before the
-  collapse (120M and 90M of 150M); every other base is its final
-  checkpoint.</p>
-  <h3 id="value-sweeps">Value sweeps</h3>
-  <p>Each base agent is fine-tuned onto a grid of altered goal values;
-  the fitted direction through those weight changes is the value axis.
-  Arms differ only in what the objectives pay.</p>
-  <dl>
-  <dt>Grid</dt>
-  <dd>
-  Offsets of <span class="math inline">\(\pm0.1\)</span> to <span
-  class="math inline">\(\pm0.4\)</span> in steps of <span
-  class="math inline">\(0.1\)</span>, plus a null arm at the base value,
-  for each of the two goals separately: 9 arms per goal per base.
-  </dd>
-  <dt>Per arm</dt>
-  <dd>
-  400k steps at a constant 10⁻⁴ (annealing would put each arm at a
-  different point on its own schedule), on a 150k-level dataset
-  generated at that arm’s values.
-  </dd>
-  <dt>Fitting</dt>
-  <dd>
-  The axis is least-squares fitted from the symmetric grid alone, with
-  the common fine-tuning drift removed. Extension arms are held out of
-  every fit by construction.
-  </dd>
-  <dt>Past parity</dt>
-  <dd>
-  Arms that take the swept goal beyond the other use levels whose
-  colours are pinned to objectives. Under the usual scheme the generator
-  repaints whichever goal is richer, so such an arm would learn a
-  relabelled preference instead of a reversed one.
-  </dd>
-  <dt>Measurement</dt>
-  <dd>
-  Every arm and every written model is decoded at the <em>base</em>
-  values on held-out levels, so all thresholds are comparable regardless
-  of what an arm trained on.
-  </dd>
-  </dl>
-  <h3 id="transformer-scaling-family">Transformer scaling family</h3>
-  <p>A separate grid of BC transformers, used to ask how the axis and
-  the threshold change with capacity. All share one recipe: 7.84M expert
-  demonstrations, 30k updates at batch 256, AdamW at <span
-  class="math inline">\(3\times10^{-4}\)</span> with cosine decay and
-  500 warmup steps, weight decay 0.01, gradient clip 1.0. Values, step
-  penalty and colour link match the RL task; the demonstrator is the
-  exact undiscounted solver, so these models have no discounting to
-  correct for.</p>
-  <table>
-  <thead>
-  <tr class="header">
-  <th style="text-align: left;">Model</th>
-  <th style="text-align: right;">d</th>
-  <th style="text-align: right;">Layers</th>
-  <th style="text-align: right;">Heads</th>
-  <th style="text-align: right;">Params</th>
-  <th style="text-align: right;">Axis reliability</th>
-  <th style="text-align: right;">cos(v̂₀, v̂₁)</th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr class="odd">
-  <td style="text-align: left;">d128 L4</td>
-  <td style="text-align: right;">128</td>
-  <td style="text-align: right;">4</td>
-  <td style="text-align: right;">4</td>
-  <td style="text-align: right;">806,533</td>
-  <td style="text-align: right;">0.88</td>
-  <td style="text-align: right;">−0.94</td>
-  </tr>
-  <tr class="even">
-  <td style="text-align: left;">d128 L8</td>
-  <td style="text-align: right;">128</td>
-  <td style="text-align: right;">8</td>
-  <td style="text-align: right;">4</td>
-  <td style="text-align: right;">1,599,621</td>
-  <td style="text-align: right;">0.68</td>
-  <td style="text-align: right;">−0.81</td>
-  </tr>
-  <tr class="odd">
-  <td style="text-align: left;">d128 L16</td>
-  <td style="text-align: right;">128</td>
-  <td style="text-align: right;">16</td>
-  <td style="text-align: right;">4</td>
-  <td style="text-align: right;">3,185,797</td>
-  <td style="text-align: right;">0.78</td>
-  <td style="text-align: right;">−0.89</td>
-  </tr>
-  <tr class="even">
-  <td style="text-align: left;">d256 L4</td>
-  <td style="text-align: right;">256</td>
-  <td style="text-align: right;">4</td>
-  <td style="text-align: right;">8</td>
-  <td style="text-align: right;">3,185,925</td>
-  <td style="text-align: right;">0.91</td>
-  <td style="text-align: right;">−0.96</td>
-  </tr>
-  <tr class="odd">
-  <td style="text-align: left;">d256 L8</td>
-  <td style="text-align: right;">256</td>
-  <td style="text-align: right;">8</td>
-  <td style="text-align: right;">8</td>
-  <td style="text-align: right;">6,344,965</td>
-  <td style="text-align: right;">0.39</td>
-  <td style="text-align: right;">−0.58</td>
-  </tr>
-  <tr class="even">
-  <td style="text-align: left;">d256 L16</td>
-  <td style="text-align: right;">256</td>
-  <td style="text-align: right;">16</td>
-  <td style="text-align: right;">8</td>
-  <td style="text-align: right;">12,663,045</td>
-  <td style="text-align: right;">0.37</td>
-  <td style="text-align: right;">−0.55</td>
-  </tr>
-  <tr class="odd">
-  <td style="text-align: left;">d512 L4</td>
-  <td style="text-align: right;">512</td>
-  <td style="text-align: right;">4</td>
-  <td style="text-align: right;">16</td>
-  <td style="text-align: right;">12,663,301</td>
-  <td style="text-align: right;">0.91</td>
-  <td style="text-align: right;">−0.97</td>
-  </tr>
-  <tr class="even">
-  <td style="text-align: left;">d512 L8</td>
-  <td style="text-align: right;">512</td>
-  <td style="text-align: right;">8</td>
-  <td style="text-align: right;">16</td>
-  <td style="text-align: right;">25,272,837</td>
-  <td style="text-align: right;">0.87</td>
-  <td style="text-align: right;">−0.95</td>
-  </tr>
-  <tr class="odd">
-  <td style="text-align: left;">d512 L16</td>
-  <td style="text-align: right;">512</td>
-  <td style="text-align: right;">16</td>
-  <td style="text-align: right;">16</td>
-  <td style="text-align: right;">50,491,909</td>
-  <td style="text-align: right;">0.88</td>
-  <td style="text-align: right;">−0.95</td>
-  </tr>
-  </tbody>
-  </table>
-  <p>A depth series at d = 256 (2, 4, 8, 16, 32, 64 layers, 1.6M–50.6M
-  parameters) and a narrow-deep control (d 128, 32 layers) were trained
-  on the same recipe; the 16-layer configuration has three seeds and the
-  rest one. Axis reliability is the split-half correlation of the fitted
-  direction; cos(v̂₀, v̂₁) is the angle between the directions fitted from
-  sweeping each goal separately, where −1 means the two sweeps move one
-  shared knob rather than two independent value registers.</p>
-  <p>Two configurations, d256 L8 and L16, sit well below the rest on
-  both measures. Their axes remain present and graded: the fitted
-  direction recovers an arm’s offset with correlation 0.985, as high as
-  any other model, but at roughly half scale (slope 0.46 against 0.90
-  elsewhere) on the same 13-arm grid. This is the signature of noisier
-  weight changes attenuating the fit, which pulls reliability and the
-  cosine toward zero together, rather than of a value axis that stops
-  existing at those sizes.</p>
-  <p>The 0.8M model here is architecturally identical to the post’s BC
-  transformer but is not the same run: this family trains on 7.84M
-  demonstrations against the post model’s 900k.</p>
-  <h3 id="compute">Compute</h3>
-  <p>Everything was trained on single RTX 4090s. A DRC or ResNet base is
-  roughly 4–5 hours, a ViT base around 5.5 hours, and a full 18-arm
-  value sweep with its measurements about 1.5 hours per base. The
-  scaling family’s models train in minutes to a few hours each, being
-  far smaller runs over a fixed demonstration set.</p>
   </details>
   <footer>© 2026 Rahul Marchand</footer>
 </div>
