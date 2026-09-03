@@ -91,13 +91,14 @@ details {
 }
 summary {
   font-family: "IBM Plex Sans", sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--ink-soft);
-  padding: 12px 0;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  padding: 14px 0;
   cursor: pointer;
 }
-summary:hover { color: var(--ink); }
+summary:hover { color: var(--accent); }
 details[open] summary { border-bottom: 1px solid var(--line); }
 details figure { margin: 20px 0 24px; }
 /* Appendix content authored in markdown. */

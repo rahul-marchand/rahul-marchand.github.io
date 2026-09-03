@@ -24,9 +24,18 @@ Caption text — markdown, links and $math$ all work.
 :::
 ```
 
-Appendix prose is plain markdown inside a `<details class="wide">` block (tables and
-definition lists are styled by style.css). Data-derived numbers quoted in captions are
-hand-maintained: when a figure's data.json changes, update the numbers in the md.
+Appendix prose is plain markdown inside a `<details class="wide" id="app-<id>">` block
+(tables and definition lists are styled by style.css). Data-derived numbers quoted in
+captions are hand-maintained: when a figure's data.json changes, update the numbers in the md.
+
+**Cross-references** are authored as tokens and resolved at build time from document
+order, so reordering renumbers everything, prose included:
+
+- `@fig:<name>` -> linked "Figure N" (`<name>` = the fig marker's name; `@fig:foo.a`
+  renders "Figure Na" for panel refs)
+- `@tbl:<id>` -> linked "Table N" (give the table's wrapper div the id: `::: {#tbl-<id> .tbl}`)
+- `@app:<id>` -> linked "Appendix X" (letters follow `<details>` block order; the build
+  prepends "Appendix X: " to each summary, so don't write the letter in the md)
 
 ```sh
 build/build.sh path/to/post.md decision-threshold path/to/figures/
