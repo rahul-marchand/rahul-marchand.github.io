@@ -32,7 +32,7 @@ type="text/javascript"></script>
   different reward function. This result was reproduced across DRC (a
   recurrent planning architecture), ResNet and ViT agents trained with
   RL, and in a transformer trained using imitation learning.</p>
-  <figure id="fig-basin" class="fig-basin" id="basin-fig">
+  <figure class="fig-basin" id="basin-fig">
 <style>
   .fig-basin {
     --wall: #2e313b; --floor: #eeebe3;
@@ -488,7 +488,7 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   class="math inline">\(d_B\)</span> are well-defined. The agent
   observes a <span class="math inline">\(4\times11\times11\)</span>
   array: one channel each for the walls, its own position, and the two
-  objectives’ positions (<a class="xref" href="#fig-task-planning">Figure 2a</a>). Walls, start position
+  objectives’ positions (<a class="xref" href="#taskplan-fig">Figure 2a</a>). Walls, start position
   and objective positions are randomised across levels. Further
   environment details are in <a class="xref" href="#app-env">Appendix A</a>.</p>
   <p>We train four agents on three seeds (ViT one seed): a DRC, a ResNet
@@ -497,7 +497,7 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   imitation learning, specifically behaviour cloning (BC), supervised
   learning on an optimal solver’s state–action pairs. Hyperparameters
   and training details are in <a class="xref" href="#app-agents">Appendix B</a>.</p>
-  <figure id="fig-task-planning" class="fig-taskplan wide" id="taskplan-fig">
+  <figure class="fig-taskplan wide" id="taskplan-fig">
 <style>
   .fig-taskplan {
     --wall: #2e313b; --floor: #eeebe3;
@@ -533,7 +533,7 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
 
   <p>We reproduced Bush et al.’s planning results on our new
   environment. We can read the agent’s plan from its activations
-  (<a class="xref" href="#fig-task-planning">Figure 2b</a>) and writing plans in also works, though less
+  (<a class="xref" href="#taskplan-fig">Figure 2b</a>) and writing plans in also works, though less
   reliably than in their Sokoban setting. Nothing downstream depends on
   plan writing.</p>
   <h2 id="finding-a-decision-threshold-in-the-agent">Finding a Decision
@@ -546,7 +546,7 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   giving 2 sets of 9 arms per base agent (details on base agents in
   <a class="xref" href="#app-agents">Appendix B</a>). Note we also fine-tuned arms outside this grid but never
   used these to fit the axis (these are the squares on
-  <a class="xref" href="#fig-value-axis">Figure 3</a>).</p>
+  <a class="xref" href="#valueaxis-fig">Figure 3</a>).</p>
   <p>Each arm leaves a weight change <span
   class="math inline">\(\Delta\theta_i = \theta_i -
   \theta_{\text{base}}\)</span>. We model these jointly as</p>
@@ -652,7 +652,7 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   class="math inline">\(\theta + \alpha\,\mathbf{v}\)</span>, with no
   drift term. How <span class="math inline">\(\hat{\tau}\)</span> is
   estimated from behaviour is described in <a class="xref" href="#app-tau">Appendix D</a>.</p>
-  <figure id="fig-value-axis" class="fig-valueaxis wide" id="valueaxis-fig">
+  <figure class="fig-valueaxis wide" id="valueaxis-fig">
 <style>
   .fig-valueaxis {
     --wall: #2e313b; --floor: #eeebe3;
@@ -683,7 +683,7 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
 </figure>
 
   <p>The write reproduces the held-out arm’s threshold, as seen in
-  <a class="xref" href="#fig-value-axis">Figure 3</a>: to 0.4 [0.3, 0.5] steps in the DRC, 0.5 [0.2, 0.8] in
+  <a class="xref" href="#valueaxis-fig">Figure 3</a>: to 0.4 [0.3, 0.5] steps in the DRC, 0.5 [0.2, 0.8] in
   the ResNet, 0.2 in the ViT and 0.9 [0.7, 1.1] in the BC transformer. A
   minority component of the weight change carries the majority of the
   behavioural effect.</p>
@@ -1079,7 +1079,7 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   at which the agent is indifferent between the goals (the curve’s
   0.5-crossing), and the scale <span class="math inline">\(s\)</span>,
   the width of the indifference region: the agent’s decision noise.</p>
-  <p><a class="xref" href="#fig-scurves">Figure 4</a> shows these curves for each base agent and for the
+  <p><a class="xref" href="#scurves-fig">Figure 4</a> shows these curves for each base agent and for the
   same frozen agent with the axis written at <span
   class="math inline">\(\alpha = \pm 0.2\)</span>. The write slides the
   whole curve sideways rather than flattening it: <span
@@ -1092,7 +1092,7 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   transformer. The scale <span class="math inline">\(s\)</span>
   stretches roughly in proportion to the threshold as the write moves
   it, in all four architectures.</p>
-  <figure id="fig-scurves" class="fig-scurves wide" id="scurves-fig">
+  <figure class="fig-scurves wide" id="scurves-fig">
 <style>
   .fig-scurves {
     --rich: #a63d2f; --poor: #2f5a78;
@@ -1115,7 +1115,7 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   agent. Dashed, open: the same frozen agent with the value axis written
   into its weights at α = ±0.2 (α in units of the 0.5 goal’s value);
   raising that value (α = +0.2) shifts the curve left. These are two
-  fixed doses along the write that <a class="xref" href="#fig-value-axis">Figure 3</a>’s dashed ribbons
+  fixed doses along the write that <a class="xref" href="#valueaxis-fig">Figure 3</a>’s dashed ribbons
   sweep continuously. Shading spans the independent base models where
   three exist and is the decode’s 95% interval otherwise (writes: one
   base). Grey dashes: the task-optimal crossing at gap 10, identical in

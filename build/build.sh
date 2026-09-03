@@ -37,14 +37,21 @@ html = re.sub(
     take, html, flags=re.S,
 )
 
+anchors = {}  # fig marker name -> the figure's anchor id
 def splice(m):
     name = m.group(1)
     f = figdir / (name + ".html")
     if not f.exists():
         return m.group(0)
     frag = f.read_text()
-    # our anchor replaces any id the fragment shipped with
-    frag = re.sub(r'(<figure )(id="[^"]*" )?', rf'\1id="fig-{name}" ', frag, count=1)
+    # a fragment's own id is its anchor (scripts may rely on it); inject one only if absent
+    tag = re.search(r"<figure[^>]*>", frag)
+    own = re.search(r'id="([^"]+)"', tag.group(0)) if tag else None
+    if own:
+        anchors[name] = own.group(1)
+    else:
+        frag = re.sub(r"<figure ", f'<figure id="fig-{name}" ', frag, count=1)
+        anchors[name] = f"fig-{name}"
     cap = caps.get(name)
     if cap:
         frag = re.sub(
@@ -59,8 +66,13 @@ html = re.sub(r"<!--\s*fig:\s*([\w-]+)\s*-->", splice, html)
 # Cross-references. Numbering mirrors the CSS counters: every <figure> increments
 # the figure counter, every <table> the table counter, every <details> is a letter.
 refs = {}
-for n, m in enumerate(re.finditer(r'<figure id="fig-([\w-]+)"', html), 1):
-    refs[("fig", m.group(1))] = f"Figure {n}"
+hrefs = {}
+id_to_name = {v: k for k, v in anchors.items()}
+for n, m in enumerate(re.finditer(r'<figure[^>]*\bid="([^"]+)"', html), 1):
+    name = id_to_name.get(m.group(1))
+    if name:
+        refs[("fig", name)] = f"Figure {n}"
+        hrefs[("fig", name)] = m.group(1)
 n_tbl = 0
 pending = None
 for m in re.finditer(r'<div id="tbl-([\w-]+)"[^>]*>|<table[\s>]', html):
@@ -85,7 +97,8 @@ def link(m):
     text = refs.get((kind, name))
     if text is None:
         raise SystemExit(f"unresolved reference @{kind}:{name}")
-    return f'<a class="xref" href="#{kind}-{name}">{text}{suffix}</a>'
+    href = hrefs.get((kind, name), f"{kind}-{name}")
+    return f'<a class="xref" href="#{href}">{text}{suffix}</a>'
 
 html = re.sub(r"@(fig|tbl|app):([\w-]+?)(?:\.(\w+))?(?=[\s.,;:)<'’])", link, html)
 page.write_text(html)
