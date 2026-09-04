@@ -460,15 +460,38 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   up to ~50 steps ahead. Similar learned look-ahead has been found in a
   chess policy network (<a
   href="https://arxiv.org/abs/2406.00877">Jenner et al., 2024</a>).</p>
+  <p>Finally, our method works in weight space: we fine-tune copies of
+  an agent and study the differences this leaves in the weights, <span
+  class="math inline">\(\theta_{\text{ft}} -
+  \theta_{\text{base}}\)</span>. This is what the model-editing
+  literature calls a task vector (<a
+  href="https://arxiv.org/abs/2212.04089">Ilharco et al., 2023</a>).
+  These differences have turned out to carry surprising structure: task
+  vectors can be added and subtracted to compose behaviours (Ilharco et
+  al.), interpolating the weights of policies fine-tuned on different
+  reward functions trades off smoothly between them (<a
+  href="https://arxiv.org/abs/2306.04488">Ramé et al., 2023</a>), and
+  the difference of two contrastive fine-tunes yields a direction that
+  steers behaviours like sycophancy further out-of-distribution than
+  activation steering (<a href="https://arxiv.org/abs/2511.05408">Fierro
+  &amp; Roger, 2026</a>). We return to how our results relate to this
+  line of work in the discussion.</p>
   <h2 id="the-task">The Task</h2>
   <p>We build on <a href="https://arxiv.org/abs/2504.01871">Bush et al.,
   2025</a>, keeping the DRC agent but swapping Sokoban for maze
-  navigation with two rewarded objectives. A single-objective task
-  mostly exercises planning: every candidate plan leads to the same
-  target, and ranking them is simply picking the shortest path. With two
-  objectives and a step cost, plans to different targets must be
-  compared and that comparison is exactly the valuation step we set out
-  to isolate. The underlying maze-navigation skill is unaffected.</p>
+  navigation with two rewarded objectives. Planning in single-goal mazes
+  was already demonstrated in <a
+  href="https://tuphs28.github.io/projects/interpplanning/#appendix">an
+  appendix of the blog post accompanying their paper</a>, where a DRC’s
+  decoded route plans generalise to mazes far larger than any seen in
+  training; our environment adds the second objective, and with this the
+  valuation step.</p>
+  <p>A single-objective task mostly exercises planning as every
+  candidate plan leads to the same target, and ranking them is simply
+  picking the shortest path. With two objectives and a step cost, plans
+  to different targets must be compared and that comparison is exactly
+  the valuation step we set out to isolate. The underlying
+  maze-navigation skill is unaffected.</p>
   <p>Let <span class="math inline">\(R_A\)</span> and <span
   class="math inline">\(R_B\)</span> be the two objectives’ rewards,
   <span class="math inline">\(d_A\)</span> and <span
@@ -549,7 +572,7 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   class="math inline">\(0.1\)</span> on each of the two objectives
   giving 2 sets of 9 arms per base agent (details on base agents in
   <a class="xref" href="#app-agents">Appendix B</a>). Note we also fine-tuned arms outside this grid but never
-  used these to fit the axis (these are the squares on
+  used these to fit the axis (these are indicated by square markers in
   <a class="xref" href="#valueaxis-fig">Figure 3</a>).</p>
   <p>Each arm leaves a weight change <span
   class="math inline">\(\Delta\theta_i = \theta_i -
@@ -581,17 +604,14 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   total change: the shared drift <span
   class="math inline">\(\mathbf{d}\)</span>, the written axis <span
   class="math inline">\(\alpha_i\,\mathbf{v}\)</span>, and the residual
-  <span class="math inline">\(\mathbf{r}_i\)</span>. <span
-  class="math inline">\(\cos(\mathbf{v}_0, \mathbf{v}_1)\)</span>:
-  cosine between axes fitted separately on the two sweeps. Ranges are
-  min–max over independent base agents, both sweeps pooled; the axis
-  here is the full-grid fit.</caption>
+  <span class="math inline">\(\mathbf{r}_i\)</span>. Ranges are min–max
+  over independent base agents, both sweeps pooled; the axis here is the
+  full-grid fit.</caption>
   <colgroup>
-  <col style="width: 20%" />
-  <col style="width: 20%" />
-  <col style="width: 20%" />
-  <col style="width: 20%" />
-  <col style="width: 20%" />
+  <col style="width: 25%" />
+  <col style="width: 25%" />
+  <col style="width: 25%" />
+  <col style="width: 25%" />
   </colgroup>
   <thead>
   <tr class="header">
@@ -602,8 +622,6 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   class="math inline">\(\alpha_i\,\mathbf{v}\)</span>, %)</th>
   <th style="text-align: center;">Residual (<span
   class="math inline">\(\mathbf{r}_i\)</span>, %)</th>
-  <th style="text-align: center;"><span
-  class="math inline">\(\cos(\mathbf{v}_0, \mathbf{v}_1)\)</span></th>
   </tr>
   </thead>
   <tbody>
@@ -612,43 +630,30 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   <td style="text-align: center;">24.9 [22.3, 28.5]</td>
   <td style="text-align: center;">29.5 [25.7, 35.7]</td>
   <td style="text-align: center;">45.2 [41.7, 48.1]</td>
-  <td style="text-align: center;">−0.66 [−0.75, −0.61]</td>
   </tr>
   <tr class="even">
   <td style="text-align: left;">ResNet ×3</td>
   <td style="text-align: center;">21.4 [19.3, 23.1]</td>
   <td style="text-align: center;">18.3 [16.5, 21.3]</td>
   <td style="text-align: center;">62.2 [57.7, 66.4]</td>
-  <td style="text-align: center;">−0.23 [−0.38, −0.12]</td>
   </tr>
   <tr class="odd">
   <td style="text-align: left;">ViT ×1</td>
   <td style="text-align: center;">37.3</td>
   <td style="text-align: center;">14.3</td>
   <td style="text-align: center;">48.0</td>
-  <td style="text-align: center;">−0.23</td>
   </tr>
   <tr class="even">
   <td style="text-align: left;">BC ×3</td>
   <td style="text-align: center;">43.9 [40.9, 47.1]</td>
   <td style="text-align: center;">22.5 [21.8, 23.3]</td>
   <td style="text-align: center;">34.9 [31.6, 38.5]</td>
-  <td style="text-align: center;">−0.98 [−0.99, −0.98]</td>
   </tr>
   </tbody>
   </table>
   </div>
-  <p>The final column of <a class="xref" href="#tbl-decomp">Table 1</a> helps answer whether the two sweeps
-  find the same axis: <span class="math inline">\(\mathbf{v}\)</span>
-  fitted only on the arms varying one goal’s value, against <span
-  class="math inline">\(\mathbf{v}\)</span> fitted only on the other’s.
-  The cosine is negative and in a 1.2–1.4M-dimensional weight space,
-  where random directions have cosine <span
-  class="math inline">\(\approx 0.001\)</span> this is far beyond
-  chance. Each per-sweep fit carries its own fine-tuning noise, which
-  attenuates the cosine and the noisier fits (ResNet, ViT) sit lower.
-  Where the fit is cleanest the two fits recover essentially the same
-  axis (BC, −0.98).</p>
+  <p>The two sweeps, fitted separately, recover the same axis up to a
+  sign flip; see <a class="xref" href="#app-cosine">Appendix E</a>.</p>
   <p>For a short study of how these proportions change as we finetune
   for longer see <a class="xref" href="#app-longer">Appendix C</a>.</p>
   <p>Then for each grid offset we take the axis fitted with that arm
@@ -711,45 +716,55 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   class="math inline">\(22\)</span>. The RL agents are trained
   undiscounted (<span class="math inline">\(\gamma = 1\)</span>) so
   would receive maximum reward for the task optimal tradeoff.</p>
-  <p>Finally, we investigate what proportion of the weights the axis
-  takes up. <span class="math inline">\(\mathbf{v}_0\)</span> and <span
-  class="math inline">\(\mathbf{v}_1\)</span> are fitted from disjoint
-  sets of fine-tunes, so their elementwise product <span
-  class="math inline">\(\mathbf{v}_0 \odot \mathbf{v}_1\)</span>
-  accumulates mass only where the two identify the same direction. Half
-  of this agreement sits in 7% of the DRC’s weights [0.7–11 across
-  bases], 2.8% of the ResNet’s [2.3–3.8], and 13% of the ViT’s (one
-  base). In the DRC the concentration is strongest: in every base the
-  densest tensor is the 1,152-parameter input convolution. This means
-  0.08% of the network carrying 28–45% of the agreement. The BC
-  transformer is the most diffuse with half its axis needing 42% of the
-  weights.</p>
+  <p>Finally, the axis is not spread evenly through the network; where
+  in the weights it sits is examined in <a class="xref" href="#app-where">Appendix F</a>.</p>
   <h2 id="discussion">Discussion</h2>
-  <p>Whats the story here?</p>
   <h5 id="what-have-we-found-here">What have we found here?</h5>
-  <p>gap between threshold and a goal</p>
-  <p>hierarchy/clean separation in an agent. skills/competences (Bush et
-  al. stuff) → utility calc found → final decision</p>
+  <p>We find a single direction <span
+  class="math inline">\(\mathbf{v}\)</span> in weight space that sets
+  the agent’s decision threshold. Writing <span
+  class="math inline">\(\theta + \alpha\,\mathbf{v}\)</span> reproduces
+  the behaviour of an agent finetuned with an objective value shifted by
+  <span class="math inline">\(\alpha\)</span> to within a step
+  (<a class="xref" href="#valueaxis-fig">Figure 3</a>). Moving the value of one objective up moves the
+  weights in the same direction as moving the value of the other
+  objective down. These results hold across four architectures and two
+  training regimes.</p>
+  <p>What kind of object is this? A threshold is not a complete goal
+  representation. We define a mechanistic goal representation to be a
+  system that ranks these plans. A binary decision threshold is a simple
+  version of this. The representation of this we have found it a
+  critical part of this machinery.</p>
+  <p>(Has anyone defined a mechanistic goal represenation? would be
+  usefult to make the above tighter)</p>
+  <p>The results suggest the internal computation of the agent has been
+  broken down into a hierarchy. The agent forms plans
+  (<a class="xref" href="#taskplan-fig">Figure 2b</a>). The outputs of these planning competent
+  circuits then feed into our plan ranking mechanism (goal
+  represenation) which then finally converts into an action output.</p>
+  <!-- fig: hierarchy -->
+  <h5 id="does-existing-theory-predict-a-linear-decision-threshold">Does
+  existing theory predict a linear Decision Threshold?</h5>
+  <p>preliminary:</p>
+  <p>locally linear in reward (byproduct of gradient descent)</p>
+  <p>But our axis is linear across quite a long range (Also when it
+  breaks its consistently at tau &lt;0 not an arbitrary point). This
+  looks more like a free parameter built into the model weights.</p>
+  <p>Similar to these results: weight steering paper, rewarded soups,
+  editing models with task arithmetic</p>
+  <p>But key differences: we never vary values, this hierarchy clean
+  split between maze navigation and plan ranking here, also detail on
+  the mechanism (breaks at tau&lt;0, noise characteristics)</p>
+  <p>https://arxiv.org/pdf/2511.05408v2</p>
   <h5
-  id="what-does-this-tell-us-about-how-we-would-expect-goal-representations-to-form-in-models">What
-  does this tell us about how we would expect goal representations to
+  id="what-could-this-tell-us-about-how-we-would-expect-goal-representations-to-form-in-models">What
+  could this tell us about how we would expect goal representations to
   form in models?</h5>
+  <p>The re</p>
   <p>weights vs activations. e.g. vs mini et al. who found cheese
   tracker in the activations.</p>
   <p>small portion of total model weights affects this. not diffuse</p>
   <p>robust across architectures</p>
-  <h5 id="does-existing-theory-predict-this">Does existing theory
-  predict this?</h5>
-  <p>Maybe this belongs in the limitationsy bit. Essentially our point
-  here is does existing theory explain this cleanly. If it does then we
-  haven’t really shown anything interesting. If this is unexplained then
-  what is missing?</p>
-  <p>is it trivial that this was learnt? maybe from the the env you can
-  predict this? What does this mean</p>
-  <p>why couldn’t we have found a mess of heuristics. mini et al
-  style?</p>
-  <p>theoretical side, does existing theory predict this? a v stable
-  result that generalises across architectures etc.</p>
   <h5 id="limitationsqualifying-the-results">Limitations/Qualifying the
   results</h5>
   <p>still a lot unknown about internal calcs the model is doing just
@@ -760,7 +775,6 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   <p>Next post will be a full exploration of internal calculations.
   i.e. try to fully flesh out each of these three bits of the
   hierarchy.</p>
-  <!-- fig: hierarchy -->
   <h2 id="bibliography">Bibliography</h2>
   <ul>
   <li>Bellot, A., Richens, J., &amp; Everitt, T. (2025). The Limits of
@@ -779,9 +793,16 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   Campos, S., &amp; Shah, R. (2025). Evaluating the Goal-Directedness of
   Large Language Models. <a
   href="https://arxiv.org/abs/2504.11844">arXiv:2504.11844</a></li>
+  <li>Fierro, C., &amp; Roger, F. (2026). Steering Language Models with
+  Weight Arithmetic. <em>ICLR 2026</em>. <a
+  href="https://arxiv.org/abs/2511.05408">arXiv:2511.05408</a></li>
   <li>Guez, A., Mirza, M., Gregor, K., et al. (2019). An Investigation
   of Model-Free Planning. <em>ICML 2019</em>. <a
   href="https://arxiv.org/abs/1901.03559">arXiv:1901.03559</a></li>
+  <li>Ilharco, G., Ribeiro, M. T., Wortsman, M., Gururangan, S.,
+  Schmidt, L., Hajishirzi, H., &amp; Farhadi, A. (2023). Editing Models
+  with Task Arithmetic. <em>ICLR 2023</em>. <a
+  href="https://arxiv.org/abs/2212.04089">arXiv:2212.04089</a></li>
   <li>Jenner, E., Kapur, S., Georgiev, V., Allen, C., Emmons, S., &amp;
   Russell, S. (2024). Evidence of Learned Look-Ahead in a Chess-Playing
   Neural Network. <em>NeurIPS 2024</em>. <a
@@ -801,6 +822,11 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   <li>Orseau, L., McGill, S., &amp; Legg, S. (2018). Agents and Devices:
   A Relative Definition of Agency. <a
   href="https://arxiv.org/abs/1805.12387">arXiv:1805.12387</a></li>
+  <li>Ramé, A., Couairon, G., Shukor, M., Dancette, C., Gaya, J.-B.,
+  Soulier, L., &amp; Cord, M. (2023). Rewarded Soups: Towards
+  Pareto-Optimal Alignment by Interpolating Weights Fine-Tuned on
+  Diverse Rewards. <em>NeurIPS 2023</em>. <a
+  href="https://arxiv.org/abs/2306.04488">arXiv:2306.04488</a></li>
   <li>Taufeeque, M., Quirke, P., Li, M., Cundy, C., Tucker, A. D.,
   Gleave, A., &amp; Garriga-Alonso, A. (2024). Planning in a Recurrent
   Neural Network that Plays Sokoban. <em>ICML 2024 Mechanistic
@@ -1127,6 +1153,69 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
 </div>
 </figure>
 
+  </details>
+  <details class="wide" id="app-cosine">
+  <summary>Appendix E: 
+  Do the two sweeps find the same axis?
+  </summary>
+  <table>
+  <caption>Cosine between axes fitted separately on the two sweeps.
+  Ranges are min–max over independent base agents.</caption>
+  <thead>
+  <tr class="header">
+  <th style="text-align: left;"></th>
+  <th style="text-align: center;"><span
+  class="math inline">\(\cos(\mathbf{v}_0, \mathbf{v}_1)\)</span></th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr class="odd">
+  <td style="text-align: left;">DRC ×3</td>
+  <td style="text-align: center;">−0.66 [−0.75, −0.61]</td>
+  </tr>
+  <tr class="even">
+  <td style="text-align: left;">ResNet ×3</td>
+  <td style="text-align: center;">−0.23 [−0.38, −0.12]</td>
+  </tr>
+  <tr class="odd">
+  <td style="text-align: left;">ViT ×1</td>
+  <td style="text-align: center;">−0.23</td>
+  </tr>
+  <tr class="even">
+  <td style="text-align: left;">BC ×3</td>
+  <td style="text-align: center;">−0.98 [−0.99, −0.98]</td>
+  </tr>
+  </tbody>
+  </table>
+  <p>These cosines compare <span
+  class="math inline">\(\mathbf{v}\)</span> fitted only on the arms
+  varying one goal’s value against <span
+  class="math inline">\(\mathbf{v}\)</span> fitted only on the other’s.
+  The cosine is negative and in a 1.2–1.4M-dimensional weight space,
+  where random directions have cosine <span
+  class="math inline">\(\approx 0.001\)</span> this is far beyond
+  chance. Each per-sweep fit carries its own fine-tuning noise, which
+  attenuates the cosine and the noisier fits (ResNet, ViT) sit lower.
+  Where the fit is cleanest the two fits recover essentially the same
+  axis (BC, −0.98).</p>
+  </details>
+  <details class="wide" id="app-where">
+  <summary>Appendix F: 
+  Where the axis sits in the weights
+  </summary>
+  <p>We investigate what proportion of the weights the axis takes up.
+  <span class="math inline">\(\mathbf{v}_0\)</span> and <span
+  class="math inline">\(\mathbf{v}_1\)</span> are fitted from disjoint
+  sets of fine-tunes, so their elementwise product <span
+  class="math inline">\(\mathbf{v}_0 \odot \mathbf{v}_1\)</span>
+  accumulates mass only where the two identify the same direction. Half
+  of this agreement sits in 7% of the DRC’s weights [0.7–11 across
+  bases], 2.8% of the ResNet’s [2.3–3.8], and 13% of the ViT’s (one
+  base). In the DRC the concentration is strongest: in every base the
+  densest tensor is the 1,152-parameter input convolution. This means
+  0.08% of the network carrying 28–45% of the agreement. The BC
+  transformer is the most diffuse with half its axis needing 42% of the
+  weights.</p>
   </details>
   <footer>© 2026 Rahul Marchand</footer>
 </div>
