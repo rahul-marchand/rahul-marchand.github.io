@@ -657,15 +657,15 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   fitted on arms trained by varying one objective and the <span
   class="math inline">\(\mathbf{v}_1\)</span> fit on arms trained by
   varying the other objective are approximately the same <span
-  class="math inline">\(\mathbf{v}\)</span>; see <a class="xref" href="#app-cosine">Appendix E</a>.</p>
+  class="math inline">\(\mathbf{v}\)</span>; see <a class="xref" href="#app-cosine">Appendix C</a>.</p>
   <p>For a short study of how the proportions of <span
   class="math inline">\(\mathbf{d}\)</span>, <span
   class="math inline">\(\mathbf{v}\)</span> and <span
   class="math inline">\(\mathbf{r}_i\)</span> change as we finetune for
-  longer see <a class="xref" href="#app-longer">Appendix C</a>.</p>
+  longer see <a class="xref" href="#app-longer">Appendix D</a>.</p>
   <p>For an analysis of where in the weights <span
   class="math inline">\(\mathbf{v}\)</span> concentrates see
-  <a class="xref" href="#app-where">Appendix F</a>.</p>
+  <a class="xref" href="#app-where">Appendix E</a>.</p>
   <p>The residual error that the model we are fitting leaves unexplained
   is large. We suggest that both the drift and residual components have
   almost no effect on the model’s decision threshold. To test this we
@@ -677,7 +677,7 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   and add it to the frozen base weights, <span
   class="math inline">\(\theta + \alpha\,\mathbf{v}\)</span>, with no
   drift term. How <span class="math inline">\(\hat{\tau}\)</span> is
-  estimated from behaviour is described in <a class="xref" href="#app-tau">Appendix D</a>.</p>
+  estimated from behaviour is described in <a class="xref" href="#app-tau">Appendix F</a>.</p>
   <p>EXPLAIN a bit more</p>
   <figure class="fig-valueaxis wide" id="valueaxis-fig">
 <style>
@@ -1053,8 +1053,53 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   hours, and a full 18-arm value sweep with its measurements about 1.5
   hours per base.</p>
   </details>
-  <details class="wide" id="app-longer">
+  <details class="wide" id="app-cosine">
   <summary>Appendix C: 
+  Do the two sweeps find the same axis?
+  </summary>
+  <table>
+  <caption>Cosine between axes fitted separately on the two sweeps.
+  Ranges are min–max over independent base agents.</caption>
+  <thead>
+  <tr class="header">
+  <th style="text-align: left;"></th>
+  <th style="text-align: center;"><span
+  class="math inline">\(\cos(\mathbf{v}_0, \mathbf{v}_1)\)</span></th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr class="odd">
+  <td style="text-align: left;">DRC ×3</td>
+  <td style="text-align: center;">−0.66 [−0.75, −0.61]</td>
+  </tr>
+  <tr class="even">
+  <td style="text-align: left;">ResNet ×3</td>
+  <td style="text-align: center;">−0.23 [−0.38, −0.12]</td>
+  </tr>
+  <tr class="odd">
+  <td style="text-align: left;">ViT ×1</td>
+  <td style="text-align: center;">−0.23</td>
+  </tr>
+  <tr class="even">
+  <td style="text-align: left;">BC ×3</td>
+  <td style="text-align: center;">−0.98 [−0.99, −0.98]</td>
+  </tr>
+  </tbody>
+  </table>
+  <p>These cosines compare <span
+  class="math inline">\(\mathbf{v}\)</span> fitted only on the arms
+  varying one goal’s value against <span
+  class="math inline">\(\mathbf{v}\)</span> fitted only on the other’s.
+  The cosine is negative and in a 1.2–1.4M-dimensional weight space,
+  where random directions have cosine <span
+  class="math inline">\(\approx 0.001\)</span> this is far beyond
+  chance. Each per-sweep fit carries its own fine-tuning noise, which
+  attenuates the cosine and the noisier fits (ResNet, ViT) sit lower.
+  Where the fit is cleanest the two fits recover essentially the same
+  axis (BC, −0.98).</p>
+  </details>
+  <details class="wide" id="app-longer">
+  <summary>Appendix D: 
   The axis over longer fine-tuning
   </summary>
   <p>The <a class="xref" href="#tbl-decomp">Table 1</a> decomposition for the DRC, read at checkpoints of
@@ -1110,8 +1155,26 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   </tbody>
   </table>
   </details>
+  <details class="wide" id="app-where">
+  <summary>Appendix E: 
+  Where the axis sits in the weights
+  </summary>
+  <p>We investigate what proportion of the weights the axis takes up.
+  <span class="math inline">\(\mathbf{v}_0\)</span> and <span
+  class="math inline">\(\mathbf{v}_1\)</span> are fitted from disjoint
+  sets of fine-tunes, so their elementwise product <span
+  class="math inline">\(\mathbf{v}_0 \odot \mathbf{v}_1\)</span>
+  accumulates mass only where the two identify the same direction. Half
+  of this agreement sits in 7% of the DRC’s weights [0.7–11 across
+  bases], 2.8% of the ResNet’s [2.3–3.8], and 13% of the ViT’s (one
+  base). In the DRC the concentration is strongest: in every base the
+  densest tensor is the 1,152-parameter input convolution. This means
+  0.08% of the network carrying 28–45% of the agreement. The BC
+  transformer is the most diffuse with half its axis needing 42% of the
+  weights.</p>
+  </details>
   <details class="wide" id="app-tau">
-  <summary>Appendix D: 
+  <summary>Appendix F: 
   Fitting τ̂
   </summary>
   <p>Every threshold in the post is read from behaviour the same way. We
@@ -1169,69 +1232,6 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
 </div>
 </figure>
 
-  </details>
-  <details class="wide" id="app-cosine">
-  <summary>Appendix E: 
-  Do the two sweeps find the same axis?
-  </summary>
-  <table>
-  <caption>Cosine between axes fitted separately on the two sweeps.
-  Ranges are min–max over independent base agents.</caption>
-  <thead>
-  <tr class="header">
-  <th style="text-align: left;"></th>
-  <th style="text-align: center;"><span
-  class="math inline">\(\cos(\mathbf{v}_0, \mathbf{v}_1)\)</span></th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr class="odd">
-  <td style="text-align: left;">DRC ×3</td>
-  <td style="text-align: center;">−0.66 [−0.75, −0.61]</td>
-  </tr>
-  <tr class="even">
-  <td style="text-align: left;">ResNet ×3</td>
-  <td style="text-align: center;">−0.23 [−0.38, −0.12]</td>
-  </tr>
-  <tr class="odd">
-  <td style="text-align: left;">ViT ×1</td>
-  <td style="text-align: center;">−0.23</td>
-  </tr>
-  <tr class="even">
-  <td style="text-align: left;">BC ×3</td>
-  <td style="text-align: center;">−0.98 [−0.99, −0.98]</td>
-  </tr>
-  </tbody>
-  </table>
-  <p>These cosines compare <span
-  class="math inline">\(\mathbf{v}\)</span> fitted only on the arms
-  varying one goal’s value against <span
-  class="math inline">\(\mathbf{v}\)</span> fitted only on the other’s.
-  The cosine is negative and in a 1.2–1.4M-dimensional weight space,
-  where random directions have cosine <span
-  class="math inline">\(\approx 0.001\)</span> this is far beyond
-  chance. Each per-sweep fit carries its own fine-tuning noise, which
-  attenuates the cosine and the noisier fits (ResNet, ViT) sit lower.
-  Where the fit is cleanest the two fits recover essentially the same
-  axis (BC, −0.98).</p>
-  </details>
-  <details class="wide" id="app-where">
-  <summary>Appendix F: 
-  Where the axis sits in the weights
-  </summary>
-  <p>We investigate what proportion of the weights the axis takes up.
-  <span class="math inline">\(\mathbf{v}_0\)</span> and <span
-  class="math inline">\(\mathbf{v}_1\)</span> are fitted from disjoint
-  sets of fine-tunes, so their elementwise product <span
-  class="math inline">\(\mathbf{v}_0 \odot \mathbf{v}_1\)</span>
-  accumulates mass only where the two identify the same direction. Half
-  of this agreement sits in 7% of the DRC’s weights [0.7–11 across
-  bases], 2.8% of the ResNet’s [2.3–3.8], and 13% of the ViT’s (one
-  base). In the DRC the concentration is strongest: in every base the
-  densest tensor is the 1,152-parameter input convolution. This means
-  0.08% of the network carrying 28–45% of the agreement. The BC
-  transformer is the most diffuse with half its axis needing 42% of the
-  weights.</p>
   </details>
   <footer>© 2026 Rahul Marchand</footer>
 </div>
