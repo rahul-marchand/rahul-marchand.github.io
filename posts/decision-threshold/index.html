@@ -753,25 +753,9 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   undiscounted (<span class="math inline">\(\gamma = 1\)</span>) so
   would receive maximum reward for the task optimal tradeoff.</p>
   <h2 id="discussion">Discussion</h2>
-  <p><strong>First a quick recap of results.</strong> We find a single
-  direction <span class="math inline">\(\mathbf{v}\)</span> in weight
-  space that sets the agent’s decision threshold. Adding <span
-  class="math inline">\(\alpha\,\mathbf{v}\)</span> to the frozen base
-  weights reproduces, to within about a step, the threshold of an agent
-  fine-tuned with a goal value shifted by <span
-  class="math inline">\(\alpha\)</span> (<a class="xref" href="#valueaxis-fig">Figure 3</a>), and leaves
-  its maze navigation capability intact. The axis is fitted on a grid of
-  fine-tunes but extrapolates beyond it, collapsing exactly at the point
-  where the write would ask the agent to prefer the lower-valued goal at
-  equal distance (i.e. <span class="math inline">\(\tau&lt;0\)</span>).
-  Fitting it separately on the sweeps of the values of each of the two
-  goals, recovers the same direction with opposite sign: cleanly in the
-  DRC and BC transformer, more weakly in the ResNet and ViT
-  (<a class="xref" href="#app-cosine">Appendix C</a>). These results hold across four architectures and two
-  training regimes.</p>
-  <p><strong>How does this relate to earlier weight steering
-  results?</strong> Linear directions in weight space that control a
-  behaviour are not new. Task vectors add and subtract (<a
+  <h3 id="relation-to-weight-steering">Relation to weight steering</h3>
+  <p>Linear directions in weight space that control a behaviour are not
+  new. Task vectors add and subtract (<a
   href="https://arxiv.org/abs/2212.04089">Ilharco et al., 2023</a>), the
   difference of two contrastive fine-tunes steers an LLM (<a
   href="https://arxiv.org/abs/2511.05408">Fierro &amp; Roger, 2026</a>),
@@ -790,15 +774,16 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   al., 2025</a>; <a href="https://arxiv.org/abs/2506.19823">Wang et al.,
   2025</a>). That hypothesis cannot explain our results. The goal values
   never vary during training and the agent never observes them, so
-  variation in the data cannot be why the agent has a free parameter for
-  this threshold value. Nor does the other account of why weight
-  directions compose in large models, weight disentanglement acquired
-  during pretraining (<a
+  variation in the data cannot be why the agent has the threshold
+  parameter <span class="math inline">\(\mathbf{v}\)</span>. Nor does
+  the other account of why weight directions compose in large models,
+  weight disentanglement acquired during pretraining (<a
   href="https://arxiv.org/abs/2305.12827">Ortiz-Jiménez et al.,
   2023</a>), reach an agent trained from scratch on one task.</p>
-  <p><strong>Why might this free parameter in the weights
-  appear?</strong> Close to a trained network, behaviour is near-linear
-  in small, local, weight changes (<a
+  <h3 id="why-a-free-parameter-appears">Why a free parameter
+  appears</h3>
+  <p>Close to a trained network, behaviour is near-linear in small,
+  local, weight changes (<a
   href="https://arxiv.org/abs/2210.05643">Malladi et al., 2023</a>), and
   fine-tunes that start from the same weights stay close together (<a
   href="https://arxiv.org/abs/1912.05671">Frankle et al., 2020</a>), so
@@ -837,8 +822,9 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   only ever needs the difference between the values. Intact navigation,
   because the scoring step is being changed and the planning step is
   not.</p>
-  <p><strong>Evidence for a modular, hierarchical structure.</strong>
-  What we have shown is this. The agent forms plans, and they can be
+  <h3 id="evidence-for-modular-structure">Evidence for modular
+  structure</h3>
+  <p>What we have shown is this. The agent forms plans, and they can be
   read from its activations before it moves (<a class="xref" href="#taskplan-fig">Figure 2b</a>). A
   single direction in its weights changes which goal it chooses while
   leaving the route to that goal shortest-path (<a class="xref" href="#valueaxis-fig">Figure 3</a>). So
@@ -957,27 +943,28 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
 </div>
 </figure>
 
-  <p><strong>This translates out of reinforcement learning.</strong> The
-  BC transformer was trained to predict the next action of an optimal
-  solver, and it developed the same threshold parameter as the RL
-  agents, in the cleanest weight-space form of the four: the two sweeps
-  recover almost exactly the same axis (<a class="xref" href="#app-cosine">Appendix C</a>), and its threshold
-  and exchange rate sit closest to the task optimum (<a class="xref" href="#app-agents">Appendix B</a>). This
-  related to Dennet’s definition of goal-directedness from the
-  background. We said a system is goal-directed to the extent that a
-  goal-and-planner model is the most compact predictor of its behaviour.
-  Behaviour cloning performs essentially this, optimising for a compact
-  predictor of behaviour. Our BC transformer seeds all hold the solver’s
-  goal parameter in their weights because this a compressed account of
-  the solver’s actions. Predictors internalising the latent variables of
-  whatever generated their data has precedent, a board state from move
-  sequences (<a href="https://arxiv.org/abs/2210.13382">Li et al.,
-  2023</a>), other agents’ preferences and beliefs from their
-  trajectories (<a href="https://arxiv.org/abs/1802.07740">Rabinowitz et
-  al., 2018</a>), and, it has been argued, the intentions of authors
-  from their text (<a href="https://arxiv.org/abs/2212.01681">Andreas,
-  2022</a>); humans appear to infer goals the same way, by inverting a
-  planner (<a
+  <h3 id="beyond-reinforcement-learning">Beyond reinforcement
+  learning</h3>
+  <p>The BC transformer was trained to predict the next action of an
+  optimal solver, and it developed the same threshold parameter as the
+  RL agents, in the cleanest weight-space form of the four: the two
+  sweeps recover almost exactly the same axis (<a class="xref" href="#app-cosine">Appendix C</a>), and its
+  threshold and exchange rate sit closest to the task optimum
+  (<a class="xref" href="#app-agents">Appendix B</a>). This related to Dennet’s definition of
+  goal-directedness from the background. We said a system is
+  goal-directed to the extent that a goal-and-planner model is the most
+  compact predictor of its behaviour. Behaviour cloning performs
+  essentially this, optimising for a compact predictor of behaviour. Our
+  BC transformer seeds all hold the solver’s goal parameter in their
+  weights because this a compressed account of the solver’s actions.
+  Predictors internalising the latent variables of whatever generated
+  their data has precedent, a board state from move sequences (<a
+  href="https://arxiv.org/abs/2210.13382">Li et al., 2023</a>), other
+  agents’ preferences and beliefs from their trajectories (<a
+  href="https://arxiv.org/abs/1802.07740">Rabinowitz et al., 2018</a>),
+  and, it has been argued, the intentions of authors from their text (<a
+  href="https://arxiv.org/abs/2212.01681">Andreas, 2022</a>); humans
+  appear to infer goals the same way, by inverting a planner (<a
   href="https://doi.org/10.1016/j.cognition.2009.07.005">Baker et al.,
   2009</a>). What is new here is that the latent is a goal with a
   ground-truth value, and that it is stored as a single weight direction
@@ -1001,34 +988,35 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   last case is the one that matters for language models, which are
   trained to predict the behaviour of goal-directed agents whose goals
   vary across the corpus.</p>
-  <p><strong>Limitations.</strong> <em>This is not a full
-  reverse-engineering.</em> The explanation above is inferred from what
-  the axis does, not read from the circuit. A messier implementation,
-  say the axis modulating a tangle of navigation heuristics inside the
-  planner, could yield an equally clean steerable direction without a
-  separate valuation stage. Circuit-level evidence is what separates the
-  two, and it is deferred to post 2.</p>
-  <p><em>Small agents on one task.</em> A million parameters on 11×11
-  mazes. That is what buys a ground-truth objective, a full sweep of
-  fine-tunes and a threshold decoded against a known optimum, none of
+  <h3 id="limitations">Limitations</h3>
+  <p><strong>This is not a full reverse-engineering.</strong> The
+  explanation above is inferred from what the axis does, not read from
+  the circuit. A messier implementation, say the axis modulating a
+  tangle of navigation heuristics inside the planner, could yield an
+  equally clean steerable direction without a separate valuation stage.
+  Circuit-level evidence is what separates the two, and it is deferred
+  to post 2.</p>
+  <p><strong>Small agents on one task.</strong> A million parameters on
+  11×11 mazes. That is what buys a ground-truth objective, a full sweep
+  of fine-tunes and a threshold decoded against a known optimum, none of
   which exists at scale. It also means nothing here shows the structure
   survives scale or richer tasks; the imitation-learning argument is an
   argument, not a measurement.</p>
-  <p><em>The valuation step is as simple as it could be.</em> One scalar
-  sets a binary choice. With several goals, nonlinear values or
-  uncertainty over them, the goal need not collapse to one direction,
+  <p><strong>The valuation step is as simple as it could be.</strong>
+  One scalar sets a binary choice. With several goals, nonlinear values
+  or uncertainty over them, the goal need not collapse to one direction,
   and where it stops collapsing is an open question.</p>
-  <p><em>The agents are not optimal, and this is reflected in the
-  axis.</em> The RL agents’ thresholds sit at 5 to 9 extra steps against
-  an optimum of 10, and their exchange rates are off the task’s
+  <p><strong>The agents are not optimal, and this is reflected in the
+  axis.</strong> The RL agents’ thresholds sit at 5 to 9 extra steps
+  against an optimum of 10, and their exchange rates are off the task’s
   (<a class="xref" href="#app-agents">Appendix B</a>). The axis is calibrated to what fine-tuning produces,
   not to the optimum, so a write moves the threshold as far as the
   corresponding fine-tune would, and no further.</p>
-  <p><em>Measurement.</em> The ViT is one seed. The residual is 35 to 62
-  percent of the weight change; we showed the axis is sufficient to move
-  the threshold but did not directly test that the drift and residual
-  are behaviourally inert. The two sweeps agree cleanly only in the DRC
-  and BC transformer. Measurable <span
+  <p><strong>Measurement.</strong> The ViT is one seed. The residual is
+  35 to 62 percent of the weight change; we showed the axis is
+  sufficient to move the threshold but did not directly test that the
+  drift and residual are behaviourally inert. The two sweeps agree
+  cleanly only in the DRC and BC transformer. Measurable <span
   class="math inline">\(\hat{\tau}\)</span> is capped by maze size, so
   the axis above <span class="math inline">\(\alpha = 0.4\)</span> is
   untested. Every arm was fine-tuned for one duration at one learning
@@ -1043,60 +1031,57 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   imitate. The parameter is separable from the planning it steers, and a
   predictor of goal-directed behaviour grows it as readily as an agent
   rewarded for the behaviour itself.</p>
+  <h3 id="implications">Implications</h3>
   <p>For the questions in the motivation, four things follow.</p>
-  <ul>
-  <li><strong>An internalised objective can be measured against ground
+  <p><strong>An internalised objective can be measured against ground
   truth, and found wrong.</strong> The RL agents’ thresholds sit below
   the task optimum. In the terms of <a
   href="https://arxiv.org/abs/1906.01820">Hubinger et al., 2019</a>, the
   objective read from behaviour is the behavioural objective and the
   parameter found in the weights belongs to the mesa-objective; here
   both are measurable, and both disagree with the base objective. The
-  axis corrects the disagreement by writing rather than retraining.</li>
-  <li><strong>Goal drift during fine-tuning can be watched in weight
+  axis corrects the disagreement by writing rather than retraining.</p>
+  <p><strong>Goal drift during fine-tuning can be watched in weight
   space.</strong> Projecting each update onto <span
   class="math inline">\(\mathbf{v}\)</span> tracks the value it implies
   with no behavioural evaluation, the monitoring idea of <a
   href="https://arxiv.org/abs/2511.05408">Fierro &amp; Roger, 2026</a>,
-  here in units the environment defines.</li>
-  <li><strong>Weights predict behaviour where behaviour alone
+  here in units the environment defines.</p>
+  <p><strong>Weights predict behaviour where behaviour alone
   cannot.</strong> The write extrapolates to values the agent was never
   trained on, which is the out-of-distribution prediction <a
   href="https://arxiv.org/abs/2506.02923">Bellot et al., 2025</a> show
-  behavioural data cannot deliver.</li>
-  <li><strong>The collapse at <span class="math inline">\(\tau &lt;
+  behavioural data cannot deliver.</p>
+  <p><strong>The collapse at <span class="math inline">\(\tau &lt;
   0\)</span> is goal misgeneralisation in miniature.</strong> The goal
   circuit carries a training-time assumption, that one goal is the
   richer one. Past that assumption the machinery breaks rather than
   adapts, which is the pattern <a
   href="https://arxiv.org/abs/2105.14111">Langosco et al., 2022</a>
-  named, here with the assumption located.</li>
-  </ul>
-  <p>Next.</p>
-  <ul>
-  <li><strong>Trace the circuit.</strong> Observe each stage of
+  named, here with the assumption located.</p>
+  <h3 id="next-steps">Next steps</h3>
+  <p><strong>Trace the circuit.</strong> Observe each stage of
   <a class="xref" href="#hierarchy-fig">Figure 4</a> directly: where the value enters, before or after
   planning, and how the comparison is implemented. The choice curve
   already constrains this, since its scale moves with its threshold
   (<a class="xref" href="#app-tau">Appendix F</a>), and the drift and residual components need a direct test
-  of inertness. This is post 2.</li>
-  <li><strong>Make the valuation step harder.</strong> More goals,
+  of inertness. This is post 2.</p>
+  <p><strong>Make the valuation step harder.</strong> More goals,
   nonlinear values, goals nested inside plans. The question is where the
-  single direction stops being enough, and what replaces it.</li>
-  <li><strong>Quantify how close the learnt computation is to the ideal
+  single direction stops being enough, and what replaces it.</p>
+  <p><strong>Quantify how close the learnt computation is to the ideal
   one.</strong> The agents’ thresholds and exchange rates are off the
   optimum by amounts we can measure but cannot yet explain. A
   theoretical account of what determines that gap would be a natural
-  complement to the empirical work here.</li>
-  <li><strong>Test the imitation hypothesis.</strong> Clone
-  demonstrators of graded rationality and demonstration sets that only
-  partly identify the threshold; clone a population of solvers with
-  different thresholds and watch the goal move from the weights into the
-  activations. A quantitative measure of goal-directedness (<a
+  complement to the empirical work here.</p>
+  <p><strong>Test the imitation hypothesis.</strong> Clone demonstrators
+  of graded rationality and demonstration sets that only partly identify
+  the threshold; clone a population of solvers with different thresholds
+  and watch the goal move from the weights into the activations. A
+  quantitative measure of goal-directedness (<a
   href="https://arxiv.org/abs/2412.04758">MacDermott et al., 2024</a>)
   applied to the demonstrators would give the axis on which the
-  cleanliness of the learnt parameter should vary.</li>
-  </ul>
+  cleanliness of the learnt parameter should vary.</p>
   <p>The direction we care about is whether trained agents decompose
   into recognisable components, planning, valuation and choice, with
   goals as parameters of the valuation step, in the way hand-built
