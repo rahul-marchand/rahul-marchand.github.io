@@ -33,6 +33,28 @@ h1 { font-size: 30px; font-weight: 600; margin: 0 0 6px; }
 h2 { font-size: 21px; font-weight: 600; margin: 40px 0 12px; }
 h3 { font-size: 17px; font-weight: 600; margin: 28px 0 8px; }
 
+/* Paper-style section numbers via counters: the md carries none, reordering
+   renumbers. Summary, Bibliography and Appendices stay unnumbered; h3s inside
+   <details> (appendix internals) are never numbered. */
+.page h2 { counter-increment: sec; counter-reset: subsec; }
+.page h2::before {
+  content: counter(sec);
+  color: var(--ink-soft);
+  font-weight: 500;
+  margin-right: 0.75em;
+}
+.page h3 { counter-increment: subsec; }
+.page h3::before {
+  content: counter(sec) "." counter(subsec);
+  color: var(--ink-soft);
+  font-weight: 500;
+  margin-right: 0.75em;
+}
+h2#summary, h2#bibliography, h2#appendices { counter-increment: none; }
+h2#summary::before, h2#bibliography::before, h2#appendices::before { content: none; }
+details h3 { counter-increment: none; }
+details h3::before { content: none; }
+
 p, ul, ol { margin: 0 0 16px; }
 ul, ol { padding-left: 24px; }
 
