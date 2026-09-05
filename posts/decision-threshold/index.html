@@ -1001,35 +1001,34 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   last case is the one that matters for language models, which are
   trained to predict the behaviour of goal-directed agents whose goals
   vary across the corpus.</p>
-  <p><strong>Limitations.</strong></p>
-  <p><strong>This is not a full reverse-engineering.</strong> The
-  explanation above is inferred from what the axis does, not read from
-  the circuit. A messier implementation, say the axis modulating a
-  tangle of navigation heuristics inside the planner, could yield an
-  equally clean steerable direction without a separate valuation stage.
-  Circuit-level evidence is what separates the two, and it is deferred
-  to post 2.</p>
-  <p><strong>Small agents on one task.</strong> A million parameters on
-  11×11 mazes. That is what buys a ground-truth objective, a full sweep
-  of fine-tunes and a threshold decoded against a known optimum, none of
+  <p><strong>Limitations.</strong> <em>This is not a full
+  reverse-engineering.</em> The explanation above is inferred from what
+  the axis does, not read from the circuit. A messier implementation,
+  say the axis modulating a tangle of navigation heuristics inside the
+  planner, could yield an equally clean steerable direction without a
+  separate valuation stage. Circuit-level evidence is what separates the
+  two, and it is deferred to post 2.</p>
+  <p><em>Small agents on one task.</em> A million parameters on 11×11
+  mazes. That is what buys a ground-truth objective, a full sweep of
+  fine-tunes and a threshold decoded against a known optimum, none of
   which exists at scale. It also means nothing here shows the structure
   survives scale or richer tasks; the imitation-learning argument is an
   argument, not a measurement.</p>
-  <p><strong>The valuation step is as simple as it could be.</strong>
-  One scalar sets a binary choice. With several goals, nonlinear values
-  or uncertainty over them, the goal need not collapse to one direction,
+  <p><em>The valuation step is as simple as it could be.</em> One scalar
+  sets a binary choice. With several goals, nonlinear values or
+  uncertainty over them, the goal need not collapse to one direction,
   and where it stops collapsing is an open question.</p>
-  <p><strong>The agents are not optimal, and this is reflected in the
-  axis.</strong> The RL agents’ thresholds sit at 5 to 9 extra steps
-  against an optimum of 10, and their exchange rates are off the task’s
+  <p><em>The agents are not optimal, and this is reflected in the
+  axis.</em> The RL agents’ thresholds sit at 5 to 9 extra steps against
+  an optimum of 10, and their exchange rates are off the task’s
   (<a class="xref" href="#app-agents">Appendix B</a>). The axis is calibrated to what fine-tuning produces,
   not to the optimum, so a write moves the threshold as far as the
   corresponding fine-tune would, and no further.</p>
-  <p><strong>Measurement.</strong> The ViT is one seed. The residual is
-  35 to 62 percent of the weight change; we showed the axis is
-  sufficient to move the threshold but did not directly test that the
-  drift and residual are behaviourally inert. The two sweeps agree
-  cleanly only in the DRC and BC transformer. Measurable <span
+  <p><em>Measurement.</em> The ViT is one seed. The residual is 35 to 62
+  percent of the weight change; we showed the axis is sufficient to move
+  the threshold but did not directly test that the drift and residual
+  are behaviourally inert. The two sweeps agree cleanly only in the DRC
+  and BC transformer. Measurable <span
   class="math inline">\(\hat{\tau}\)</span> is capped by maze size, so
   the axis above <span class="math inline">\(\alpha = 0.4\)</span> is
   untested. Every arm was fine-tuned for one duration at one learning
@@ -1112,10 +1111,6 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   Understanding as Inverse Planning. <em>Cognition</em>, 113(3),
   329–349. <a
   href="https://doi.org/10.1016/j.cognition.2009.07.005">doi:10.1016/j.cognition.2009.07.005</a></li>
-  <li>Barreto, A., Dabney, W., Munos, R., Hunt, J. J., Schaul, T., van
-  Hasselt, H., &amp; Silver, D. (2017). Successor Features for Transfer
-  in Reinforcement Learning. <em>NeurIPS 2017</em>. <a
-  href="https://arxiv.org/abs/1606.05312">arXiv:1606.05312</a></li>
   <li>Bellot, A., Richens, J., &amp; Everitt, T. (2025). The Limits of
   Predicting Agents from Behaviour. <em>ICML 2025</em>. <a
   href="https://arxiv.org/abs/2506.02923">arXiv:2506.02923</a></li>
@@ -1197,10 +1192,6 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   A Modern Approach</em> (4th ed.), §2.4.5 Utility-based agents.
   Pearson. <a
   href="https://aima.cs.berkeley.edu/">aima.cs.berkeley.edu</a></li>
-  <li>Stachenfeld, K. L., Botvinick, M. M., &amp; Gershman, S. J.
-  (2017). The Hippocampus as a Predictive Map. <em>Nature
-  Neuroscience</em>, 20(11), 1643–1653. <a
-  href="https://www.nature.com/articles/nn.4650">doi:10.1038/nn.4650</a></li>
   <li>Taufeeque, M., Quirke, P., Li, M., Cundy, C., Tucker, A. D.,
   Gleave, A., &amp; Garriga-Alonso, A. (2024). Planning in a Recurrent
   Neural Network that Plays Sokoban. <em>ICML 2024 Mechanistic
