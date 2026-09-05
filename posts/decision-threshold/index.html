@@ -957,48 +957,161 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
 </div>
 </figure>
 
-  <p><strong>This translates out of Reinforcement Learning.</strong>
-  Touches on our central thesis. This idea that these sorts of
-  goals/circuits are the efficient ways to model behaviour and so are
-  also what get learnt in our models. Where does this naturally fit in?
-  Is it part of the hierarchy point? I think a separate point but maybe
-  belongs after this?</p>
-  <p><strong>Core limitations</strong> Not yet a full reverse
-  engineering. this means though we have some evidence for this
-  hierarchical decompostion we can imagine convoluted/messy
-  implimentations that e.g. mix the two steps and have for whatever
-  reason a clean steerable direction that modulates this (e.g. imagine
-  in the planning step this axis affects some weird mess of heuristics
-  being used to navigate)</p>
-  <p>small models. A strength in that it allows for access to ground
-  truth and more rigorous analysis etc but obvious weakness in terms of
-  generality?</p>
-  <p>complexity of utility calculation. We have quite a simple “middle”
-  step. this binary threshold classifier. What would results look like
-  as we scale the complexity of this middle step?</p>
+  <p><strong>This translates out of reinforcement learning.</strong> The
+  BC transformer was trained to predict the next action of an optimal
+  solver, and it developed the same threshold parameter as the RL
+  agents, in the cleanest weight-space form of the four: the two sweeps
+  recover almost exactly the same axis (<a class="xref" href="#app-cosine">Appendix C</a>), and its threshold
+  and exchange rate sit closest to the task optimum (<a class="xref" href="#app-agents">Appendix B</a>). This
+  related to Dennet’s definition of goal-directedness from the
+  background. We said a system is goal-directed to the extent that a
+  goal-and-planner model is the most compact predictor of its behaviour.
+  Behaviour cloning performs essentially this, optimising for a compact
+  predictor of behaviour. Our BC transformer seeds all hold the solver’s
+  goal parameter in their weights because this a compressed account of
+  the solver’s actions. Predictors internalising the latent variables of
+  whatever generated their data has precedent, a board state from move
+  sequences (<a href="https://arxiv.org/abs/2210.13382">Li et al.,
+  2023</a>), other agents’ preferences and beliefs from their
+  trajectories (<a href="https://arxiv.org/abs/1802.07740">Rabinowitz et
+  al., 2018</a>), and, it has been argued, the intentions of authors
+  from their text (<a href="https://arxiv.org/abs/2212.01681">Andreas,
+  2022</a>); humans appear to infer goals the same way, by inverting a
+  planner (<a
+  href="https://doi.org/10.1016/j.cognition.2009.07.005">Baker et al.,
+  2009</a>). What is new here is that the latent is a goal with a
+  ground-truth value, and that it is stored as a single weight direction
+  rather than inferred per input, because the demonstrator’s goal never
+  changed.</p>
+  <p>We state the general claim as a hypothesis. The goal-and-planner
+  decomposition is the short description of goal-directed behaviour,
+  optimisation finds short descriptions, so any system trained to
+  produce or predict goal-directed behaviour should tend to grow a goal
+  circuit, and the better a goal model compresses the behaviour, the
+  cleaner the circuit. One observation in our data is consistent with
+  this: the agent trained on the most rational behaviour has the
+  cleanest axis, while the RL agents, never under pressure to predict
+  anything and themselves less rational, have messier ones, though the
+  dense supervised signal of imitation is a confound. The claim is
+  testable. Clone demonstrators of graded rationality, or demonstration
+  sets that only partly identify the threshold, and the axis should
+  degrade in step. Clone a population of solvers with different
+  thresholds and the goal should move out of the weights and into the
+  activations, inferred per demonstrator as in Rabinowitz et al. That
+  last case is the one that matters for language models, which are
+  trained to predict the behaviour of goal-directed agents whose goals
+  vary across the corpus.</p>
+  <p><strong>Limitations.</strong></p>
+  <p><strong>This is not a full reverse-engineering.</strong> The
+  explanation above is inferred from what the axis does, not read from
+  the circuit. A messier implementation, say the axis modulating a
+  tangle of navigation heuristics inside the planner, could yield an
+  equally clean steerable direction without a separate valuation stage.
+  Circuit-level evidence is what separates the two, and it is deferred
+  to post 2.</p>
+  <p><strong>Small agents on one task.</strong> A million parameters on
+  11×11 mazes. That is what buys a ground-truth objective, a full sweep
+  of fine-tunes and a threshold decoded against a known optimum, none of
+  which exists at scale. It also means nothing here shows the structure
+  survives scale or richer tasks; the imitation-learning argument is an
+  argument, not a measurement.</p>
+  <p><strong>The valuation step is as simple as it could be.</strong>
+  One scalar sets a binary choice. With several goals, nonlinear values
+  or uncertainty over them, the goal need not collapse to one direction,
+  and where it stops collapsing is an open question.</p>
+  <p><strong>The agents are not optimal, and this is reflected in the
+  axis.</strong> The RL agents’ thresholds sit at 5 to 9 extra steps
+  against an optimum of 10, and their exchange rates are off the task’s
+  (<a class="xref" href="#app-agents">Appendix B</a>). The axis is calibrated to what fine-tuning produces,
+  not to the optimum, so a write moves the threshold as far as the
+  corresponding fine-tune would, and no further.</p>
+  <p><strong>Measurement.</strong> The ViT is one seed. The residual is
+  35 to 62 percent of the weight change; we showed the axis is
+  sufficient to move the threshold but did not directly test that the
+  drift and residual are behaviourally inert. The two sweeps agree
+  cleanly only in the DRC and BC transformer. Measurable <span
+  class="math inline">\(\hat{\tau}\)</span> is capped by maze size, so
+  the axis above <span class="math inline">\(\alpha = 0.4\)</span> is
+  untested. Every arm was fine-tuned for one duration at one learning
+  rate, (see <a class="xref" href="#app-longer">Appendix D</a> for a small test of finetuning for longer).</p>
   <h2 id="conclusion">Conclusion</h2>
-  <p>implications/future directions fit here I think.</p>
-  <p>FULLY REVERSE ENGINEER INTERNAL CALCS (not too far off in this
-  model) Currently looking into the internal calculations more. Try to
-  better observe each of the three steps of the hierarchy. E.g. an
-  initial result is from the behavioural tau hat fitting curves you can
-  infer that the agent is internally calculating x,y,z.</p>
-  <p>INCREASE TASK COMPLEXITY AND OBSERVE HOW INTERNALS CHANGE how does
-  the hierarchy look if we add richer goals? make the middle step more
-  complicated? How about if we nest more levels of goals and planning?
-  What would the machinery look like then?</p>
-  <p>QUANTIFY HOW CLOSE TO IDEAL CALCULATIONS WE ARE? (matthews stuff
-  with the toy models of etc)</p>
-  <p>implications are what?</p>
-  <p>vaguely this idea of people used to think of AI as hard code x,y,z.
-  Now in an intentional stance sort of way we can see this (very very
-  roughly still) appearing in the agents. Towards an understanding of
-  the internal operating system of agents etc. Above is the goal of mech
-  interp in general. Need to operationalise a few implications on a few
-  levels below this.</p>
-  <p>What about on the goals front?</p>
+  <p>We set out to find the goal representation of an agent whose
+  objective we know. One scalar of it, the decision threshold, turns out
+  to be a single direction in the weights: fitted from a grid of
+  fine-tunes, it moves the threshold as precisely as retraining,
+  extrapolates past the fitted range, leaves navigation untouched, and
+  appears in three RL architectures and in a transformer trained only to
+  imitate. The parameter is separable from the planning it steers, and a
+  predictor of goal-directed behaviour grows it as readily as an agent
+  rewarded for the behaviour itself.</p>
+  <p>For the questions in the motivation, four things follow.</p>
+  <ul>
+  <li><strong>An internalised objective can be measured against ground
+  truth, and found wrong.</strong> The RL agents’ thresholds sit below
+  the task optimum. In the terms of <a
+  href="https://arxiv.org/abs/1906.01820">Hubinger et al., 2019</a>, the
+  objective read from behaviour is the behavioural objective and the
+  parameter found in the weights belongs to the mesa-objective; here
+  both are measurable, and both disagree with the base objective. The
+  axis corrects the disagreement by writing rather than retraining.</li>
+  <li><strong>Goal drift during fine-tuning can be watched in weight
+  space.</strong> Projecting each update onto <span
+  class="math inline">\(\mathbf{v}\)</span> tracks the value it implies
+  with no behavioural evaluation, the monitoring idea of <a
+  href="https://arxiv.org/abs/2511.05408">Fierro &amp; Roger, 2026</a>,
+  here in units the environment defines.</li>
+  <li><strong>Weights predict behaviour where behaviour alone
+  cannot.</strong> The write extrapolates to values the agent was never
+  trained on, which is the out-of-distribution prediction <a
+  href="https://arxiv.org/abs/2506.02923">Bellot et al., 2025</a> show
+  behavioural data cannot deliver.</li>
+  <li><strong>The collapse at <span class="math inline">\(\tau &lt;
+  0\)</span> is goal misgeneralisation in miniature.</strong> The goal
+  circuit carries a training-time assumption, that one goal is the
+  richer one. Past that assumption the machinery breaks rather than
+  adapts, which is the pattern <a
+  href="https://arxiv.org/abs/2105.14111">Langosco et al., 2022</a>
+  named, here with the assumption located.</li>
+  </ul>
+  <p>Next.</p>
+  <ul>
+  <li><strong>Trace the circuit.</strong> Observe each stage of
+  <a class="xref" href="#hierarchy-fig">Figure 4</a> directly: where the value enters, before or after
+  planning, and how the comparison is implemented. The choice curve
+  already constrains this, since its scale moves with its threshold
+  (<a class="xref" href="#app-tau">Appendix F</a>), and the drift and residual components need a direct test
+  of inertness. This is post 2.</li>
+  <li><strong>Make the valuation step harder.</strong> More goals,
+  nonlinear values, goals nested inside plans. The question is where the
+  single direction stops being enough, and what replaces it.</li>
+  <li><strong>Quantify how close the learnt computation is to the ideal
+  one.</strong> The agents’ thresholds and exchange rates are off the
+  optimum by amounts we can measure but cannot yet explain. A
+  theoretical account of what determines that gap would be a natural
+  complement to the empirical work here.</li>
+  <li><strong>Test the imitation hypothesis.</strong> Clone
+  demonstrators of graded rationality and demonstration sets that only
+  partly identify the threshold; clone a population of solvers with
+  different thresholds and watch the goal move from the weights into the
+  activations. A quantitative measure of goal-directedness (<a
+  href="https://arxiv.org/abs/2412.04758">MacDermott et al., 2024</a>)
+  applied to the demonstrators would give the axis on which the
+  cleanliness of the learnt parameter should vary.</li>
+  </ul>
+  <p>The direction we care about is whether trained agents decompose
+  into recognisable components, planning, valuation and choice, with
+  goals as parameters of the valuation step, in the way hand-built
+  agents once did by design. This post locates one such component and
+  puts its parameter in hand.</p>
   <h2 id="bibliography">Bibliography</h2>
   <ul>
+  <li>Andreas, J. (2022). Language Models as Agent Models. <em>Findings
+  of EMNLP 2022</em>. <a
+  href="https://arxiv.org/abs/2212.01681">arXiv:2212.01681</a></li>
+  <li>Baker, C. L., Saxe, R., &amp; Tenenbaum, J. B. (2009). Action
+  Understanding as Inverse Planning. <em>Cognition</em>, 113(3),
+  329–349. <a
+  href="https://doi.org/10.1016/j.cognition.2009.07.005">doi:10.1016/j.cognition.2009.07.005</a></li>
   <li>Barreto, A., Dabney, W., Munos, R., Hunt, J. J., Schaul, T., van
   Hasselt, H., &amp; Silver, D. (2017). Successor Features for Transfer
   in Reinforcement Learning. <em>NeurIPS 2017</em>. <a
@@ -1049,6 +1162,10 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   Krueger, D. (2022). Goal Misgeneralization in Deep Reinforcement
   Learning. <em>ICML 2022</em>. <a
   href="https://arxiv.org/abs/2105.14111">arXiv:2105.14111</a></li>
+  <li>Li, K., Hopkins, A. K., Bau, D., Viégas, F., Pfister, H., &amp;
+  Wattenberg, M. (2023). Emergent World Representations: Exploring a
+  Sequence Model Trained on a Synthetic Task. <em>ICLR 2023</em>. <a
+  href="https://arxiv.org/abs/2210.13382">arXiv:2210.13382</a></li>
   <li>MacDermott, M., Fox, J., Belardinelli, F., &amp; Everitt, T.
   (2024). Measuring Goal-Directedness. <em>NeurIPS 2024</em>
   (spotlight). <a
@@ -1067,6 +1184,10 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   Arithmetic in the Tangent Space: Improved Editing of Pre-Trained
   Models. <em>NeurIPS 2023</em>. <a
   href="https://arxiv.org/abs/2305.12827">arXiv:2305.12827</a></li>
+  <li>Rabinowitz, N. C., Perbet, F., Song, H. F., Zhang, C., Eslami, S.
+  M. A., &amp; Botvinick, M. (2018). Machine Theory of Mind. <em>ICML
+  2018</em>. <a
+  href="https://arxiv.org/abs/1802.07740">arXiv:1802.07740</a></li>
   <li>Ramé, A., Couairon, G., Shukor, M., Dancette, C., Gaya, J.-B.,
   Soulier, L., &amp; Cord, M. (2023). Rewarded Soups: Towards
   Pareto-Optimal Alignment by Interpolating Weights Fine-Tuned on
