@@ -753,64 +753,256 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   undiscounted (<span class="math inline">\(\gamma = 1\)</span>) so
   would receive maximum reward for the task optimal tradeoff.</p>
   <h2 id="discussion">Discussion</h2>
-  <h5 id="what-have-we-found-here">What have we found here?</h5>
-  <p>We find a single direction <span
-  class="math inline">\(\mathbf{v}\)</span> in weight space that sets
-  the agent’s decision threshold. Writing <span
-  class="math inline">\(\theta + \alpha\,\mathbf{v}\)</span> reproduces
-  the behaviour of an agent finetuned with an objective value shifted by
-  <span class="math inline">\(\alpha\)</span> to within a step
-  (<a class="xref" href="#valueaxis-fig">Figure 3</a>). Moving the value of one objective up moves the
-  weights in the same direction as moving the value of the other
-  objective down. These results hold across four architectures and two
+  <p><strong>First a quick recap of results.</strong> We find a single
+  direction <span class="math inline">\(\mathbf{v}\)</span> in weight
+  space that sets the agent’s decision threshold. Adding <span
+  class="math inline">\(\alpha\,\mathbf{v}\)</span> to the frozen base
+  weights reproduces, to within about a step, the threshold of an agent
+  fine-tuned with a goal value shifted by <span
+  class="math inline">\(\alpha\)</span> (<a class="xref" href="#valueaxis-fig">Figure 3</a>), and leaves
+  its maze navigation capability intact. The axis is fitted on a grid of
+  fine-tunes but extrapolates beyond it, collapsing exactly at the point
+  where the write would ask the agent to prefer the lower-valued goal at
+  equal distance (i.e. <span class="math inline">\(\tau&lt;0\)</span>).
+  Fitting it separately on the sweeps of the values of each of the two
+  goals, recovers the same direction with opposite sign: cleanly in the
+  DRC and BC transformer, more weakly in the ResNet and ViT
+  (<a class="xref" href="#app-cosine">Appendix C</a>). These results hold across four architectures and two
   training regimes.</p>
-  <p>What kind of object is this? A threshold is not a complete goal
-  representation. We define a mechanistic goal representation to be a
-  system that ranks these plans. A binary decision threshold is a simple
-  version of this. The representation of this we have found it a
-  critical part of this machinery.</p>
-  <p>(Has anyone defined a mechanistic goal represenation? would be
-  usefult to make the above tighter)</p>
-  <p>The results suggest the internal computation of the agent has been
-  broken down into a hierarchy. The agent forms plans
-  (<a class="xref" href="#taskplan-fig">Figure 2b</a>). The outputs of these planning competent
-  circuits then feed into our plan ranking mechanism (goal
-  represenation) which then finally converts into an action output.</p>
-  <!-- fig: hierarchy -->
-  <h5 id="does-existing-theory-predict-a-linear-decision-threshold">Does
-  existing theory predict a linear Decision Threshold?</h5>
-  <p>preliminary:</p>
-  <p>locally linear in reward (byproduct of gradient descent)</p>
-  <p>But our axis is linear across quite a long range (Also when it
-  breaks its consistently at tau &lt;0 not an arbitrary point). This
-  looks more like a free parameter built into the model weights.</p>
-  <p>Similar to these results: weight steering paper, rewarded soups,
-  editing models with task arithmetic</p>
-  <p>But key differences: we never vary values, this hierarchy clean
-  split between maze navigation and plan ranking here, also detail on
-  the mechanism (breaks at tau&lt;0, noise characteristics)</p>
-  <p>https://arxiv.org/pdf/2511.05408v2</p>
-  <h5
-  id="what-could-this-tell-us-about-how-we-would-expect-goal-representations-to-form-in-models">What
-  could this tell us about how we would expect goal representations to
-  form in models?</h5>
-  <p>The re</p>
-  <p>weights vs activations. e.g. vs mini et al. who found cheese
-  tracker in the activations.</p>
-  <p>small portion of total model weights affects this. not diffuse</p>
-  <p>robust across architectures</p>
-  <h5 id="limitationsqualifying-the-results">Limitations/Qualifying the
-  results</h5>
-  <p>still a lot unknown about internal calcs the model is doing just
-  from these results</p>
+  <p><strong>How does this relate to earlier weight steering
+  results?</strong> Linear directions in weight space that control a
+  behaviour are not new. Task vectors add and subtract (<a
+  href="https://arxiv.org/abs/2212.04089">Ilharco et al., 2023</a>), the
+  difference of two contrastive fine-tunes steers an LLM (<a
+  href="https://arxiv.org/abs/2511.05408">Fierro &amp; Roger, 2026</a>),
+  and interpolating between policies fine-tuned on different rewards
+  trades off smoothly between them, including for a control policy
+  trained from scratch (<a href="https://arxiv.org/abs/2306.04488">Ramé
+  et al., 2023</a>). One natural explanation in the language-model case
+  is that the steered property varies across the pretraining data, so
+  the model learns a latent variable for it: the weights fix a prior
+  over that variable, each prompt is evidence the model conditions on to
+  infer its value, and fine-tuning shifts the prior (<a
+  href="https://arxiv.org/abs/2111.02080">Xie et al., 2021</a>).
+  Persona-vector work is loosely in this spirit, finding that
+  fine-tuning shifts a model along the activation direction that
+  prompting elicits (<a href="https://arxiv.org/abs/2507.21509">Chen et
+  al., 2025</a>; <a href="https://arxiv.org/abs/2506.19823">Wang et al.,
+  2025</a>). That hypothesis cannot explain our results. The goal values
+  never vary during training and the agent never observes them, so
+  variation in the data cannot be why the agent has a free parameter for
+  this threshold value. Nor does the other account of why weight
+  directions compose in large models, weight disentanglement acquired
+  during pretraining (<a
+  href="https://arxiv.org/abs/2305.12827">Ortiz-Jiménez et al.,
+  2023</a>), reach an agent trained from scratch on one task.</p>
+  <p><strong>Why might this free parameter in the weights
+  appear?</strong> Close to a trained network, behaviour is near-linear
+  in small, local, weight changes (<a
+  href="https://arxiv.org/abs/2210.05643">Malladi et al., 2023</a>), and
+  fine-tunes that start from the same weights stay close together (<a
+  href="https://arxiv.org/abs/1912.05671">Frankle et al., 2020</a>), so
+  a line between value-shifted fine-tunes is expected on those grounds
+  alone. However we observer <span
+  class="math inline">\(\mathbf{v}\)</span> to have much richer
+  properties that this would not explain:</p>
+  <ul>
+  <li>This linear weight change is robust across a long distance in
+  <span class="math inline">\(\tau\)</span>, from the largest <span
+  class="math inline">\(\tau\)</span> the mazes allow us to measure down
+  to <span class="math inline">\(\tau\)</span> near zero
+  (<a class="xref" href="#valueaxis-fig">Figure 3</a>).</li>
+  <li>Writing collapses at <span class="math inline">\(\tau &lt;
+  0\)</span> rather than fading with distance from the base model, and
+  no axis can be refitted past that point.</li>
+  <li>Fine-tuning with one goal’s value raised moves the weights the
+  same way as fine-tuning with the other’s lowered (<a class="xref" href="#app-cosine">Appendix C</a>).</li>
+  <li><span class="math inline">\(\mathbf{v}\)</span> concentrates in
+  sections of the architectures, though where this happens varies
+  significantly across architectures (<a class="xref" href="#app-where">Appendix E</a>).</li>
+  <li>Writing moves <span class="math inline">\(\tau\)</span> without
+  harming navigation.</li>
+  </ul>
+  <p><span class="math inline">\(\mathbf{v}\)</span> appears to set a
+  quantity the agent’s forward pass actually uses in internal
+  computation. The task calls for a plan to each goal, a score for each
+  plan, value minus step cost times length, and a comparison of the two
+  scores. The value in that score is a constant of the environment, so
+  an agent that builds this computation has to store it somewhere as a
+  parameter. The properties above then follow. Prediction across the
+  whole range, the collapse at <span class="math inline">\(\tau &lt;
+  0\)</span>, because the comparison assumes which goal is the richer
+  one, so reversing that requires a different circuit rather than a
+  different parameter setting. The single axis, because the comparison
+  only ever needs the difference between the values. Intact navigation,
+  because the scoring step is being changed and the planning step is
+  not.</p>
+  <p><strong>Evidence for a modular, hierarchical structure.</strong>
+  What we have shown is this. The agent forms plans, and they can be
+  read from its activations before it moves (<a class="xref" href="#taskplan-fig">Figure 2b</a>). A
+  single direction in its weights changes which goal it chooses while
+  leaving the route to that goal shortest-path (<a class="xref" href="#valueaxis-fig">Figure 3</a>). So
+  whatever computes the route and whatever sets the choice can be moved
+  independently: the computation has at least two separable parts.</p>
+  <p>What we think is going on is the structure in <a class="xref" href="#hierarchy-fig">Figure 4</a>.
+  Planning circuits produce a route to each goal. A valuation step
+  scores each route, its goal’s value less the step cost of reaching it,
+  and <span class="math inline">\(\mathbf{v}\)</span> is the direction
+  that sets that value. A comparison picks the higher score and the
+  agent executes it. The present evidence is consistent with this
+  picture rather than establishing it, since separability alone does not
+  fix the order of the stages. Two details already constrain it. The
+  mechanism does not survive <span class="math inline">\(\tau &lt;
+  0\)</span>, so the comparison is built around which goal is the richer
+  one rather than being symmetric. And in the DRC the axis sits in the
+  input convolution, so the value may be applied before planning, as a
+  gain on the goal channel, rather than after it. Preliminary
+  experiments that trace the circuit directly support the picture and
+  are the subject of post 2.</p>
+  <figure class="fig-hierarchy wide" id="hierarchy-fig">
+<style>
+  .fig-hierarchy {
+    --rich: #a63d2f; --poor: #2f5a78; --probe: #6f5f9c;
+  }
+  .fig-hierarchy .stage { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 22px; }
+  .fig-hierarchy svg { display: block; width: 100%; height: auto; max-width: 790px; margin: 0 auto; }
+  .fig-hierarchy figcaption {
+    font-family: 'Source Serif 4', Georgia, serif; font-size: 15.5px;
+    color: var(--ink); max-width: 70ch; margin: 18px auto 0; line-height: 1.65;
+    border-top: 1px solid var(--line); padding-top: 16px;
+  }
+</style>
+<div class="stage">
+<svg viewBox="0 0 790 356" role="img" aria-label="Hypothesised organisation of the DRC agent: observation, planning, valuation, comparison, action. Planning and the effect of the weight write are established; valuation and comparison are hypothesised.">
+<defs>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="var(--ink)"/></marker>
+<marker id="ah-rev" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 10 0 L 0 5 L 10 10 z" fill="var(--ink)"/></marker>
+<marker id="ah-soft" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="var(--ink-soft)"/></marker>
+</defs>
+<path d="M 18 30 L 48 30" stroke="var(--ink)" stroke-width="1.4"/>
+<text x="56" y="34" font-size="11.5" fill="var(--ink)" text-anchor="start" font-family="'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif">established in this post</text>
+<path d="M 18 50 L 48 50" stroke="var(--ink-soft)" stroke-width="1.4" stroke-dasharray="5 4"/>
+<text x="56" y="54" font-size="11.5" fill="var(--ink-soft)" text-anchor="start" font-family="'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif">hypothesised, tested in post 2</text>
+<rect x="18" y="140" width="92" height="70" rx="6" fill="var(--paper)" stroke="var(--ink)" stroke-width="1.4"/>
+<rect x="150" y="140" width="150" height="70" rx="6" fill="var(--paper)" stroke="var(--ink)" stroke-width="1.4"/>
+<rect x="340" y="140" width="150" height="70" rx="6" fill="var(--paper)" stroke="var(--ink-soft)" stroke-dasharray="5 4" stroke-width="1.4"/>
+<rect x="530" y="140" width="150" height="70" rx="6" fill="var(--paper)" stroke="var(--ink-soft)" stroke-dasharray="5 4" stroke-width="1.4"/>
+<rect x="720" y="140" width="52" height="70" rx="6" fill="var(--paper)" stroke="var(--ink)" stroke-width="1.4"/>
+<rect x="34" y="154" width="22" height="22" fill="var(--panel)" stroke="var(--ink)" stroke-width="1.2"/>
+<rect x="40" y="158" width="22" height="22" fill="var(--panel)" stroke="var(--ink-soft)" stroke-width="1.2"/>
+<rect x="46" y="162" width="22" height="22" fill="var(--panel)" stroke="var(--rich)" stroke-width="1.2"/>
+<rect x="52" y="166" width="22" height="22" fill="var(--panel)" stroke="var(--poor)" stroke-width="1.2"/>
+<text x="64.0" y="202" font-size="11.5" fill="var(--ink-soft)" text-anchor="middle" font-family="'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif">observation</text>
+<rect x="164" y="152" width="35" height="35" fill="var(--panel)" stroke="var(--line)"/>
+<polyline points="167.5,183.5 167.5,169.5 181.5,169.5 181.5,155.5 195.5,155.5" fill="none" stroke="var(--rich)" stroke-width="1.6"/>
+<polyline points="167.5,183.5 181.5,183.5 181.5,176.5 195.5,176.5" fill="none" stroke="var(--poor)" stroke-width="1.6"/>
+<circle cx="167.5" cy="183.5" r="2.2" fill="var(--ink)"/>
+<text x="212" y="166" font-size="13" fill="var(--ink)" text-anchor="start" font-family="'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif" font-weight="600">planning</text>
+<text x="212" y="184" font-size="11.5" fill="var(--ink-soft)" text-anchor="start" font-family="'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif">a route to</text>
+<text x="212" y="198" font-size="11.5" fill="var(--ink-soft)" text-anchor="start" font-family="'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif">each goal</text>
+<text x="415.0" y="166" font-size="13" fill="var(--ink)" text-anchor="middle" font-family="'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif" font-weight="600">valuation</text>
+<text x="415.0" y="185" font-size="11.5" fill="var(--ink-soft)" text-anchor="middle" font-family="'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif">score each route</text>
+<text x="415.0" y="201" font-size="12" fill="var(--ink)" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace">R − c · d</text>
+<text x="605.0" y="166" font-size="13" fill="var(--ink)" text-anchor="middle" font-family="'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif" font-weight="600">comparison</text>
+<text x="605.0" y="185" font-size="11.5" fill="var(--ink-soft)" text-anchor="middle" font-family="'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif">pick the higher score</text>
+<text x="605.0" y="201" font-size="12" fill="var(--ink)" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace">threshold τ̂</text>
+<path d="M 734 175 L 756 175" stroke="var(--ink)" stroke-width="1.8" marker-end="url(#ah)"/>
+<text x="746.0" y="202" font-size="11.5" fill="var(--ink-soft)" text-anchor="middle" font-family="'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif">action</text>
+<path d="M 110 175.0 L 147 175.0" fill="none" stroke="var(--ink)" marker-end="url(#ah)" stroke-width="1.4"/>
+<path d="M 300 175.0 L 337 175.0" fill="none" stroke="var(--ink-soft)" stroke-dasharray="5 4" marker-end="url(#ah-soft)" stroke-width="1.4"/>
+<path d="M 490 175.0 L 527 175.0" fill="none" stroke="var(--ink-soft)" stroke-dasharray="5 4" marker-end="url(#ah-soft)" stroke-width="1.4"/>
+<path d="M 680 175.0 L 717 175.0" fill="none" stroke="var(--ink-soft)" stroke-dasharray="5 4" marker-end="url(#ah-soft)" stroke-width="1.4"/>
+<text x="415.0" y="26" font-size="12.5" fill="var(--ink)" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-weight="500">write  θ + α v</text>
+<path d="M 415.0 34 L 415.0 63" fill="none" stroke="var(--ink)" marker-end="url(#ah)" stroke-width="1.4"/>
+<circle cx="415.0" cy="82" r="16" fill="var(--paper)" stroke="var(--ink)" stroke-width="1.4"/>
+<text x="415.0" y="86.5" font-size="13" fill="var(--ink)" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-weight="600">R</text>
+<text x="439.0" y="86" font-size="11.5" fill="var(--ink-soft)" text-anchor="start" font-family="'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif">goal value, set by v</text>
+<path d="M 415.0 98 L 415.0 137" fill="none" stroke="var(--ink-soft)" stroke-dasharray="5 4" marker-end="url(#ah-soft)" stroke-width="1.4"/>
+<path d="M 399.0 86 Q 190 92 162 137" fill="none" stroke="var(--ink-soft)" stroke-dasharray="5 4" marker-end="url(#ah-soft)" stroke-width="1.4"/>
+<text x="202" y="120" font-size="11" fill="var(--ink-soft)" text-anchor="start" font-family="'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif">in the DRC, v concentrates</text>
+<text x="202" y="134" font-size="11" fill="var(--ink-soft)" text-anchor="start" font-family="'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif">in the input convolution</text>
+<circle cx="160" cy="232" r="4.5" fill="var(--probe)"/>
+<path d="M 160 228 L 160 212" stroke="var(--probe)" stroke-width="1.4"/>
+<text x="172" y="236" font-size="12" fill="var(--ink)" text-anchor="start" font-family="'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif">linear probe reads the route</text>
+<text x="172" y="252" font-size="11" fill="var(--ink-soft)" text-anchor="start" font-family="'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif">path channels, extended across ticks,</text>
+<text x="172" y="266" font-size="11" fill="var(--ink-soft)" text-anchor="start" font-family="'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif">pruned by backtracking</text>
+<path d="M 548 272 L 662 272" stroke="var(--line)" stroke-width="1"/>
+<polyline points="548.0,228.3 550.9,228.4 553.7,228.5 556.5,228.6 559.4,228.8 562.2,229.0 565.1,229.3 568.0,229.6 570.8,230.1 573.6,230.6 576.5,231.3 579.4,232.2 582.2,233.2 585.0,234.5 587.9,236.0 590.8,237.8 593.6,239.8 596.5,242.1 599.3,244.6 602.1,247.3 605.0,250.0 607.9,252.7 610.7,255.4 613.5,257.9 616.4,260.2 619.2,262.2 622.1,264.0 625.0,265.5 627.8,266.8 630.6,267.8 633.5,268.7 636.4,269.4 639.2,269.9 642.0,270.4 644.9,270.7 647.8,271.0 650.6,271.2 653.5,271.4 656.3,271.5 659.1,271.6 662.0,271.7" fill="none" stroke="var(--ink)" stroke-width="1.6"/>
+<path d="M 605.0 228 L 605.0 272" stroke="var(--ink-soft)" stroke-width="1" stroke-dasharray="3 3"/>
+<path d="M 591.0 280 L 619.0 280" stroke="var(--ink)" stroke-width="1.2" marker-end="url(#ah)" marker-start="url(#ah-rev)"/>
+<text x="605.0" y="294" font-size="11" fill="var(--ink-soft)" text-anchor="middle" font-family="'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif">τ̂ moves with α, s stretches with it</text>
+<text x="544" y="275" font-size="10" fill="var(--ink-soft)" text-anchor="end" font-family="'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif">gap</text>
+<path d="M 150 312 L 150 318 L 772 318 L 772 312" fill="none" stroke="var(--ink)" stroke-width="1.2"/>
+<text x="461.0" y="334" font-size="12" fill="var(--ink)" text-anchor="middle" font-family="'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif">the route stays shortest-path under the write</text>
+</svg>
+<figcaption><p>The hypothesised organisation of the DRC, drawn as the classic
+  utility-based agent (<a href="https://aima.cs.berkeley.edu/">Russell
+  &amp; Norvig, 2020</a>): a planner proposes a route to each goal, a
+  valuation step scores each route, a comparison chooses. Solid elements
+  are established. Route plans are held as per-square direction concepts
+  in the recurrent state, extended across ticks and pruned by
+  backtracking (<a href="https://arxiv.org/abs/2504.01871">Bush et al.,
+  2025</a>; <a href="https://arxiv.org/abs/2506.10138">Taufeeque et al.,
+  2026</a>), and read here by a linear probe (<a class="xref" href="#taskplan-fig">Figure 2b</a>).
+  Writing <span class="math inline">\(\theta +
+  \alpha\,\mathbf{v}\)</span> moves the choice threshold <span
+  class="math inline">\(\hat{\tau}\)</span> (<a class="xref" href="#valueaxis-fig">Figure 3</a>) and
+  stretches the choice curve’s scale <span
+  class="math inline">\(s\)</span> in proportion (<a class="xref" href="#scurves-fig">Figure 5</a>), while
+  routes stay shortest-path. Dashed elements are hypothesised. No
+  mechanism for scoring or comparing routes has been described in this
+  agent or its Sokoban predecessors; this post fixes one parameter of
+  that stage, the goal’s value, and locates it in the input convolution
+  (<a class="xref" href="#app-where">Appendix E</a>). Post 2 traces the rest.</p></figcaption>
+</div>
+</figure>
+
+  <p><strong>This translates out of Reinforcement Learning.</strong>
+  Touches on our central thesis. This idea that these sorts of
+  goals/circuits are the efficient ways to model behaviour and so are
+  also what get learnt in our models. Where does this naturally fit in?
+  Is it part of the hierarchy point? I think a separate point but maybe
+  belongs after this?</p>
+  <p><strong>Core limitations</strong> Not yet a full reverse
+  engineering. this means though we have some evidence for this
+  hierarchical decompostion we can imagine convoluted/messy
+  implimentations that e.g. mix the two steps and have for whatever
+  reason a clean steerable direction that modulates this (e.g. imagine
+  in the planning step this axis affects some weird mess of heuristics
+  being used to navigate)</p>
+  <p>small models. A strength in that it allows for access to ground
+  truth and more rigorous analysis etc but obvious weakness in terms of
+  generality?</p>
+  <p>complexity of utility calculation. We have quite a simple “middle”
+  step. this binary threshold classifier. What would results look like
+  as we scale the complexity of this middle step?</p>
   <h2 id="conclusion">Conclusion</h2>
-  <p>what does this mean for our understanding of goal representations
-  generally?</p>
-  <p>Next post will be a full exploration of internal calculations.
-  i.e. try to fully flesh out each of these three bits of the
-  hierarchy.</p>
+  <p>implications/future directions fit here I think.</p>
+  <p>FULLY REVERSE ENGINEER INTERNAL CALCS (not too far off in this
+  model) Currently looking into the internal calculations more. Try to
+  better observe each of the three steps of the hierarchy. E.g. an
+  initial result is from the behavioural tau hat fitting curves you can
+  infer that the agent is internally calculating x,y,z.</p>
+  <p>INCREASE TASK COMPLEXITY AND OBSERVE HOW INTERNALS CHANGE how does
+  the hierarchy look if we add richer goals? make the middle step more
+  complicated? How about if we nest more levels of goals and planning?
+  What would the machinery look like then?</p>
+  <p>QUANTIFY HOW CLOSE TO IDEAL CALCULATIONS WE ARE? (matthews stuff
+  with the toy models of etc)</p>
+  <p>implications are what?</p>
+  <p>vaguely this idea of people used to think of AI as hard code x,y,z.
+  Now in an intentional stance sort of way we can see this (very very
+  roughly still) appearing in the agents. Towards an understanding of
+  the internal operating system of agents etc. Above is the goal of mech
+  interp in general. Need to operationalise a few implications on a few
+  levels below this.</p>
+  <p>What about on the goals front?</p>
   <h2 id="bibliography">Bibliography</h2>
   <ul>
+  <li>Barreto, A., Dabney, W., Munos, R., Hunt, J. J., Schaul, T., van
+  Hasselt, H., &amp; Silver, D. (2017). Successor Features for Transfer
+  in Reinforcement Learning. <em>NeurIPS 2017</em>. <a
+  href="https://arxiv.org/abs/1606.05312">arXiv:1606.05312</a></li>
   <li>Bellot, A., Richens, J., &amp; Everitt, T. (2025). The Limits of
   Predicting Agents from Behaviour. <em>ICML 2025</em>. <a
   href="https://arxiv.org/abs/2506.02923">arXiv:2506.02923</a></li>
@@ -818,6 +1010,10 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   D. (2025). Interpreting Emergent Planning in Model-Free Reinforcement
   Learning. <em>ICLR 2025</em> (oral). <a
   href="https://arxiv.org/abs/2504.01871">arXiv:2504.01871</a></li>
+  <li>Chen, R., Arditi, A., Sleight, H., Evans, O., &amp; Lindsey, J.
+  (2025). Persona Vectors: Monitoring and Controlling Character Traits
+  in Language Models. <a
+  href="https://arxiv.org/abs/2507.21509">arXiv:2507.21509</a></li>
   <li>Dennett, D. C. (1981). True Believers: The Intentional Strategy
   and Why It Works. In A. F. Heath (Ed.), <em>Scientific
   Explanation</em>. Oxford University Press. Reprinted in <em>The
@@ -830,9 +1026,17 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   <li>Fierro, C., &amp; Roger, F. (2026). Steering Language Models with
   Weight Arithmetic. <em>ICLR 2026</em>. <a
   href="https://arxiv.org/abs/2511.05408">arXiv:2511.05408</a></li>
+  <li>Frankle, J., Dziugaite, G. K., Roy, D. M., &amp; Carbin, M.
+  (2020). Linear Mode Connectivity and the Lottery Ticket Hypothesis.
+  <em>ICML 2020</em>. <a
+  href="https://arxiv.org/abs/1912.05671">arXiv:1912.05671</a></li>
   <li>Guez, A., Mirza, M., Gregor, K., et al. (2019). An Investigation
   of Model-Free Planning. <em>ICML 2019</em>. <a
   href="https://arxiv.org/abs/1901.03559">arXiv:1901.03559</a></li>
+  <li>Hubinger, E., van Merwijk, C., Mikulik, V., Skalse, J., &amp;
+  Garrabrant, S. (2019). Risks from Learned Optimization in Advanced
+  Machine Learning Systems. <a
+  href="https://arxiv.org/abs/1906.01820">arXiv:1906.01820</a></li>
   <li>Ilharco, G., Ribeiro, M. T., Wortsman, M., Gururangan, S.,
   Schmidt, L., Hajishirzi, H., &amp; Farhadi, A. (2023). Editing Models
   with Task Arithmetic. <em>ICLR 2023</em>. <a
@@ -849,6 +1053,9 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   (2024). Measuring Goal-Directedness. <em>NeurIPS 2024</em>
   (spotlight). <a
   href="https://arxiv.org/abs/2412.04758">arXiv:2412.04758</a></li>
+  <li>Malladi, S., Wettig, A., Yu, D., Chen, D., &amp; Arora, S. (2023).
+  A Kernel-Based View of Language Model Fine-Tuning. <em>ICML 2023</em>.
+  <a href="https://arxiv.org/abs/2210.05643">arXiv:2210.05643</a></li>
   <li>Mini, U., Grietzer, P., Sharma, M., Meek, A., MacDiarmid, M.,
   &amp; Turner, A. M. (2023). Understanding and Controlling a
   Maze-Solving Policy Network. <a
@@ -856,11 +1063,23 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   <li>Orseau, L., McGill, S., &amp; Legg, S. (2018). Agents and Devices:
   A Relative Definition of Agency. <a
   href="https://arxiv.org/abs/1805.12387">arXiv:1805.12387</a></li>
+  <li>Ortiz-Jiménez, G., Favero, A., &amp; Frossard, P. (2023). Task
+  Arithmetic in the Tangent Space: Improved Editing of Pre-Trained
+  Models. <em>NeurIPS 2023</em>. <a
+  href="https://arxiv.org/abs/2305.12827">arXiv:2305.12827</a></li>
   <li>Ramé, A., Couairon, G., Shukor, M., Dancette, C., Gaya, J.-B.,
   Soulier, L., &amp; Cord, M. (2023). Rewarded Soups: Towards
   Pareto-Optimal Alignment by Interpolating Weights Fine-Tuned on
   Diverse Rewards. <em>NeurIPS 2023</em>. <a
   href="https://arxiv.org/abs/2306.04488">arXiv:2306.04488</a></li>
+  <li>Russell, S., &amp; Norvig, P. (2020). <em>Artificial Intelligence:
+  A Modern Approach</em> (4th ed.), §2.4.5 Utility-based agents.
+  Pearson. <a
+  href="https://aima.cs.berkeley.edu/">aima.cs.berkeley.edu</a></li>
+  <li>Stachenfeld, K. L., Botvinick, M. M., &amp; Gershman, S. J.
+  (2017). The Hippocampus as a Predictive Map. <em>Nature
+  Neuroscience</em>, 20(11), 1643–1653. <a
+  href="https://www.nature.com/articles/nn.4650">doi:10.1038/nn.4650</a></li>
   <li>Taufeeque, M., Quirke, P., Li, M., Cundy, C., Tucker, A. D.,
   Gleave, A., &amp; Garriga-Alonso, A. (2024). Planning in a Recurrent
   Neural Network that Plays Sokoban. <em>ICML 2024 Mechanistic
@@ -874,6 +1093,15 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   P. (2021). Optimal Policies Tend to Seek Power. <em>NeurIPS 2021</em>
   (spotlight). <a
   href="https://arxiv.org/abs/1912.01683">arXiv:1912.01683</a></li>
+  <li>Wang, M., Dupré la Tour, T., Watkins, O., Makelov, A., Chi, R. A.,
+  Miserendino, S., Wang, J., Rajaram, A., Heidecke, J., Patwardhan, T.,
+  &amp; Mossing, D. (2025). Persona Features Control Emergent
+  Misalignment. <a
+  href="https://arxiv.org/abs/2506.19823">arXiv:2506.19823</a></li>
+  <li>Xie, S. M., Raghunathan, A., Liang, P., &amp; Ma, T. (2021). An
+  Explanation of In-context Learning as Implicit Bayesian Inference.
+  <em>ICLR 2022</em>. <a
+  href="https://arxiv.org/abs/2111.02080">arXiv:2111.02080</a></li>
   </ul>
   <h2 id="appendices">Appendices</h2>
   <!-- Appendix letters are assigned by block order at build time; reference blocks as @app:<id>. -->
@@ -1206,7 +1434,7 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   at which the agent is indifferent between the goals (the curve’s
   0.5-crossing), and the scale <span class="math inline">\(s\)</span>,
   the width of the indifference region: the agent’s decision noise.</p>
-  <p><a class="xref" href="#scurves-fig">Figure 4</a> shows these curves for each base agent and for the
+  <p><a class="xref" href="#scurves-fig">Figure 5</a> shows these curves for each base agent and for the
   same frozen agent with the axis written at <span
   class="math inline">\(\alpha = \pm 0.2\)</span>. The write slides the
   whole curve sideways rather than flattening it: <span
