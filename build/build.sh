@@ -83,6 +83,13 @@ for m in re.finditer(r'<div id="tbl-([\w-]+)"[^>]*>|<table[\s>]', html):
         if pending:
             refs[("tbl", pending)] = f"Table {n_tbl}"
             pending = None
+n_sec = 0
+for m in re.finditer(r'<h2 id="([^"]+)"', html):
+    if m.group(1) in ("summary", "bibliography", "appendices"):
+        continue
+    n_sec += 1
+    refs[("sec", m.group(1))] = f"Section {n_sec}"
+    hrefs[("sec", m.group(1))] = m.group(1)
 letters = []
 def letter_summary(m):
     letters.append(m.group(1))
@@ -100,7 +107,7 @@ def link(m):
     href = hrefs.get((kind, name), f"{kind}-{name}")
     return f'<a class="xref" href="#{href}">{text}{suffix}</a>'
 
-html = re.sub(r"@(fig|tbl|app):([\w-]+?)(?:\.(\w+))?(?=[\s.,;:)<'’])", link, html)
+html = re.sub(r"@(fig|tbl|app|sec):([\w-]+?)(?:\.(\w+))?(?=[\s.,;:)<'’])", link, html)
 page.write_text(html)
 EOF
 fi
