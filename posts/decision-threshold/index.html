@@ -762,59 +762,58 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   and interpolating between policies fine-tuned on different rewards
   trades off smoothly between them, even for a control policy trained
   from scratch (<a href="https://arxiv.org/abs/2306.04488">Ramé et al.,
-  2023</a>). The standard explanations for why such directions exist are
+  2023</a>).</p>
+  <p>The standard explanations for why such directions exist are
   geometric. Fine-tunes that start from the same trained weights stay in
   one basin, close in parameter space (<a
-  href="https://arxiv.org/abs/2008.11687">Neyshabur et al., 2020</a>; <a
-  href="https://arxiv.org/abs/2203.05482">Wortsman et al., 2022</a>),
-  fine-tuning is often well described by linearising the network around
-  its starting weights (<a
-  href="https://arxiv.org/abs/2210.05643">Malladi et al., 2023</a>), and
-  the change a fine-tune needs is low-dimensional even for reinforcement
-  learning agents trained from scratch (<a
-  href="https://arxiv.org/abs/1804.08838">Li et al., 2018</a>). Our base
-  training would be the shared initialisation, the fine-tunes are short,
-  and the change we ask for is one-dimensional, so a line between
+  href="https://arxiv.org/abs/2008.11687">Neyshabur et al., 2020</a>),
+  and fine-tuning is often well described by linearising the network
+  around its starting weights (<a
+  href="https://arxiv.org/abs/2210.05643">Malladi et al., 2023</a>). Our
+  base training would be the shared initialisation, the fine-tunes are
+  short, and the change we ask for is one-dimensional, so a line between
   value-shifted fine-tunes is expected on these grounds.</p>
-  <p>These accounts explain why fine-tuning leaves a straight,
-  low-dimensional, composable trace in the weights. They say nothing
-  about what any particular direction means: what quantity in the
-  agent’s computation it corresponds to, or why moving along this one
-  changes the decision threshold and nothing else. In language models,
-  one hypothesis is that the steered property varies across the
+  <p>These accounts explain why fine-tuning leaves a localised,
+  straight, low-dimensional, composable trace in the weights. They say
+  nothing about what any particular direction means: what quantity in
+  the agent’s computation it corresponds to, or why moving along this
+  one changes the decision threshold and nothing else. In language
+  models, one hypothesis is that the steered property varies across the
   pretraining corpus, so the model learns a latent variable for it. The
   weights fix a prior over this variable and each prompt is evidence the
-  model conditions on to infer its value, with fine-tuning shifting the
-  prior (<a href="https://arxiv.org/abs/2111.02080">Xie et al.,
-  2021</a>). Persona-vector work is loosely in this spirit, with
-  fine-tuning shifting a model along the activation direction that
-  prompting elicits (<a href="https://arxiv.org/abs/2507.21509">Chen et
-  al., 2025</a>; <a href="https://arxiv.org/abs/2506.19823">Wang et al.,
-  2025</a>). Our goal values never vary and are never observed, so there
-  is no such variable to fix a prior over, and this hypothesis cannot
-  explain our results.</p>
+  model conditions on to infer its value (<a
+  href="https://arxiv.org/abs/2111.02080">Xie et al., 2021</a>), with
+  fine-tuning then shifting the prior. Persona-vector work is loosely in
+  this spirit, with fine-tuning shifting a model along the activation
+  direction that prompting elicits (<a
+  href="https://arxiv.org/abs/2507.21509">Chen et al., 2025</a>). Our
+  goal values never vary and are never observed, so there is no such
+  variable to fix a prior over, and this hypothesis cannot explain our
+  results.</p>
   <h3 id="why-a-free-parameter-appears">Why a free parameter
   appears</h3>
-  <p>The literature of the last section predicts more than a line. For
-  the RL agents the return is linear in the reward, so the change a
-  value shift makes to the fine-tuning gradient is affine in the shift,
-  and to first order the weight change is linear in that gradient (<a
-  href="https://arxiv.org/abs/2310.12808">Daheim et al., 2024</a>). The
-  prediction is therefore exactly the form we fit: a drift shared by
-  every arm plus one direction scaled by the shift, calibrated in value
-  units. We can also predict that raising one goal’s value and lowering
-  the other’s move the weights the same way, which is what we find
-  (<a class="xref" href="#app-cosine">Appendix C</a>). The agent never observes the values, and the only thing
-  its policy controls is which goal it reaches, so the training signal
-  for rewarding one goal more is the same as for rewarding the other
-  less. This account however fails to explain the following:</p>
+  <p>The literature discussed in the last section predicts more than a
+  line. For the RL agents the return is linear in the reward, so the
+  change a value shift makes to the fine-tuning gradient is affine in
+  the shift, and to first order the weight change is linear in that
+  gradient (<a href="https://arxiv.org/abs/1703.04730">Koh &amp; Liang,
+  2017</a>; <a href="https://arxiv.org/abs/2310.12808">Daheim et al.,
+  2024</a>). The prediction is therefore exactly the form we fit: a
+  drift shared by every arm plus one direction scaled by the shift,
+  calibrated in value units. We can also predict that raising one goal’s
+  value and lowering the other’s move the weights the same way, which is
+  what we find (<a class="xref" href="#app-cosine">Appendix C</a>). The agent never observes the values, and
+  the only thing its policy controls is which goal it reaches, so the
+  training signal for rewarding one goal more is the same as for
+  rewarding the other less. This account however fails to explain the
+  following:</p>
   <ul>
   <li>This linear weight change is robust across a long distance in
   <span class="math inline">\(\tau\)</span>, ranging from the largest
   <span class="math inline">\(\tau\)</span> the mazes allow us to
   measure down to <span class="math inline">\(\tau\)</span> near zero
   (<a class="xref" href="#valueaxis-fig">Figure 3</a>). This seems much longer than you’d expect if the
-  local first-order explanation where the sole cause of this.</li>
+  local first-order explanation were the sole cause of this.</li>
   <li>Writing collapses at <span class="math inline">\(\tau &lt;
   0\)</span>, and no axis can be fitted past that point. The boundary
   seems to mark a change in internal mechanism rather than fading with
@@ -838,9 +837,9 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   its ratio with the step penalty), one stored constant is all there is
   to find. <span class="math inline">\(\mathbf{v}\)</span> is this
   constant. Behaviour cannot tell whether <span
-  class="math inline">\(\mathbf{v}\)</span> encodes the difference in
-  value, the step cost or the threshold itself, since only their ratio
-  is identifiable.</p>
+  class="math inline">\(\mathbf{v}\)</span> encodes be used to infer a
+  difference in value, the step cost or the threshold itself, since only
+  their ratio is identifiable.</p>
   <p>This would explain the properties above. We observe prediction
   across the whole range since a stored constant has no decay window.
   The collapse happens at <span class="math inline">\(\tau &lt;
@@ -850,10 +849,10 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   different circuit rather than a different setting. We see intact
   navigation, because the scoring step is being changed and the planning
   step is not.</p>
-  <p>What is notable is not that this constant parameter exists, since
-  any circuit that scores by value has one, but that it exists as a
-  single legible direction despite not being variable during training.
-  The next section discusses the implications of this.</p>
+  <p>What is notable is not that this constant exists at all, since any
+  circuit that scores by value has one somewhere, but that it exists as
+  a single legible direction despite not being variable during
+  training.</p>
   <h3 id="evidence-for-modular-structure">Evidence for modular
   structure</h3>
   <p>So far we understand two properties of the weights. <a
@@ -1015,14 +1014,13 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   Russell, S. (2024). Evidence of Learned Look-Ahead in a Chess-Playing
   Neural Network. <em>NeurIPS 2024</em>. <a
   href="https://arxiv.org/abs/2406.00877">arXiv:2406.00877</a></li>
+  <li>Koh, P. W., &amp; Liang, P. (2017). Understanding Black-box
+  Predictions via Influence Functions. <em>ICML 2017</em>. <a
+  href="https://arxiv.org/abs/1703.04730">arXiv:1703.04730</a></li>
   <li>Langosco, L., Koch, J., Sharkey, L., Pfau, J., Orseau, L., &amp;
   Krueger, D. (2022). Goal Misgeneralization in Deep Reinforcement
   Learning. <em>ICML 2022</em>. <a
   href="https://arxiv.org/abs/2105.14111">arXiv:2105.14111</a></li>
-  <li>Li, C., Farkhoor, H., Liu, R., &amp; Yosinski, J. (2018).
-  Measuring the Intrinsic Dimension of Objective Landscapes. <em>ICLR
-  2018</em>. <a
-  href="https://arxiv.org/abs/1804.08838">arXiv:1804.08838</a></li>
   <li>Li, K., Hopkins, A. K., Bau, D., Viégas, F., Pfister, H., &amp;
   Wattenberg, M. (2023). Emergent World Representations: Exploring a
   Sequence Model Trained on a Synthetic Task. <em>ICLR 2023</em>. <a
@@ -1070,17 +1068,6 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   P. (2021). Optimal Policies Tend to Seek Power. <em>NeurIPS 2021</em>
   (spotlight). <a
   href="https://arxiv.org/abs/1912.01683">arXiv:1912.01683</a></li>
-  <li>Wang, M., Dupré la Tour, T., Watkins, O., Makelov, A., Chi, R. A.,
-  Miserendino, S., Wang, J., Rajaram, A., Heidecke, J., Patwardhan, T.,
-  &amp; Mossing, D. (2025). Persona Features Control Emergent
-  Misalignment. <a
-  href="https://arxiv.org/abs/2506.19823">arXiv:2506.19823</a></li>
-  <li>Wortsman, M., Ilharco, G., Gadre, S. Y., Roelofs, R.,
-  Gontijo-Lopes, R., Morcos, A. S., Namkoong, H., Farhadi, A., Carmon,
-  Y., Kornblith, S., &amp; Schmidt, L. (2022). Model Soups: Averaging
-  Weights of Multiple Fine-Tuned Models Improves Accuracy Without
-  Increasing Inference Time. <em>ICML 2022</em>. <a
-  href="https://arxiv.org/abs/2203.05482">arXiv:2203.05482</a></li>
   <li>Xie, S. M., Raghunathan, A., Liang, P., &amp; Ma, T. (2021). An
   Explanation of In-context Learning as Implicit Bayesian Inference.
   <em>ICLR 2022</em>. <a
