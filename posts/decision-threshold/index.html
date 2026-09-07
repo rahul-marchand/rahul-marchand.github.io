@@ -1613,16 +1613,15 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   class="math inline">\(\tau^*\)</span> through zero: past parity the
   swept goal is worth more than the other, and the optimal policy
   reverses its preference. None of these arms enter any axis fit.</p>
-  <p>Fine-tuning survives the crossing in the ResNet, the ViT and the BC
-  transformer: their far arms track the new reward function through and
-  past <span class="math inline">\(\tau = 0\)</span>. The DRC at the
-  standard 400k steps is the exception. Its far arms stall just below
+  <p>Fine-tuning works past <span class="math inline">\(\tau =
+  0\)</span> in the ResNet, the ViT and the BC transformer. The DRC at
+  the standard 400k steps is the exception. Its arms stall just below
   zero, and it reverses only under longer fine-tuning, crossing after
-  about 750k steps (<a class="xref" href="#app-longer">Appendix D</a>).</p>
-  <p>The write does not. Approaching <span class="math inline">\(\tau =
-  0\)</span> the written threshold flattens away from the fine-tuned
-  line, and pushed further the written agent stops finishing episodes at
-  all, marked in the figure where reach falls below the decode’s floor.
+  about 750k steps (<a class="xref" href="#arm-length-fig">Figure 4c</a>).</p>
+  <p>The write does not work past. Approaching the written threshold
+  flattens away from the fine-tuned line, and pushed further the written
+  agent stops finishing episodes at all, marked in the figure where
+  reach falls below the decode’s floor.
   <!-- TODO: state the reach criterion/floor used for the cut-off --></p>
   <p>The failure is not a matter of distance from the base weights.
   Fitting a fresh axis to the far arms themselves fails even within the
