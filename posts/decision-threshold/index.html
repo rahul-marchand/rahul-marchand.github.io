@@ -1595,11 +1595,9 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   into its weights at α = ±0.2 (α in units of the 0.5 goal’s value);
   raising that value (α = +0.2) shifts the curve left. These are two
   fixed doses along the write that <a class="xref" href="#valueaxis-fig">Figure 3</a>’s dashed ribbons
-  sweep continuously. Shading spans the three independent base models
-  where three exist (every BC curve; the DRC and ResNet at α = 0) and is
-  the decode’s 95% interval otherwise (their writes, and every ViT
-  curve, come from one base). Grey dashes: the task-optimal crossing at
-  gap 10, identical in every panel.</p></figcaption>
+  sweep continuously. Shading spans the three independent bases (is the
+  decode’s 95% interval for the ViT). Grey dashes: the task-optimal
+  crossing at gap 10, identical in every panel.</p></figcaption>
 </div>
 </figure>
 
@@ -1614,13 +1612,13 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   beyond it, to values that push the optimal threshold <span
   class="math inline">\(\tau^*\)</span> through zero: past parity the
   swept goal is worth more than the other, and the optimal policy
-  reverses its preference. Arms in this regime train on levels whose
-  colours are pinned to objectives (<a class="xref" href="#app-agents">Appendix B</a>), and none of them enter
-  any axis fit.</p>
-  <p>Fine-tuning survives the crossing: the far arms track the new
-  reward function through and past <span class="math inline">\(\tau =
-  0\)</span>.
-  <!-- TODO: qualify per architecture if uneven, e.g. reach/collapse exceptions --></p>
+  reverses its preference. None of these arms enter any axis fit.</p>
+  <p>Fine-tuning survives the crossing in the ResNet, the ViT and the BC
+  transformer: their far arms track the new reward function through and
+  past <span class="math inline">\(\tau = 0\)</span>. The DRC at the
+  standard 400k steps is the exception. Its far arms stall just below
+  zero, and it reverses only under longer fine-tuning, crossing after
+  about 750k steps (<a class="xref" href="#app-longer">Appendix D</a>).</p>
   <p>The write does not. Approaching <span class="math inline">\(\tau =
   0\)</span> the written threshold flattens away from the fine-tuned
   line, and pushed further the written agent stops finishing episodes at
