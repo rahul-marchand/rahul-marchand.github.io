@@ -52,8 +52,8 @@ h3 { font-size: 17px; font-weight: 600; margin: 28px 0 8px; }
 }
 h2#summary, h2#bibliography, h2#appendices { counter-increment: none; }
 h2#summary::before, h2#bibliography::before, h2#appendices::before { content: none; }
-details h3 { counter-increment: none; }
-details h3::before { content: none; }
+.page details h3 { counter-increment: none; }
+.page details h3::before { content: none; }
 
 p, ul, ol { margin: 0 0 16px; }
 ul, ol { padding-left: 24px; }
