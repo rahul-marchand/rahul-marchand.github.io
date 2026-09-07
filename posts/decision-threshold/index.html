@@ -1279,13 +1279,18 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   other’s.</p>
   <p>There are two issues with using a raw cosine.</p>
   <p>First it is attenuated by each fit’s own fine-tuning noise, so a
-  noisy pair of fits hides a shared axis. We correct for this with a
-  reliability ceiling: splitting a sweep’s arms in half and fitting an
-  axis on each half gives that sweep’s reliability <span
-  class="math inline">\(\rho\)</span>, the correlation between the two
-  half-fits, and two independently fitted axes can agree at most to
-  <span class="math inline">\(\sqrt{\rho_0 \rho_1}\)</span>. The cosine
-  is therefore judged against this ceiling rather than against 1.</p>
+  noisy pair of fits hides a shared axis. We correct for this with each
+  sweep’s reliability <span class="math inline">\(\rho\)</span>:
+  splitting the sweep’s mirrored arm pairs in half and fitting an axis
+  on each half gives the correlation between two independent estimates
+  of the same direction, corrected to full length by Spearman-Brown
+  since each half fits on half the arms. If the two sweeps measure one
+  shared axis, the expected magnitude of their cosine is then <span
+  class="math inline">\(\sqrt{\rho_0 \rho_1}\)</span>, the attenuation
+  the two fits’ noise alone would produce, so the cosine is judged
+  against this benchmark rather than against 1. It is an estimate of an
+  expectation, not a bound, which is how ratios can sit marginally above
+  1.</p>
   <p>Second fine-tuning concentrates its weight changes in the same few
   directions whatever the values trained toward. To control for this we
   fit axes on arms trained with shuffled value labels. The Null column
@@ -1294,10 +1299,10 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   <table>
   <caption>Whether the two sweeps are adjusting the weights along the
   same axis. Ranges are min to max over independent base agents. Each
-  sweep’s reliability <span class="math inline">\(\rho\)</span> is the
-  split-half correlation of its fitted axis, and the ceiling <span
-  class="math inline">\(\sqrt{\rho_0 \rho_1}\)</span> is the largest
-  magnitude the cosine could reach given the two reliabilities; the
+  sweep’s reliability <span class="math inline">\(\rho\)</span> is its
+  split-half correlation, Spearman-Brown corrected; <span
+  class="math inline">\(\sqrt{\rho_0 \rho_1}\)</span> is the expected
+  magnitude of the cosine if both sweeps measure one shared axis; the
   ratio uses the cosine’s magnitude. The null 5th percentile is the 5%
   tail of the cosine’s distribution when the arms’ value labels are
   shuffled within both sweeps; against that null the observed cosine has
@@ -1315,10 +1320,11 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   <th style="text-align: left;"></th>
   <th style="text-align: center;"><span
   class="math inline">\(\cos(\mathbf{v}_0, \mathbf{v}_1)\)</span></th>
-  <th style="text-align: center;">Ceiling <span
+  <th style="text-align: center;"><span
   class="math inline">\(\sqrt{\rho_0 \rho_1}\)</span></th>
   <th style="text-align: center;"><span
-  class="math inline">\(\lvert\cos\rvert\)</span> / ceiling</th>
+  class="math inline">\(\lvert\cos\rvert / \sqrt{\rho_0
+  \rho_1}\)</span></th>
   <th style="text-align: center;">Null 5th percentile</th>
   </tr>
   </thead>
@@ -1353,14 +1359,13 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   </tr>
   </tbody>
   </table>
-  <p>The ratio of the cosine’s magnitude to its ceiling is 0.95 to 1.02
-  in the DRC, the ResNet and the BC transformer, so the two sweeps
-  recover the same axis up to fitting noise; ratios marginally exceed 1
-  within resampling noise. The ViT sits lower, 0.85 on its one base. The
-  null widens with reliability, its 5th percentile running from −0.08 on
-  the noisiest ResNet base to −0.87 on the BC transformer, which is why
-  a raw cosine of −0.12 can still be significant while a cosine of −0.85
-  would not have to be.</p>
+  <p>The ratio of the cosine’s magnitude to this expectation is 0.95 to
+  1.02 in the DRC, the ResNet and the BC transformer: the cosines sit
+  where a single shared axis predicts they should. The ViT sits lower,
+  0.85 on its one base. The null widens with reliability, its 5th
+  percentile running from −0.08 on the noisiest ResNet base to −0.87 on
+  the BC transformer, which is why a raw cosine of −0.12 can still be
+  significant while a cosine of −0.85 would not have to be.</p>
   <p>Cross-readback agrees: projecting one sweep’s arms onto the other
   sweep’s axis recovers the trained offsets with correlation −0.97 to
   −1.00 across all ten kept bases, with a slope equal to the cosine, as
