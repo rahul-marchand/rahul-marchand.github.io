@@ -1510,10 +1510,9 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
 </div>
 </figure>
 
-  <p>A tensor’s slice is not only located but linearly controllable.
-  Writing it at half, one, two, four and eight times its own size moves
-  the threshold in proportion, in every tensor that moves it at all
-  (<a class="xref" href="#axis-dose-fig">Figure 6</a>).</p>
+  <p>A tensor’s slice is linearly controllable. Writing it at half, one,
+  two, four and eight times its own size moves the threshold in
+  proportion, in every tensor that moves it at all (<a class="xref" href="#axis-dose-fig">Figure 6</a>).</p>
   <figure class="fig-axis-dose wide" id="axis-dose-fig">
 <style>
   .fig-axis-dose {
@@ -1596,10 +1595,11 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   into its weights at α = ±0.2 (α in units of the 0.5 goal’s value);
   raising that value (α = +0.2) shifts the curve left. These are two
   fixed doses along the write that <a class="xref" href="#valueaxis-fig">Figure 3</a>’s dashed ribbons
-  sweep continuously. Shading spans the independent base models where
-  three exist and is the decode’s 95% interval otherwise (writes: one
-  base). Grey dashes: the task-optimal crossing at gap 10, identical in
-  every panel.</p></figcaption>
+  sweep continuously. Shading spans the three independent base models
+  where three exist (every BC curve; the DRC and ResNet at α = 0) and is
+  the decode’s 95% interval otherwise (their writes, and every ViT
+  curve, come from one base). Grey dashes: the task-optimal crossing at
+  gap 10, identical in every panel.</p></figcaption>
 </div>
 </figure>
 
