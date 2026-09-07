@@ -1447,9 +1447,8 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   from disjoint fine-tunes, so their noise is independent, while both
   contain the same threshold knob with opposite sign. Their inner
   product, taken tensor by tensor, counts only the length the two agree
-  on. Each tensor’s share of that total is the slate bar in
-  <a class="xref" href="#where-axis-fig">Figure 5</a>, drawn over the pale bar of the share it would have if
-  the axis were spread evenly over the weights.</p>
+  on; call each tensor’s share of that total its share of the axis
+  (<a class="xref" href="#where-axis-fig">Figure 5</a>).</p>
   <p>A share of length says where gradient descent wrote, not where the
   threshold is held. So for every tensor we also write only its slice of
   the axis into the base agent and decode the threshold on held-out
@@ -1461,26 +1460,26 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   writing everything except a tensor loses what writing it alone gives.
   That additivity is what lets the brick bars be read as shares.</p>
   <p>The two shares disagree where it matters. In every architecture the
-  flatten layer before the heads holds a large slice of the axis’s
-  length and none of its effect: 12% of the length and 0% of the effect
-  in the DRC, 59% and 3% in the ViT. Reading a fine-tune’s weight change
-  tells you where it was cheap to write, not where the behaviour
-  lives.</p>
+  flatten layer before the heads holds a large slice of the axis and
+  none of its effect. In the DRC it is 68% of the parameters, 12% of the
+  axis and 0% of the effect; in the ViT, 59% of the axis and 3% of the
+  effect. Reading a fine-tune’s weight change tells you where it was
+  cheap to write, not where the behaviour lives.</p>
   <p>Where the effect does live differs by architecture. In the DRC it
-  sits at the input. Half of the agreement is in 7% of the weights, and
-  in every base the densest tensor is the 1,152-weight input
-  convolution, 0.08% of the network holding 28 to 45% of the agreement
-  and 41% of the effect. Its slice alone moves the threshold by 1.5 of
-  the full write’s 3.8 steps; the rest comes from conv 1 and the cells’
-  input convolutions, with the recurrent convolutions carrying almost
-  nothing. Inside the input convolution the axis lies entirely on the
-  two colour planes, amplifying one colour’s kernel and attenuating the
-  other’s, so at its purest the knob is a gain on how loudly each colour
-  is seen. The ResNet repeats the pattern one layer deeper, in the input
+  sits at the input. Half of the axis sits in 7% of the weights, and in
+  every base the densest tensor is the 1,152-weight input convolution,
+  0.08% of the network holding 28 to 45% of the axis and 41% of the
+  effect. Its slice alone moves the threshold by 1.5 of the full write’s
+  3.8 steps; the rest comes from conv 1 and the cells’ input
+  convolutions, with the recurrent convolutions carrying almost nothing.
+  Inside the input convolution the axis lies entirely on the two colour
+  planes, amplifying one colour’s kernel and attenuating the other’s, so
+  at its purest the knob is a gain on how loudly each colour is seen.
+  The ResNet repeats the pattern one layer deeper, in the input
   convolution and stages 0 to 3, with nothing from stage 4 on. The ViT’s
   full write is small, 1.8 steps, and its effect sits in block 0, well
   away from the flatten layer where its length is. The BC transformer is
-  the diffuse case: the agreement tracks the parameter shares, and the
+  the diffuse case: its axis shares track the parameter shares, and the
   effect is carried by the MLPs of blocks 0 to 2.</p>
   <figure class="fig-where-axis wide" id="where-axis-fig">
 <style>
@@ -1503,16 +1502,16 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   <strong>(b)</strong> the ResNet, <strong>(c)</strong> the ViT,
   <strong>(d)</strong> the BC transformer, tensors in forward order.
   Three shares per tensor. Pale: its share of the parameters. Slate: its
-  share of the axis’s length, the per-tensor inner product of the two
-  sweeps’ fitted axes over the network total, so that fine-tuning noise
-  cancels. Brick: its share of the axis’s effect, the threshold shift
-  from writing that tensor’s slice of the axis alone over the full
-  write’s shift, both at <span class="math inline">\(\alpha =
-  0.3\)</span> and averaged over the two signs; the full write shifts
-  the threshold by 3.8 steps in the DRC, 4.2 in the ResNet, 1.8 in the
-  ViT and 7.0 in the BC transformer. Whiskers are the range across
-  independent base agents, three each for the DRC, ResNet and BC
-  transformer and one for the ViT.</p></figcaption>
+  share of the axis, the per-tensor inner product of the two sweeps’
+  fitted axes over the network total, so that fine-tuning noise cancels.
+  Brick: its share of the axis’s effect, the threshold shift from
+  writing that tensor’s slice of the axis alone over the full write’s
+  shift, both at <span class="math inline">\(\alpha = 0.3\)</span> and
+  averaged over the two signs; the full write shifts the threshold by
+  3.8 steps in the DRC, 4.2 in the ResNet, 1.8 in the ViT and 7.0 in the
+  BC transformer. Whiskers are the range across independent base agents,
+  three each for the DRC, ResNet and BC transformer and one for the
+  ViT.</p></figcaption>
 </div>
 </figure>
 
