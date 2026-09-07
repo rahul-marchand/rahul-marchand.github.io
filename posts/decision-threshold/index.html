@@ -1437,18 +1437,16 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   Locating <span class="math inline">\(\mathbf{v}\)</span> in the
   weights
   </summary>
-  <p>The axis is a direction over all of a network’s weights, and its
-  squared length splits exactly across the tensors the network is built
-  from, so the first question is simply which tensors hold it. A fitted
-  axis, though, is mostly fine-tuning noise, and noise lands wherever
-  fine-tuning moves weights anyway, which is the largest tensor. We
-  therefore use both sweeps. The axis fitted from sweeping one
-  objective’s value and the axis fitted from sweeping the other’s come
-  from disjoint fine-tunes, so their noise is independent, while both
-  are assumed to contain the same threshold knob with opposite sign;
-  <a class="xref" href="#app-cosine">Appendix C</a> tests that assumption. Their inner product, taken tensor
-  by tensor, counts only the length the two agree on; call each tensor’s
-  share of that total its share of the axis (<a class="xref" href="#where-axis-fig">Figure 5</a>).</p>
+  <p>A fitted axis is mostly fine-tuning noise. We therefore use both
+  sweeps. The axis fitted from sweeping one objective’s value and the
+  axis fitted from sweeping the other’s come from disjoint fine-tunes,
+  so their noise is independent, while both are assumed to represent the
+  same direction in the weights with opposite sign; <a class="xref" href="#app-cosine">Appendix C</a> tests
+  that assumption. Because the two fits’ noise is independent, it is
+  attenuated in their inner product while the shared axis accumulates.
+  Splitting that inner product tensor by tensor therefore measures how
+  much of the shared axis each tensor holds; each tensor’s fraction of
+  the total is its share of the axis (<a class="xref" href="#where-axis-fig">Figure 5</a>).</p>
   <p>A share of length says where gradient descent wrote, not where the
   threshold is held. So for every tensor we also write only its slice of
   the axis into the base agent and decode the threshold on held-out
@@ -1503,15 +1501,15 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   <strong>(d)</strong> the BC transformer, tensors in forward order.
   Three shares per tensor. Pale: its share of the parameters. Slate: its
   share of the axis, the per-tensor inner product of the two sweeps’
-  fitted axes over the network total, so that fine-tuning noise cancels.
-  Brick: its share of the axis’s effect, the threshold shift from
-  writing that tensor’s slice of the axis alone over the full write’s
-  shift, both at <span class="math inline">\(\alpha = 0.3\)</span> and
-  averaged over the two signs; the full write shifts the threshold by
-  3.8 steps in the DRC, 4.2 in the ResNet, 1.8 in the ViT and 7.0 in the
-  BC transformer. Whiskers are the range across independent base agents,
-  three each for the DRC, ResNet and BC transformer and one for the
-  ViT.</p></figcaption>
+  fitted axes over the network total, so that fine-tuning noise
+  attenuates instead of accumulating. Brick: its share of the axis’s
+  effect, the threshold shift from writing that tensor’s slice of the
+  axis alone over the full write’s shift, both at <span
+  class="math inline">\(\alpha = 0.3\)</span> and averaged over the two
+  signs; the full write shifts the threshold by 3.8 steps in the DRC,
+  4.2 in the ResNet, 1.8 in the ViT and 7.0 in the BC transformer.
+  Whiskers are the range across independent base agents, three each for
+  the DRC, ResNet and BC transformer and one for the ViT.</p></figcaption>
 </div>
 </figure>
 
