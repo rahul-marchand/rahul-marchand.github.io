@@ -1282,10 +1282,10 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   noisy pair of fits hides a shared axis. We correct for this with a
   reliability ceiling: splitting a sweep’s arms in half and fitting an
   axis on each half gives that sweep’s reliability <span
-  class="math inline">\(r\)</span>, the correlation between the two
+  class="math inline">\(\rho\)</span>, the correlation between the two
   half-fits, and two independently fitted axes can agree at most to
-  <span class="math inline">\(\sqrt{r_0 r_1}\)</span>. The cosine is
-  therefore judged against this ceiling rather than against 1.</p>
+  <span class="math inline">\(\sqrt{\rho_0 \rho_1}\)</span>. The cosine
+  is therefore judged against this ceiling rather than against 1.</p>
   <p>Second fine-tuning concentrates its weight changes in the same few
   directions whatever the values trained toward. To control for this we
   fit axes on arms trained with shuffled value labels. The Null column
@@ -1294,15 +1294,15 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   <table>
   <caption>Whether the two sweeps are adjusting the weights along the
   same axis. Ranges are min to max over independent base agents. Each
-  sweep’s reliability <span class="math inline">\(r\)</span> is the
+  sweep’s reliability <span class="math inline">\(\rho\)</span> is the
   split-half correlation of its fitted axis, and the ceiling <span
-  class="math inline">\(\sqrt{r_0 r_1}\)</span> is the largest magnitude
-  the cosine could reach given the two reliabilities; the ratio uses the
-  cosine’s magnitude. The null 5th percentile is the 5% tail of the
-  cosine’s distribution when the arms’ value labels are shuffled within
-  both sweeps; against that null the observed cosine has <span
-  class="math inline">\(p &lt; 0.001\)</span> for every base (2,000
-  resamples).</caption>
+  class="math inline">\(\sqrt{\rho_0 \rho_1}\)</span> is the largest
+  magnitude the cosine could reach given the two reliabilities; the
+  ratio uses the cosine’s magnitude. The null 5th percentile is the 5%
+  tail of the cosine’s distribution when the arms’ value labels are
+  shuffled within both sweeps; against that null the observed cosine has
+  <span class="math inline">\(p &lt; 0.001\)</span> for every base
+  (2,000 resamples).</caption>
   <colgroup>
   <col style="width: 20%" />
   <col style="width: 20%" />
@@ -1316,7 +1316,7 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   <th style="text-align: center;"><span
   class="math inline">\(\cos(\mathbf{v}_0, \mathbf{v}_1)\)</span></th>
   <th style="text-align: center;">Ceiling <span
-  class="math inline">\(\sqrt{r_0 r_1}\)</span></th>
+  class="math inline">\(\sqrt{\rho_0 \rho_1}\)</span></th>
   <th style="text-align: center;"><span
   class="math inline">\(\lvert\cos\rvert\)</span> / ceiling</th>
   <th style="text-align: center;">Null 5th percentile</th>
