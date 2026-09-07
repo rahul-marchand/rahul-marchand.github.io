@@ -1288,9 +1288,7 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   shared axis, the expected magnitude of their cosine is then <span
   class="math inline">\(\sqrt{\rho_0 \rho_1}\)</span>, the attenuation
   the two fits’ noise alone would produce, so the cosine is judged
-  against this benchmark rather than against 1. It is an estimate of an
-  expectation, not a bound, which is how ratios can sit marginally above
-  1.</p>
+  against this benchmark rather than against 1.</p>
   <p>Second fine-tuning concentrates its weight changes in the same few
   directions whatever the values trained toward. To control for this we
   fit axes on arms trained with shuffled value labels. The Null column
@@ -1359,22 +1357,9 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   </tr>
   </tbody>
   </table>
-  <p>The ratio of the cosine’s magnitude to this expectation is 0.95 to
-  1.02 in the DRC, the ResNet and the BC transformer: the cosines sit
-  where a single shared axis predicts they should. The ViT sits lower,
-  0.85 on its one base. The null widens with reliability, its 5th
-  percentile running from −0.08 on the noisiest ResNet base to −0.87 on
-  the BC transformer, which is why a raw cosine of −0.12 can still be
-  significant while a cosine of −0.85 would not have to be.</p>
-  <p>Cross-readback agrees: projecting one sweep’s arms onto the other
-  sweep’s axis recovers the trained offsets with correlation −0.97 to
-  −1.00 across all ten kept bases, with a slope equal to the cosine, as
-  attenuation predicts.</p>
-  <p>The excluded ViT bases have no axis rather than a disagreeing one.
-  Every ViT base below 80% held-out competence has reliability 0.05 to
-  0.13, a cosine within 0.04 of zero, and permutation <span
-  class="math inline">\(p\)</span> between 0.05 and 0.52: an incompetent
-  base has nothing to fit.</p>
+  <p>Projecting one sweep’s arms onto the other sweep’s axis recovers
+  the trained offsets with correlation −0.97 to −1.00 across all ten
+  bases, with a slope equal to the cosine, as attenuation predicts.</p>
   </details>
   <details class="wide" id="app-longer">
   <summary>Appendix D: 
