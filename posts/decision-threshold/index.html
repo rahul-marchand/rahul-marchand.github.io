@@ -1357,9 +1357,16 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   </tr>
   </tbody>
   </table>
-  <p>Projecting one sweep’s arms onto the other sweep’s axis recovers
-  the trained offsets with correlation −0.97 to −1.00 across all ten
-  bases, with a slope equal to the cosine, as attenuation predicts.</p>
+  <p>A third check uses one sweep’s axis as a measuring instrument for
+  the other’s fine-tunes. Each arm of a sweep is a weight change trained
+  at a known value offset, and projecting it onto the other sweep’s axis
+  gives a one-number reading of how far the fine-tune moved along that
+  axis. Across all ten bases these readings match the trained offsets
+  with correlation −0.97 to −1.00: an axis fitted from sweeping one
+  objective reads off, almost exactly, how much the other objective’s
+  value was changed in fine-tunes it never saw. The readings are scaled
+  down by a factor equal to the measured cosine, which is precisely the
+  damping the two fits’ noise predicts.</p>
   </details>
   <details class="wide" id="app-longer">
   <summary>Appendix D: 
