@@ -1381,23 +1381,19 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   steadily, from roughly a quarter of the change at the standard budget
   to two fifths at 3M steps: it is the accumulated effect of any further
   training, whatever the values, so it can only grow, and the write and
-  residual shares shrink in proportion. The axis is not a transient of
-  short fine-tuning; it still carries a fifth of the weight change at 3M
-  steps.</p>
+  residual shares shrink in proportion.</p>
   <p>Panel (b) tracks the exchange rate the arms learn. It climbs from
   about 9 steps per unit of value at 100k to 14 at the standard budget
-  and plateaus near 16 from 1M steps on, still short of the task’s 20.
-  Some of the undershoot in <a class="xref" href="#valueaxis-fig">Figure 3</a> is unfinished learning; the
-  rest survives seven times the budget and looks like a stable gap.</p>
+  and plateaus near 16 from 1M steps on, still short of the task’s
+  optimal 20. Some of the undershoot in <a class="xref" href="#valueaxis-fig">Figure 3</a> is unfinished
+  learning; some of it seems to potentially be a stable gap.</p>
   <p>Panel (c) tracks two arms trained past parity, both asked for <span
   class="math inline">\(\tau^* = -4\)</span>. They still sit near <span
   class="math inline">\(\hat{\tau} = +1.5\)</span> at the standard
   budget, cross zero only after about 750k steps, and reach <span
-  class="math inline">\(-3\)</span> by 3M. The frozen base written at
-  the same dose never crosses, staying above <span
-  class="math inline">\(+1\)</span> at every length. A reversal is
-  learnable given time; the axis cannot express it at any dose
-  (<a class="xref" href="#app-far">Appendix G</a>).</p>
+  class="math inline">\(-3\)</span> by 3M. A reversal is learnable given
+  time; but the axis fitted on the above parity finetunes cannot express
+  this reversal (<a class="xref" href="#app-far">Appendix G</a>).</p>
   <figure class="fig-arm-length wide" id="arm-length-fig">
 <style>
   .fig-arm-length {
