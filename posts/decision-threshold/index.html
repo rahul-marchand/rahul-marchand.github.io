@@ -1445,10 +1445,10 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   therefore use both sweeps. The axis fitted from sweeping one
   objective’s value and the axis fitted from sweeping the other’s come
   from disjoint fine-tunes, so their noise is independent, while both
-  contain the same threshold knob with opposite sign. Their inner
-  product, taken tensor by tensor, counts only the length the two agree
-  on; call each tensor’s share of that total its share of the axis
-  (<a class="xref" href="#where-axis-fig">Figure 5</a>).</p>
+  are assumed to contain the same threshold knob with opposite sign;
+  <a class="xref" href="#app-cosine">Appendix C</a> tests that assumption. Their inner product, taken tensor
+  by tensor, counts only the length the two agree on; call each tensor’s
+  share of that total its share of the axis (<a class="xref" href="#where-axis-fig">Figure 5</a>).</p>
   <p>A share of length says where gradient descent wrote, not where the
   threshold is held. So for every tensor we also write only its slice of
   the axis into the base agent and decode the threshold on held-out
