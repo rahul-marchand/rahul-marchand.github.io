@@ -1276,24 +1276,27 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   class="math inline">\(\mathbf{v}_0\)</span>, fitted only on the arms
   sweeping one objective’s value, against <span
   class="math inline">\(\mathbf{v}_1\)</span>, fitted only on the
-  other’s. A raw cosine is the wrong yardstick twice over. It is
+  other’s. There are two issues with using a raw cosine. It is
   attenuated by each fit’s own fine-tuning noise, so a noisy pair of
   fits can hide a shared axis. And its chance level is not the <span
   class="math inline">\(1/\sqrt{d} \approx 0.001\)</span> of random
-  directions in a 0.8M to 2.2M dimensional weight space: fine-tuning
-  writes structure wherever it acts, and axes fitted from arms with
-  shuffled value labels inherit it.</p>
+  directions in a 0.8M to 2.2M dimensional weight space. Fine-tuning
+  concentrates its weight changes in the same few directions whatever
+  the values trained toward. To control for this we fit axes on arms
+  trained with shuffled value labels. The Null column in the table below
+  is the standard deviation of .</p>
   <table>
-  <caption>Whether the two sweeps find one axis. Ranges are min to max
-  over independent base agents. Each sweep’s reliability <span
-  class="math inline">\(r\)</span> is the split-half correlation of its
-  fitted axis, and the ceiling <span class="math inline">\(\sqrt{r_0
-  r_1}\)</span> is the largest magnitude the cosine could reach given
-  the two reliabilities; the ratio uses the cosine’s magnitude. Null SD
-  is the standard deviation of the cosine when the arms’ value labels
-  are shuffled within both sweeps; against that null the observed cosine
-  has <span class="math inline">\(p &lt; 0.001\)</span> for every base,
-  the floor for 2,000 resamples.</caption>
+  <caption>Whether the two sweeps are adjusting the weights along the
+  same axis. Ranges are min to max over independent base agents. Each
+  sweep’s reliability <span class="math inline">\(r\)</span> is the
+  split-half correlation of its fitted axis, and the ceiling <span
+  class="math inline">\(\sqrt{r_0 r_1}\)</span> is the largest magnitude
+  the cosine could reach given the two reliabilities; the ratio uses the
+  cosine’s magnitude. The null 5th percentile is the 5% tail of the
+  cosine’s distribution when the arms’ value labels are shuffled within
+  both sweeps; against that null the observed cosine has <span
+  class="math inline">\(p &lt; 0.001\)</span> for every base (2,000
+  resamples).</caption>
   <colgroup>
   <col style="width: 20%" />
   <col style="width: 20%" />
@@ -1310,7 +1313,7 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   class="math inline">\(\sqrt{r_0 r_1}\)</span></th>
   <th style="text-align: center;"><span
   class="math inline">\(\lvert\cos\rvert\)</span> / ceiling</th>
-  <th style="text-align: center;">Null SD</th>
+  <th style="text-align: center;">Null 5th percentile</th>
   </tr>
   </thead>
   <tbody>
@@ -1319,28 +1322,28 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   <td style="text-align: center;">−0.75 to −0.61</td>
   <td style="text-align: center;">0.60 to 0.74</td>
   <td style="text-align: center;">1.01 to 1.02</td>
-  <td style="text-align: center;">0.31 to 0.42</td>
+  <td style="text-align: center;">−0.63 to −0.48</td>
   </tr>
   <tr class="even">
   <td style="text-align: left;">ResNet ×3</td>
   <td style="text-align: center;">−0.38 to −0.12</td>
   <td style="text-align: center;">0.12 to 0.38</td>
   <td style="text-align: center;">0.95 to 0.98</td>
-  <td style="text-align: center;">0.05 to 0.17</td>
+  <td style="text-align: center;">−0.27 to −0.08</td>
   </tr>
   <tr class="odd">
   <td style="text-align: left;">ViT ×1</td>
   <td style="text-align: center;">−0.23</td>
   <td style="text-align: center;">0.27</td>
   <td style="text-align: center;">0.85</td>
-  <td style="text-align: center;">0.10</td>
+  <td style="text-align: center;">−0.16</td>
   </tr>
   <tr class="even">
   <td style="text-align: left;">BC ×3</td>
   <td style="text-align: center;">−0.98</td>
   <td style="text-align: center;">0.97</td>
   <td style="text-align: center;">1.01</td>
-  <td style="text-align: center;">0.58 to 0.61</td>
+  <td style="text-align: center;">−0.87 to −0.85</td>
   </tr>
   </tbody>
   </table>
@@ -1348,9 +1351,10 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   in the DRC, the ResNet and the BC transformer, so the two sweeps
   recover the same axis up to fitting noise; ratios marginally exceed 1
   within resampling noise. The ViT sits lower, 0.85 on its one base. The
-  null’s standard deviation tracks reliability, from 0.05 on the
-  noisiest ResNet base to 0.6 on the BC transformer, which is why a raw
-  cosine of −0.12 can still sit at the floor of its null.</p>
+  null widens with reliability, its 5th percentile running from −0.08 on
+  the noisiest ResNet base to −0.87 on the BC transformer, which is why
+  a raw cosine of −0.12 can still be significant while a cosine of −0.85
+  would not have to be.</p>
   <p>Cross-readback agrees: projecting one sweep’s arms onto the other
   sweep’s axis recovers the trained offsets with correlation −0.97 to
   −1.00 across all ten kept bases, with a slope equal to the cosine, as
