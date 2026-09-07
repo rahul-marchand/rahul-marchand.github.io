@@ -1391,9 +1391,15 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   class="math inline">\(\tau^* = -4\)</span>. They still sit near <span
   class="math inline">\(\hat{\tau} = +1.5\)</span> at the standard
   budget, cross zero only after about 750k steps, and reach <span
-  class="math inline">\(-3\)</span> by 3M. A reversal is learnable given
-  time; but the axis fitted on the above parity finetunes cannot express
-  this reversal (<a class="xref" href="#app-far">Appendix G</a>).</p>
+  class="math inline">\(-3\)</span> by 3M. The written points ask
+  whether a better axis would follow. At each length the axis is
+  refitted from grid arms fine-tuned equally long, then written into the
+  frozen base at the dose the reversal arms trained on, so a longer
+  budget gets every advantage it could confer on the fit. The written
+  threshold creeps from <span class="math inline">\(+3\)</span> toward
+  <span class="math inline">\(+1\)</span> and never crosses zero. A
+  reversal is learnable given time; no fitting budget yields an axis
+  that can express it (<a class="xref" href="#app-far">Appendix G</a>).</p>
   <figure class="fig-arm-length wide" id="arm-length-fig">
 <style>
   .fig-arm-length {
@@ -1419,9 +1425,9 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   steps per unit. <strong>(c)</strong> The threshold of two arms trained
   past parity, both with <span class="math inline">\(\tau^* =
   -4\)</span>: solid, filled, the fine-tuned arms; dashed, open, the
-  frozen base with the axis written at the same dose; grey dashes the
-  task optimum. Lines are the mean of the three independent base agents
-  and shading spans their range.</p></figcaption>
+  frozen base with the axis refitted at that length and written at the
+  same dose; grey dashes the task optimum. Lines are the mean of the
+  three independent base agents and shading spans their range.</p></figcaption>
 </div>
 </figure>
 
