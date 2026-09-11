@@ -1,6 +1,6 @@
 # rahul-marchand.github.io
 
-Personal site + research blog. Plain HTML, no generator. Served by GitHub Pages from `main`.
+Personal site + research blog. Plain HTML, no generator. Served by GitHub Pages from `main` at rahulmarchand.com (`CNAME`).
 
 - `index.html` — landing page
 - `style.css` — shared tokens/typography: Charter (self-hosted in `fonts/`, Bitstream licence), black on white, one red
