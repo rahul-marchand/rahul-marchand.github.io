@@ -51,6 +51,9 @@ ul, ol { padding-left: 24px; }
 
 a { color: var(--link); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
 a:hover { color: var(--accent); }
+/* Posts carry many citations per paragraph: grey underlines there, ink on hover. */
+.page:not(.home) a { text-decoration-color: #b9b9b4; }
+.page:not(.home) a:hover { text-decoration-color: currentColor; }
 
 .byline, .meta { font-size: 15px; color: var(--ink-soft); }
 
