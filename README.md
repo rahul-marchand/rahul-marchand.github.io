@@ -43,4 +43,4 @@ build/build.sh path/to/post.md decision-threshold path/to/figures/
 git add posts && git commit -m "build post" && git push
 ```
 
-Figure fragments come from the research repo (`homeserver:~/projects/GoalMisgeneralisation/figures/`).
+Figure fragments come from the research repo (`homeserver:~/projects/GoalMisgeneralisation/figures/fragments/`).

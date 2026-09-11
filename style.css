@@ -35,14 +35,14 @@ h2 { font-size: 22px; margin: 44px 0 12px; }
 h3 { font-size: 18px; margin: 28px 0 8px; }
 
 /* Paper-style section numbers via counters: the md carries none, reordering
-   renumbers. Summary, Bibliography and Appendices stay unnumbered; h3s inside
+   renumbers. Summary, Acknowledgements, Bibliography and Appendices stay unnumbered; h3s inside
    <details> (appendix internals) are never numbered. */
 .page h2 { counter-increment: sec; counter-reset: subsec; }
 .page h2::before { content: counter(sec); color: var(--ink-soft); font-weight: 400; margin-right: 0.75em; }
 .page h3 { counter-increment: subsec; }
 .page h3::before { content: counter(sec) "." counter(subsec); color: var(--ink-soft); font-weight: 400; margin-right: 0.75em; }
-h2#summary, h2#bibliography, h2#appendices { counter-increment: none; }
-h2#summary::before, h2#bibliography::before, h2#appendices::before { content: none; }
+h2#summary, h2#acknowledgements, h2#bibliography, h2#appendices { counter-increment: none; }
+h2#summary::before, h2#acknowledgements::before, h2#bibliography::before, h2#appendices::before { content: none; }
 .page details h3 { counter-increment: none; }
 .page details h3::before { content: none; }
 
@@ -116,12 +116,16 @@ footer { margin-top: 64px; font-size: 15px; color: var(--ink-soft); }
 .links a:hover { color: var(--accent); }
 .links svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.1; stroke-linecap: round; stroke-linejoin: round; }
 ol.n { list-style: none; padding: 0; margin: 0; counter-reset: n; }
-ol.n li { position: relative; padding-left: 34px; margin: 0 0 18px; }
-ol.n li::before { counter-increment: n; content: counter(n); position: absolute; left: 0; top: 0; font-weight: 700; }
+/* Each entry: numeral, figure 1 of the work, text; all three centred on one midline. */
+ol.n li { display: grid; grid-template-columns: 18px 150px 1fr; gap: 16px; align-items: center; margin: 0 0 22px; }
+ol.n li::before { counter-increment: n; content: counter(n); font-weight: 700; }
+ol.n .fig { display: block; }
+ol.n .fig img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 2px; }
 ol.n .t { display: block; }
 ol.n .au { display: block; font-size: 16px; }
 ol.n .v, ol.n .date { display: block; font-size: 16px; color: var(--ink-soft); }
-.note { font-size: 15px; color: var(--ink-soft); margin: 4px 0 0 34px; }
+.note { font-size: 15px; color: var(--ink-soft); margin: 4px 0 0 200px; }
+@media (max-width: 480px) { ol.n li { grid-template-columns: 18px 96px 1fr; } .note { margin-left: 146px; } }
 .colophon { text-align: center; margin-top: 80px; }
 .colophon .mark { display: block; width: 24px; height: 24px; margin: 0 auto 10px; }
 

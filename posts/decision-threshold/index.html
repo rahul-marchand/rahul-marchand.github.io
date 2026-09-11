@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
 <title>A Steerable Decision Threshold in a Planning Agent</title>
 <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -965,6 +966,15 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   optimum by amounts we can measure but cannot yet explain. A
   theoretical account of what determines that gap would be a natural
   complement to the empirical work here.</p>
+  <h2 id="acknowledgements">Acknowledgements</h2>
+  <p>This is work in progress towards my master’s thesis at Oxford. <a
+  href="https://far.in.net">Matthew Farrugia-Roberts</a> supervised the
+  project throughout, first suggested the weight-difference analysis,
+  and reviewed a draft of this post. <a
+  href="https://wittlab.ai">Christian Schroeder de Witt</a> supervises
+  the thesis at the Witt Lab and provided the compute and resources for
+  it. Thanks also to Tom Bush for feedback along the way. Any mistakes
+  are my own.</p>
   <h2 id="bibliography">Bibliography</h2>
   <ul>
   <li>Andreas, J. (2022). Language Models as Agent Models. <em>Findings
@@ -1618,11 +1628,10 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   the standard 400k steps is the exception. Its arms stall just below
   zero, and it reverses only under longer fine-tuning, crossing after
   about 750k steps (<a class="xref" href="#arm-length-fig">Figure 4c</a>).</p>
-  <p>The write does not work past. Approaching the written threshold
-  flattens away from the fine-tuned line, and pushed further the written
-  agent stops finishing episodes at all, marked in the figure where
-  reach falls below the decode’s floor.
-  <!-- TODO: state the reach criterion/floor used for the cut-off --></p>
+  <p>The write does not work past <span class="math inline">\(\tau =
+  0\)</span>. Approaching the written threshold flattens away from the
+  fine-tuned line, and pushed further the written agent stops finishing
+  episodes at all.</p>
   <p>The failure is not a matter of distance from the base weights.
   Fitting a fresh axis to the far arms themselves fails even within the
   <span class="math inline">\(\tau &lt; 0\)</span> regime that those
