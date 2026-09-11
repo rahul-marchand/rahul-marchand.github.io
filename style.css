@@ -1,13 +1,18 @@
-/* Shared tokens — same palette as the interactive figures. Light-only by choice. */
+/* Shared tokens and typography. Light-only by choice: black ink on white paper, one red. */
+@font-face { font-family: Charter; src: url(fonts/charter_regular.woff2) format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: Charter; src: url(fonts/charter_bold.woff2) format("woff2"); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: Charter; src: url(fonts/charter_italic.woff2) format("woff2"); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: Charter; src: url(fonts/charter_bold_italic.woff2) format("woff2"); font-weight: 700; font-style: italic; font-display: swap; }
+
 :root {
   color-scheme: light;
-  --paper: #f8f6f2;
-  --panel: #fdfcfa;
-  --ink: #23252b;
-  --ink-soft: #5c5f6a;
-  --line: #ddd8ce;
-  --accent: #a63d2f;
-  --link: #2f5a78;
+  --paper: #fff;
+  --panel: #f7f7f5;
+  --ink: #1d1d1b;
+  --ink-soft: #6f6f6b;
+  --line: #e4e4e0;
+  --accent: #d8331f;
+  --link: #1d1d1b;
 }
 
 * { margin: 0; box-sizing: border-box; }
@@ -15,172 +20,104 @@
 body {
   background: var(--paper);
   color: var(--ink);
-  font-family: "Source Serif 4", Georgia, serif;
-  font-size: 17px;
-  line-height: 1.65;
-  padding: 48px 20px 96px;
+  font-family: Charter, "Bitstream Charter", Georgia, serif;
+  font-size: 18px;
+  line-height: 1.5;
+  padding: 64px 20px 72px;
 }
+::selection { background: var(--accent); color: #fff; }
 
 .page { max-width: 680px; margin: 0 auto; }
 
-h1, h2, h3 {
-  font-family: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
-  letter-spacing: -0.015em;
-  text-wrap: balance;
-  line-height: 1.25;
-}
-h1 { font-size: 30px; font-weight: 600; margin: 0 0 6px; }
-h2 { font-size: 21px; font-weight: 600; margin: 40px 0 12px; }
-h3 { font-size: 17px; font-weight: 600; margin: 28px 0 8px; }
+h1, h2, h3 { font-weight: 700; line-height: 1.2; letter-spacing: -0.005em; text-wrap: balance; }
+h1 { font-size: 34px; margin: 0 0 6px; }
+h2 { font-size: 22px; margin: 44px 0 12px; }
+h3 { font-size: 18px; margin: 28px 0 8px; }
 
 /* Paper-style section numbers via counters: the md carries none, reordering
    renumbers. Summary, Bibliography and Appendices stay unnumbered; h3s inside
    <details> (appendix internals) are never numbered. */
 .page h2 { counter-increment: sec; counter-reset: subsec; }
-.page h2::before {
-  content: counter(sec);
-  color: var(--ink-soft);
-  font-weight: 500;
-  margin-right: 0.75em;
-}
+.page h2::before { content: counter(sec); color: var(--ink-soft); font-weight: 400; margin-right: 0.75em; }
 .page h3 { counter-increment: subsec; }
-.page h3::before {
-  content: counter(sec) "." counter(subsec);
-  color: var(--ink-soft);
-  font-weight: 500;
-  margin-right: 0.75em;
-}
+.page h3::before { content: counter(sec) "." counter(subsec); color: var(--ink-soft); font-weight: 400; margin-right: 0.75em; }
 h2#summary, h2#bibliography, h2#appendices { counter-increment: none; }
 h2#summary::before, h2#bibliography::before, h2#appendices::before { content: none; }
 .page details h3 { counter-increment: none; }
 .page details h3::before { content: none; }
 
-p, ul, ol { margin: 0 0 16px; }
+p, ul, ol { margin: 0 0 18px; text-wrap: pretty; }
 ul, ol { padding-left: 24px; }
 
-a { color: var(--link); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+a { color: var(--link); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
 a:hover { color: var(--accent); }
 
-.byline, .meta {
-  font-family: "IBM Plex Sans", sans-serif;
-  font-size: 14px;
-  color: var(--ink-soft);
-}
+.byline, .meta { font-size: 15px; color: var(--ink-soft); }
 
-code, pre {
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.88em;
-}
-pre {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 14px 16px;
-  overflow-x: auto;
-  margin: 0 0 16px;
-}
+code, pre { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.86em; }
+pre { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px; overflow-x: auto; margin: 0 0 18px; }
 
 hr { border: 0; border-top: 1px solid var(--line); margin: 36px 0; }
 
 .page { counter-reset: fig tbl; }
 figure { margin: 32px 0; counter-increment: fig; }
-figcaption { font-size: 15px; color: var(--ink-soft); margin-top: 10px; line-height: 1.55; }
+figcaption { font-size: 15px; color: var(--ink-soft); margin-top: 10px; line-height: 1.5; }
 figcaption p { margin: 0 0 8px; display: inline; }
-figcaption::before {
-  content: "Figure " counter(fig) ".";
-  font-family: "IBM Plex Sans", sans-serif;
-  font-weight: 600;
-  color: var(--ink);
-  margin-right: 0.5em;
-}
+figcaption::before { content: "Figure " counter(fig) "."; font-weight: 700; color: var(--ink); margin-right: 0.5em; }
 /* Elements with the .wide class break out of the text column on wide viewports. */
 @media (min-width: 920px) {
-  .page .wide {
-    --figw: min(840px, calc(100vw - 64px));
-    width: var(--figw);
-    margin-left: calc((680px - var(--figw)) / 2);
-  }
+  .page .wide { --figw: min(840px, calc(100vw - 64px)); width: var(--figw); margin-left: calc((680px - var(--figw)) / 2); }
   .page details .wide { width: 100%; margin-left: 0; }
 }
 
 /* Collapsed appendix blocks. */
-details {
-  margin: 32px 0;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 0 18px;
-  background: var(--panel);
-}
-summary {
-  font-family: "IBM Plex Sans", sans-serif;
-  font-size: 16px;
-  font-weight: 600;
-  letter-spacing: -0.015em;
-  color: var(--ink);
-  padding: 14px 0;
-  cursor: pointer;
-}
+details { margin: 32px 0; border: 1px solid var(--line); border-radius: 4px; padding: 0 18px; background: var(--panel); }
+summary { font-size: 17px; font-weight: 700; color: var(--ink); padding: 14px 0; cursor: pointer; }
 summary:hover { color: var(--accent); }
 details[open] summary { border-bottom: 1px solid var(--line); }
 details figure { margin: 20px 0 24px; }
-/* Appendix content authored in markdown. */
-details > p, details > table, details > dl, details > ul { margin: 14px 0; font-family: "IBM Plex Sans", sans-serif; font-size: 14.5px; }
-table { border-collapse: collapse; width: 100%; font-size: 13.5px; margin: 20px 0; counter-increment: tbl; }
-table caption {
-  caption-side: bottom;
-  text-align: left;
-  font-size: 15.5px;
-  color: var(--ink);
-  line-height: 1.65;
-  max-width: 70ch;
-  margin: 18px auto 0;
-  padding: 16px 0 0;
-  border-top: 1px solid var(--line);
-}
-table caption::before {
-  content: "Table " counter(tbl) ".";
-  font-family: "IBM Plex Sans", sans-serif;
-  font-weight: 600;
-  color: var(--ink);
-  margin-right: 0.5em;
-}
-th {
-  font-family: "IBM Plex Sans", sans-serif;
-  font-size: 13px; font-weight: 600; color: var(--ink);
-  text-align: left; padding: 6px 18px 8px 0; white-space: nowrap;
-  border-top: 2px solid var(--ink); border-bottom: 1px solid var(--line);
-}
+details > p, details > table, details > dl, details > ul { margin: 14px 0; font-size: 15.5px; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; margin: 20px 0; counter-increment: tbl; }
+table caption { caption-side: bottom; text-align: left; font-size: 15.5px; color: var(--ink); line-height: 1.5; max-width: 70ch; margin: 18px auto 0; padding: 16px 0 0; border-top: 1px solid var(--line); }
+table caption::before { content: "Table " counter(tbl) "."; font-weight: 700; color: var(--ink); margin-right: 0.5em; }
+th { font-size: 14px; font-weight: 700; color: var(--ink); text-align: left; padding: 6px 18px 8px 0; white-space: nowrap; border-top: 2px solid var(--ink); border-bottom: 1px solid var(--line); }
 td { padding: 7px 16px 7px 0; vertical-align: top; font-variant-numeric: tabular-nums; }
 tbody tr:last-child td { border-bottom: 2px solid var(--ink); }
 /* A table presented as a figure: panel card, inset caption. */
-.tbl {
-  background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
-  padding: 22px; margin: 32px 0; overflow-x: auto;
-}
+.tbl { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 22px; margin: 32px 0; overflow-x: auto; }
 .tbl table { width: auto; margin: 0 auto; }
 .tbl td { white-space: nowrap; }
 th:last-child, td:last-child { padding-right: 0; }
-details dl { display: grid; grid-template-columns: minmax(140px, max-content) 1fr; gap: 8px 24px; font-size: 14px; }
+details dl { display: grid; grid-template-columns: minmax(140px, max-content) 1fr; gap: 8px 24px; font-size: 15px; }
 details dt { color: var(--ink-soft); }
 details dd { margin: 0; }
 details dd p, details td p { margin: 0; }
 
-blockquote {
-  border-left: 3px solid var(--line);
-  padding-left: 16px;
-  color: var(--ink-soft);
-  margin: 0 0 16px;
-}
+blockquote { border-left: 3px solid var(--line); padding-left: 16px; color: var(--ink-soft); margin: 0 0 18px; }
 
 .post-list { list-style: none; padding: 0; }
-.post-list li {
-  display: flex; justify-content: space-between; gap: 16px;
-  align-items: baseline; padding: 8px 0;
-  border-bottom: 1px solid var(--line);
-}
-.post-list time {
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 13px; color: var(--ink-soft); white-space: nowrap;
-}
+.post-list li { display: flex; justify-content: space-between; gap: 16px; align-items: baseline; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.post-list time { font-size: 15px; color: var(--ink-soft); white-space: nowrap; }
 
-footer { margin-top: 64px; font-family: "IBM Plex Sans", sans-serif; font-size: 13px; color: var(--ink-soft); }
+footer { margin-top: 64px; font-size: 15px; color: var(--ink-soft); }
+
+/* Landing page. */
+.page.home { max-width: 600px; }
+.page.home h2 { counter-increment: none; font-size: 18px; margin: 52px 0 14px; }
+.page.home h2::before { content: none; }
+.masthead { text-align: center; margin-bottom: 44px; }
+.masthead .portrait { display: block; width: 140px; height: 140px; object-fit: cover; margin: 0 auto; }
+.masthead h1 { margin: 18px 0 0; }
+.links { display: flex; justify-content: center; gap: 18px; margin: 14px 0 0; }
+.links a { display: inline-flex; color: var(--ink); text-decoration: none; }
+.links a:hover { color: var(--accent); }
+.links svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.1; stroke-linecap: round; stroke-linejoin: round; }
+ol.n { list-style: none; padding: 0; margin: 0; counter-reset: n; }
+ol.n li { position: relative; padding-left: 34px; margin: 0 0 18px; }
+ol.n li::before { counter-increment: n; content: counter(n); position: absolute; left: 0; top: 0; font-weight: 700; }
+ol.n .t { display: block; }
+ol.n .au { display: block; font-size: 16px; }
+ol.n .v, ol.n .date { display: block; font-size: 16px; color: var(--ink-soft); }
+.note { font-size: 15px; color: var(--ink-soft); margin: 4px 0 0 34px; }
+.colophon { text-align: center; margin-top: 80px; }
+.colophon .mark { display: block; width: 24px; height: 24px; margin: 0 auto 10px; }

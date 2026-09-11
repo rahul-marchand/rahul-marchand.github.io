@@ -3,7 +3,8 @@
 Personal site + research blog. Plain HTML, no generator. Served by GitHub Pages from `main`.
 
 - `index.html` — landing page
-- `style.css` — shared tokens/typography (same palette as the interactive figures)
+- `style.css` — shared tokens/typography: Charter (self-hosted in `fonts/`, Bitstream licence), black on white, one red
+- `favicon.svg`, `img/penguin.svg` — the penguin from an old badge design (`Penguin.ai`)
 - `posts/<slug>/index.html` — built posts (committed build output)
 - `build/` — pandoc template + build script
 
