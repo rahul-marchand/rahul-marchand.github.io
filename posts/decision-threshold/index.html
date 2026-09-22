@@ -792,14 +792,13 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   href="https://arxiv.org/abs/2210.05643">Malladi et al., 2023</a>). Our
   base training is the shared initialisation, the fine-tunes are short,
   and the change we ask for is one-dimensional, so a line between
-  value-shifted fine-tunes is expected on these grounds. For the RL
-  agents the account predicts more than a line. The return is linear in
-  the reward, so the fine-tuning gradient is affine in the value shift,
-  and to first order the weight change is linear in that gradient (<a
-  href="https://arxiv.org/abs/1703.04730">Koh &amp; Liang, 2017</a>; <a
-  href="https://arxiv.org/abs/2310.12808">Daheim et al., 2024</a>). That
-  is exactly the form we fit, a drift shared by every arm plus one
-  direction scaled by the shift.</p>
+  value-shifted fine-tunes is expected on these grounds. The return is
+  linear in the reward, so the fine-tuning gradient is affine in the
+  value shift, and to first order the weight change is linear in that
+  gradient (<a href="https://arxiv.org/abs/1703.04730">Koh &amp; Liang,
+  2017</a>; <a href="https://arxiv.org/abs/2310.12808">Daheim et al.,
+  2024</a>). That is exactly the form we fit, a drift shared by every
+  arm plus one direction scaled by the shift.</p>
   <p>But this explanation is limited: it predicts a line near the base,
   and says nothing about how far the line holds, how it fails, or which
   part of the weight change matters. We have three observations that
@@ -833,34 +832,25 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   variable to fix a prior over, and this hypothesis cannot explain our
   results.</p>
   <p>We suggest that <span class="math inline">\(\mathbf{v}\)</span>
-  exists because of what solving the task demands of the agent’s
-  computation. Solving it requires three things: a planned route to each
-  goal, a score for each route, and a comparison of the two scores.
-  Scoring a route requires a value for the goal it reaches. The agent
-  never observes the goal values, so it must store them, and since the
-  training signal only ever fixes their difference (more precisely, its
-  ratio to the step cost), one stored constant is all there is to find.
-  <span class="math inline">\(\mathbf{v}\)</span> is where it is stored:
-  moving along <span class="math inline">\(\mathbf{v}\)</span> changes
-  this one constant. Behaviour cannot tell whether the constant is a
-  value difference, a step cost or the threshold itself, since only
-  their ratio is identifiable.</p>
-  <p>This accounts for the three observations above. The line holds
-  across the whole range because nothing about a stored constant is tied
-  to its base setting; there is no neighbourhood to leave. It fails at
-  parity because the input’s goal channels mean “the richer goal” and
-  “the poorer goal” throughout training, so a setting that reverses them
-  contradicts what the circuit was built to read, and needs a different
-  circuit rather than a different constant. And navigation survives the
-  write because what changes is how the goals are valued, not how routes
-  to them are found.</p>
-  <p>Put together, the perturbative account and the stored constant
-  answer the question this section asks: fine-tuning moves the weights
-  linearly in the training signal, and here the training signal can only
-  move one thing. What is notable is not that this constant exists at
-  all, since any circuit that scores by value has one somewhere, but
-  that it sits in the weights as a single legible direction despite
-  never varying during training.</p>
+  exists because it was efficient to encode this part of the agent’s
+  computation in this legible way. Solving the task requires three
+  things: a planned route to each goal, a score for each route, and a
+  comparison of the two scores. Scoring a route requires a value for the
+  goal it reaches. The agent never observes the goal values, so it must
+  store them, and <span class="math inline">\(\mathbf{v}\)</span> is
+  where this is stored. Though note that we cannot tell whether the
+  constant is a value difference, a step cost or the entire threshold
+  itself. This explanation could account for the three observations
+  above. The line holds across the whole range because we are directly
+  varying a parameter in the model’s computation. It fails at parity
+  because the input’s goal channels mean “the richer goal” and “the
+  poorer goal” throughout training and a setting that reverses them
+  contradicts what the circuit was built to read. And navigation
+  survives the write because what changes is how the goals are valued,
+  not how routes to them are found. What is notable is not that this
+  constant exists at all, since any circuit that scores by value has one
+  somewhere, but that it sits in the weights as a single legible
+  direction despite never varying during training.</p>
   <h3 id="evidence-for-modular-structure">Evidence for modular
   structure</h3>
   <p>So far we understand two properties of the weights. We reproduced
