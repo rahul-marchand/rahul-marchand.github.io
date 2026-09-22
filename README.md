@@ -39,8 +39,18 @@ order, so reordering renumbers everything, prose included:
   prepends "Appendix X: " to each summary, so don't write the letter in the md)
 
 ```sh
-build/build.sh path/to/post.md decision-threshold path/to/figures/
+rsync -a homeserver:projects/GoalMisgeneralisation/figures/fragments/ /tmp/frag/
+build/build.sh "$HOME/Documents/Obsidian Vault/400 Blog/decision-threshold.md" decision-threshold /tmp/frag/
 git add posts && git commit -m "build post" && git push
 ```
 
-Figure fragments come from the research repo (`homeserver:~/projects/GoalMisgeneralisation/figures/fragments/`).
+The build is reproducible: `posts/` should always equal `build(md, fragments)`, so never hand-edit
+built HTML — fix the markdown, a fragment, `style.css` or the template instead. `--draft` adds
+`noindex`; leave it off for a published post.
+
+Conventions the markdown and fragments must follow:
+
+- Charter has no hair-space glyph: use `&thinsp;` (in `et al.`, around `+`/`−`), never `&hairsp;`.
+- Colour tokens in `style.css` stay six-digit hex; the maze figure parses them.
+- Fragments may keep asking for `Source Serif 4` / `IBM Plex`; `style.css` aliases the serif to
+  Charter and the post template loads Plex, so nothing in the research repo needs to change.

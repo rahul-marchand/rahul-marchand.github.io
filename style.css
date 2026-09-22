@@ -6,7 +6,7 @@
 
 :root {
   color-scheme: light;
-  --paper: #ffffff;
+  --paper: #ffffff;   /* six-digit: figure scripts parse these tokens as hex */
   --panel: #fbfbfa;
   --ink: #1d1d1b;
   --ink-soft: #6f6f6b;
