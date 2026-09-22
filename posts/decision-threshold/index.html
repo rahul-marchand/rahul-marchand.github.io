@@ -868,10 +868,10 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   class="math inline">\(\mathbf{v}\)</span> sets the constant that this
   trade-off turns on.</p>
   <p>Note that the present evidence is consistent with this picture
-  rather than conclusively proving it. We have not yet fully
-  reverse-engineered the circuits here. For example separability alone
-  does not fix the order of the stages. In fact it seems likely that in
-  some of the architectures (DRC, ResNet) the axis is acting during the
+  rather than conclusively proving it. Some parts of the internal
+  mechanism are not yet understood. For example separability alone does
+  not fix the order of the stages. In fact it seems likely that in some
+  of the architectures (DRC, ResNet) the axis is acting during the
   planning stage and that even though valuation can be intervened on
   separately from planning these both occur in the same intertwined
   stage.</p>
@@ -898,14 +898,11 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   href="https://arxiv.org/abs/2212.01681">Andreas, 2022</a>). Humans
   appear to infer goals the same way, by inverting a planner (<a
   href="https://doi.org/10.1016/j.cognition.2009.07.005">Baker et al.,
-  2009</a>). What is new here is that the latent is a goal with a
-  ground-truth value, and that it is stored as a single weight direction
-  rather than inferred per input, because the demonstrator’s goal never
-  changed. We state the general claim as a hypothesis: the
+  2009</a>). We state the general claim as a hypothesis: the
   goal-and-planner decomposition is the short description of
   goal-directed behaviour, optimisation finds short descriptions, so any
   system trained to produce or predict goal-directed behaviour should
-  tend to grow a goal circuit, and the better a goal-model compresses
+  tend to a form of goal circuit, and the better a goal-model compresses
   the behaviour, the cleaner the circuit.</p>
   <h2 id="conclusion">Conclusion</h2>
   <p>We set out to find the goal representation of an agent. One
@@ -930,9 +927,8 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   <p><strong>Formalise and quantify what we observe.</strong> A
   theoretical account of why we would expect to observe this parameter
   in the weights would be a natural complement to the empirical work
-  here. Additionally, quantifying the extent to which we can retarget an
-  agent seems to cut at a core part of mechanistic
-  goal-directedness.</p>
+  here. Additionally, we are interested in quantifying the extent to
+  which we can retarget an agent to new goals.</p>
   <h2 id="acknowledgements">Acknowledgements</h2>
   <p><a href="https://far.in.net">Matthew Farrugia-Roberts</a>
   supervised this work throughout and reviewed a draft of this post. The
