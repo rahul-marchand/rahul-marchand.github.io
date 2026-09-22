@@ -22,17 +22,27 @@ type="text/javascript"></script>
   <!-- Source of truth for the post. Plan/sketch: [[4YP Blog Post 1]] (link only works in Obsidian — no wiki-links in the prose below, pandoc can't read them). -->
   <!-- Build: ~/Code/rahul-marchand.github.io/build/build.sh "this file" decision-threshold <fragments-dir> [--draft] -->
   <h2 id="summary">Summary</h2>
-  <p>Our agents solve mazes with two rewarded objectives and a step
-  cost. The optimal solution involves weighing up the objectives’
-  rewards against the distances required to reach them. The maximum
-  number of extra steps that the agent will accept to reach the higher
-  valued objective is the decision threshold.</p>
-  <p>We found that this threshold is linearly encoded in a subset of the
-  model weights. Adjusting the weights by hand moves the agent’s
-  decision boundary as precisely and reliably as fine-tuning with a
-  different reward function. This result was reproduced across DRC (a
-  recurrent planning architecture), ResNet and ViT agents trained with
-  RL, and in a transformer trained using imitation learning.</p>
+  <p>Trained AI systems increasingly behave as though pursuing goals,
+  but our definitions and understanding of goal-directedness remain
+  mostly behavioural. We want to know what inside a trained agent makes
+  this goal-model predictive, and to build concepts of goal-directedness
+  that refer to mechanisms and implementations rather than behaviour:
+  the concepts and tools we need to differentiate between a look-up
+  table indexing goal-directed behaviour and a mesa-optimiser-style
+  utility maximiser. This post is an exploratory first step towards
+  this.</p>
+  <p>We train agents to solve mazes with two goals of different value
+  and a step cost. The optimal policy weighs each goal’s value against
+  the distance to reach it, and the maximum number of extra steps an
+  agent will accept to reach the higher-valued goal is its decision
+  threshold.</p>
+  <p>We find this threshold is a single direction in the weights. Adding
+  that direction to the base agent’s weights by hand moves the threshold
+  as precisely as fine-tuning on a different reward function,
+  extrapolates beyond the range it was fitted on, and leaves the agent’s
+  route planning intact. We find the same in a DRC (recurrent), ResNet
+  and ViT agent trained with RL, and in a transformer trained using
+  imitation learning.</p>
   <figure class="fig-basin" id="basin-fig">
 <style>
   .fig-basin {
@@ -398,14 +408,13 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
 })();
 </script>
 </figure>
-
   <h2 id="motivation">Motivation</h2>
   <p>AI systems increasingly display goal-directed behaviour ranging
   from the simple “win the game” objective of a chess engine to the more
   complicated objectives of an LLM (<a
   href="https://arxiv.org/abs/2504.11844">Everitt et al., 2025</a>).</p>
-  <p>Work on understanding of goal-directed behaviour in agents has so
-  far been largely behavioural (<a
+  <p>Work on understanding goal-directed behaviour in agents has so far
+  been largely behavioural (<a
   href="https://www.cs.tufts.edu/comp/150AAA/DennettTrueBelievers.pdf">Dennett,
   1981</a>; <a href="https://arxiv.org/abs/1805.12387">Orseau et al.,
   2018</a>; <a href="https://arxiv.org/abs/2412.04758">MacDermott et
@@ -558,7 +567,6 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   Probing follows Bush et al., adapted to route cells.</p></figcaption>
 </div>
 </figure>
-
   <p>We reproduced Bush et al.’s planning results on our new
   environment. We can read the agent’s plan from its activations
   (<a class="xref" href="#taskplan-fig">Figure 2b</a>) and writing plans in also works, though less
@@ -592,7 +600,7 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   grid arms, minimising <span class="math inline">\(\sum_i \lVert
   \mathbf{r}_i \rVert^2\)</span>. When relevant the value we are trying
   to write to is held out from this fit.</p>
-  <p>To produce the breakdown in the below table we fit <span
+  <p>To produce the breakdown in the table below we fit <span
   class="math inline">\(\mathbf{d}\)</span> and <span
   class="math inline">\(\mathbf{v}\)</span> over all 18 arms for an
   agent then decompose the weight change at <span
@@ -656,13 +664,13 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   </div>
   <p>We find that the <span class="math inline">\(\mathbf{v}_0\)</span>
   fitted on arms trained by varying one objective and the <span
-  class="math inline">\(\mathbf{v}_1\)</span> fit on arms trained by
+  class="math inline">\(\mathbf{v}_1\)</span> fitted on arms trained by
   varying the other objective are approximately the same <span
   class="math inline">\(\mathbf{v}\)</span>; see <a class="xref" href="#app-cosine">Appendix C</a>.</p>
   <p>For a short study of how the proportions of <span
   class="math inline">\(\mathbf{d}\)</span>, <span
   class="math inline">\(\mathbf{v}\)</span> and <span
-  class="math inline">\(\mathbf{r}_i\)</span> change as we finetune for
+  class="math inline">\(\mathbf{r}_i\)</span> change as we fine-tune for
   longer see <a class="xref" href="#app-longer">Appendix D</a>.</p>
   <p>For an analysis of where in the weights <span
   class="math inline">\(\mathbf{v}\)</span> concentrates see
@@ -676,22 +684,23 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   Threshold</h2>
   <p>When writing a value offset of <span
   class="math inline">\(\alpha\)</span> into the weights we hold out
-  that value from the grid of finetunes used to fit <span
+  that value from the grid of fine-tunes used to fit <span
   class="math inline">\(\mathbf{d}\)</span> and <span
   class="math inline">\(\mathbf{v}\)</span>. We then add the scaled axis
-  to the frozen base weights: <span class="math inline">\(\theta_{base}
-  + \alpha\,\mathbf{v}\)</span> (no drift component included).</p>
+  to the frozen base weights: <span
+  class="math inline">\(\theta_{\text{base}} +
+  \alpha\,\mathbf{v}\)</span> (no drift component included).</p>
   <p>How we estimate an agent’s learnt decision threshold, <span
-  class="math inline">\(\hat{\tau}\)</span> , from its behaviour is
+  class="math inline">\(\hat{\tau}\)</span>, from its behaviour is
   described in <a class="xref" href="#app-tau">Appendix F</a>.</p>
   <p><a class="xref" href="#valueaxis-fig">Figure 3</a> compares these estimated values of <span
   class="math inline">\(\hat{\tau}\)</span> across the different
-  finetunes (filled circles) and the axis written agents (hollow
+  fine-tunes (filled circles) and the axis written agents (hollow
   circles). The optimal <span class="math inline">\(\tau^*\)</span> is
   designated by the grey dashed line.</p>
-  <p>We also test some finetunes and axis writes further out of
+  <p>We also test some fine-tunes and axis writes further out of
   distribution. These are not included in the fitting of <span
-  class="math inline">\(\mathbf{v}\)</span> and these finetunes are
+  class="math inline">\(\mathbf{v}\)</span> and these fine-tunes are
   shown as filled in squares. They span from <span
   class="math inline">\(-0.7\leq\alpha \leq-0.5\)</span>. We do not test
   <span class="math inline">\(\alpha &gt; 0.4\)</span> as the size of
@@ -727,7 +736,6 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   (<strong>(c)</strong>: one seed).</p></figcaption>
 </div>
 </figure>
-
   <p>The write reproduces the held-out arm’s threshold, as seen in
   <a class="xref" href="#valueaxis-fig">Figure 3</a>: to 0.4 [0.3, 0.5] steps in the DRC, 0.5 [0.2, 0.8] in
   the ResNet, 0.2 in the ViT and 0.9 [0.7, 1.1] in the BC transformer. A
@@ -739,10 +747,10 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   steps of the shortest path on average.</p>
   <p>Outside the fitted window the axis extrapolates well until
   attempting to write <span class="math inline">\(\tau &lt; 0\)</span>.
-  Finetuning is mostly still able to retarget the agent to this reward
-  function but fitting an axis to these new finetunes fails even in the
+  Fine-tuning is mostly still able to retarget the agent to this reward
+  function but fitting an axis to these new fine-tunes fails even in the
   same <span class="math inline">\(\tau &lt; 0\)</span> regime and the
-  axis fit on finetunes with <span class="math inline">\(\tau &gt;
+  axis fit on fine-tunes with <span class="math inline">\(\tau &gt;
   0\)</span> fails to write in this region. <a class="xref" href="#app-far">Appendix G</a> shows the full
   picture.</p>
   <p>Notably the agent’s learnt exchange rates are not perfect. The
@@ -750,12 +758,13 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   steps per unit of value; the DRC moves <span
   class="math inline">\(14\)</span>, the ResNet <span
   class="math inline">\(16\)</span>, the ViT <span
-  class="math inline">\(10\)</span> , and the BC transformer <span
+  class="math inline">\(10\)</span>, and the BC transformer <span
   class="math inline">\(22\)</span>. The RL agents are trained
   undiscounted (<span class="math inline">\(\gamma = 1\)</span>) so
-  would receive maximum reward for the task optimal tradeoff.</p>
+  would receive maximum reward for the task-optimal trade-off.</p>
   <h2 id="discussion">Discussion</h2>
-  <h3 id="relation-to-weight-steering">Relation to weight steering</h3>
+  <h3 id="why-is-the-threshold-a-single-direction-in-the-weights">Why is
+  the threshold a single direction in the weights?</h3>
   <p>Linear directions in weight space that control a behaviour are not
   new. Task vectors add and subtract (<a
   href="https://arxiv.org/abs/2212.04089">Ilharco et al., 2023</a>), the
@@ -764,214 +773,175 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   and interpolating between policies fine-tuned on different rewards
   trades off smoothly between them, even for a control policy trained
   from scratch (<a href="https://arxiv.org/abs/2306.04488">Ramé et al.,
-  2023</a>).</p>
-  <p>The standard explanations for why such directions exist are
-  geometric. Fine-tunes that start from the same trained weights stay in
-  one basin, close in parameter space (<a
+  2023</a>). There are a couple of existing candidate explanations for
+  this.</p>
+  <p>The first describes fine-tuning as a small perturbation of the base
+  weights. Fine-tunes starting from the same trained weights stay in one
+  basin, close in parameter space (<a
   href="https://arxiv.org/abs/2008.11687">Neyshabur et al., 2020</a>),
   and fine-tuning is often well described by linearising the network
   around its starting weights (<a
   href="https://arxiv.org/abs/2210.05643">Malladi et al., 2023</a>). Our
-  base training would be the shared initialisation, the fine-tunes are
-  short, and the change we ask for is one-dimensional, so a line between
-  value-shifted fine-tunes is expected on these grounds.</p>
-  <p>These accounts explain why fine-tuning leaves a localised,
-  straight, low-dimensional, composable trace in the weights. They say
-  nothing about what any particular direction means: what quantity in
-  the agent’s computation it corresponds to, or why moving along this
-  one changes the decision threshold and nothing else. In language
-  models, one hypothesis is that the steered property varies across the
-  pretraining corpus, so the model learns a latent variable for it. The
-  weights fix a prior over this variable and each prompt is evidence the
-  model conditions on to infer its value (<a
+  base training is the shared initialisation, the fine-tunes are short,
+  and the change we ask for is one-dimensional, so a line between
+  value-shifted fine-tunes is expected on these grounds. For the RL
+  agents the account predicts more than a line. The return is linear in
+  the reward, so the fine-tuning gradient is affine in the value shift,
+  and to first order the weight change is linear in that gradient (<a
+  href="https://arxiv.org/abs/1703.04730">Koh &amp; Liang, 2017</a>; <a
+  href="https://arxiv.org/abs/2310.12808">Daheim et al., 2024</a>). That
+  is exactly the form we fit, a drift shared by every arm plus one
+  direction scaled by the shift.</p>
+  <p>But this explanation is limited: it predicts a line near the base,
+  and says nothing about how far the line holds, how it fails, or which
+  part of the weight change matters. We have three observations that
+  this leaves unexplained:</p>
+  <ul>
+  <li>The line holds across the whole measurable range of <span
+  class="math inline">\(\tau\)</span>, from the largest the mazes allow
+  down to <span class="math inline">\(\tau\)</span> near zero
+  (<a class="xref" href="#valueaxis-fig">Figure 3</a>). A local expansion has no reason to hold this
+  far.</li>
+  <li>The write collapses at <span
+  class="math inline">\(\tau&lt;0\)</span>, and no axis can be fitted
+  past that point (<a class="xref" href="#app-far">Appendix G</a>). The failure is sharp and sits at a
+  meaningful point, parity, while a first-order account would predict
+  gradual degradation with distance from the base.</li>
+  <li><span class="math inline">\(\mathbf{v}\)</span> is 14–30% of each
+  arm’s weight change (<a class="xref" href="#tbl-decomp">Table 1</a>), yet written alone, with drift and
+  residual left out, it moves <span class="math inline">\(\tau\)</span>
+  across this whole range and leaves navigation untouched.</li>
+  </ul>
+  <p>Second, in language models, one hypothesis is that the steered
+  property varies across the pretraining corpus, so the model learns a
+  latent variable for it. The weights fix a prior over this variable and
+  each prompt is evidence the model conditions on to infer its value (<a
   href="https://arxiv.org/abs/2111.02080">Xie et al., 2021</a>), with
-  fine-tuning then shifting the prior. Persona-vector work is loosely in
-  this spirit, with fine-tuning shifting a model along the activation
-  direction that prompting elicits (<a
+  fine-tuning, in this view, then shifting the prior. Persona-vector
+  work is loosely in this spirit, with fine-tuning shifting a model
+  along the activation direction that prompting elicits (<a
   href="https://arxiv.org/abs/2507.21509">Chen et al., 2025</a>). Our
   goal values never vary and are never observed, so there is no such
   variable to fix a prior over, and this hypothesis cannot explain our
   results.</p>
-  <h3 id="why-a-free-parameter-appears">Why a free parameter
-  appears</h3>
-  <p>The literature discussed in the last section predicts more than a
-  line. For the RL agents the return is linear in the reward, so the
-  change a value shift makes to the fine-tuning gradient is affine in
-  the shift, and to first order the weight change is linear in that
-  gradient (<a href="https://arxiv.org/abs/1703.04730">Koh &amp; Liang,
-  2017</a>; <a href="https://arxiv.org/abs/2310.12808">Daheim et al.,
-  2024</a>). The prediction is therefore exactly the form we fit: a
-  drift shared by every arm plus one direction scaled by the shift,
-  calibrated in value units. We can also predict that raising one goal’s
-  value and lowering the other’s move the weights the same way, which is
-  what we find (<a class="xref" href="#app-cosine">Appendix C</a>). The agent never observes the values, and
-  the only thing its policy controls is which goal it reaches, so the
-  training signal for rewarding one goal more is the same as for
-  rewarding the other less. This account however fails to explain the
-  following:</p>
-  <ul>
-  <li>This linear weight change is robust across a long distance in
-  <span class="math inline">\(\tau\)</span>, ranging from the largest
-  <span class="math inline">\(\tau\)</span> the mazes allow us to
-  measure down to <span class="math inline">\(\tau\)</span> near zero
-  (<a class="xref" href="#valueaxis-fig">Figure 3</a>). This seems much longer than you’d expect if the
-  local first-order explanation were the sole cause of this.</li>
-  <li>Writing collapses at <span class="math inline">\(\tau &lt;
-  0\)</span>, and no axis can be fitted past that point (<a class="xref" href="#app-far">Appendix G</a>). The
-  boundary seems to mark a change in internal mechanism rather than
-  fading with distance from the base model.</li>
-  <li><span class="math inline">\(\mathbf{v}\)</span> concentrates in
-  the same parts of the weights across seeds, though where varies across
-  architectures and this concentration is weakest in the BC transformer
-  (<a class="xref" href="#app-where">Appendix E</a>).</li>
-  <li>Writing <span class="math inline">\(\mathbf{v}\)</span> alone,
-  with the drift and residual left out, moves <span
-  class="math inline">\(\tau\)</span> without harming navigation.</li>
-  </ul>
   <p>We suggest that <span class="math inline">\(\mathbf{v}\)</span>
-  exists because of how the agent structures the computation it needs to
-  perform to solve the task . Solving the task requires three things: a
-  planned route to each goal, a score for each route, and a comparison
-  of the two scores. Assigning a score for each route requires having a
-  value for the final objective reached by that route. The agent never
-  observes that value, so it must store it, and since the training
-  signal only ever specifies the difference between them (specifically
-  its ratio with the step penalty), one stored constant is all there is
-  to find. <span class="math inline">\(\mathbf{v}\)</span> is this
-  constant. Behaviour cannot tell whether <span
-  class="math inline">\(\mathbf{v}\)</span> encodes be used to infer a
-  difference in value, the step cost or the threshold itself, since only
+  exists because of what solving the task demands of the agent’s
+  computation. Solving it requires three things: a planned route to each
+  goal, a score for each route, and a comparison of the two scores.
+  Scoring a route requires a value for the goal it reaches. The agent
+  never observes the goal values, so it must store them, and since the
+  training signal only ever fixes their difference (more precisely, its
+  ratio to the step cost), one stored constant is all there is to find.
+  <span class="math inline">\(\mathbf{v}\)</span> is where it is stored:
+  moving along <span class="math inline">\(\mathbf{v}\)</span> changes
+  this one constant. Behaviour cannot tell whether the constant is a
+  value difference, a step cost or the threshold itself, since only
   their ratio is identifiable.</p>
-  <p>This would explain the properties above. We observe prediction
-  across the whole range since a stored constant has no decay window.
-  The collapse happens at <span class="math inline">\(\tau &lt;
-  0\)</span>, because the input’s goal channels mean “the richer goal”
-  and “the poorer goal” throughout training, so a constant that reverses
-  them contradicts what the circuit was built to read, and needs a
-  different circuit rather than a different setting. We see intact
-  navigation, because the scoring step is being changed and the planning
-  step is not.</p>
-  <p>What is notable is not that this constant exists at all, since any
-  circuit that scores by value has one somewhere, but that it exists as
-  a single legible direction despite not being variable during
-  training.</p>
+  <p>This accounts for the three observations above. The line holds
+  across the whole range because nothing about a stored constant is tied
+  to its base setting; there is no neighbourhood to leave. It fails at
+  parity because the input’s goal channels mean “the richer goal” and
+  “the poorer goal” throughout training, so a setting that reverses them
+  contradicts what the circuit was built to read, and needs a different
+  circuit rather than a different constant. And navigation survives the
+  write because what changes is how the goals are valued, not how routes
+  to them are found.</p>
+  <p>Put together, the perturbative account and the stored constant
+  answer the question this section asks: fine-tuning moves the weights
+  linearly in the training signal, and here the training signal can only
+  move one thing. What is notable is not that this constant exists at
+  all, since any circuit that scores by value has one somewhere, but
+  that it sits in the weights as a single legible direction despite
+  never varying during training.</p>
   <h3 id="evidence-for-modular-structure">Evidence for modular
   structure</h3>
-  <p>So far we understand two properties of the weights. <a
-  href="https://arxiv.org/abs/2504.01871">Bush et al., 2025</a> and the
-  follow-up work (<a href="https://arxiv.org/abs/2506.10138">Taufeeque
-  et al., 2026</a>) show that these agents form detailed plans
-  (<a class="xref" href="#taskplan-fig">Figure 2b</a>). We have shown that a single direction in its
-  weights changes which goal it chooses while leaving the route to that
-  goal shortest-path (<a class="xref" href="#valueaxis-fig">Figure 3</a>). So whatever computes the route
-  and whatever sets the choice can be moved independently: the
-  computation has at least two separable parts.</p>
-  <p>Planning circuits produce a route to each goal. A valuation step
-  scores each route, its goal’s value less the step cost of reaching it,
-  and <span class="math inline">\(\mathbf{v}\)</span> is the direction
-  that sets the constant this scoring turns on, the trade-off between
-  value and steps. A comparison picks the higher score and the agent
-  executes the corresponding plan. Note that the present evidence is
-  consistent with this picture rather than conclusively proving it,
-  since separability alone does not fix the order of the stages. Two
-  further details constrain the space of possible mechanisms that would
-  be consistent with our observations. The mechanism does not survive
-  <span class="math inline">\(\tau &lt; 0\)</span>, so the comparison is
-  built around which goal is the richer one rather than being symmetric.
-  And in the DRC the axis concentrates in the input convolution, so
-  there the value may be applied even before planning, as a gain on the
-  goal channel, rather than after it.</p>
-  <h3 id="beyond-reinforcement-learning">Beyond reinforcement
-  learning</h3>
-  <p>The BC transformer was trained to predict the next action of an
-  optimal solver, and it developed the same threshold parameter as the
-  RL agents, in the cleanest weight-space form of the four. This relates
-  to Dennett’s definition of goal-directedness introduced in
-  <a class="xref" href="#background">Section 2</a>. We said a system is goal-directed to the extent that
-  a goal-and-planner model is the most compact predictor of its
-  behaviour. Behaviour cloning performs essentially this, optimising for
-  a compact predictor of behaviour. Our BC transformer seeds all hold
-  the solver’s goal parameter in their weights, in this reading because
-  this is a compressed account of the solver’s actions. Predictors
-  internalising the latent variables of whatever generated their data
-  has precedent, a board state from move sequences (<a
+  <p>So far we understand two properties of the weights. We reproduced
+  the evidence <a href="https://arxiv.org/abs/2504.01871">Bush et al.,
+  2025</a> and the follow-up work (<a
+  href="https://arxiv.org/abs/2506.10138">Taufeeque et al., 2026</a>)
+  found showing that these agents form detailed plans
+  (<a class="xref" href="#taskplan-fig">Figure 2b</a>). We have also shown that a single direction in
+  its weights changes which objective the agent chooses without
+  affecting the agent’s planning capabilities (<a class="xref" href="#valueaxis-fig">Figure 3</a>).
+  Whatever computes the route and whatever sets the choice can be moved
+  independently: the computation has at least two separable parts.</p>
+  <p>We have the planning circuits which produce a route to each goal
+  and the valuation step that scores each route. Moving along <span
+  class="math inline">\(\mathbf{v}\)</span> sets the constant that this
+  trade-off turns on.</p>
+  <p>Note that the present evidence is consistent with this picture
+  rather than conclusively proving it. We have not yet fully
+  reverse-engineered the circuits here. For example separability alone
+  does not fix the order of the stages. In fact it seems likely that in
+  some of the architectures (DRC, ResNet) the axis is acting during the
+  planning stage and that even though valuation can be intervened on
+  separately from planning these both occur in the same intertwined
+  stage.</p>
+  <p>One further detail that constrains the space of possible mechanisms
+  that would be consistent with our observations is that the mechanism
+  breaks past <span class="math inline">\(\tau &lt; 0\)</span>, so the
+  comparison is built around which goal is the richer one rather than
+  being symmetric.</p>
+  <p>On a separate note the BC transformer was trained to predict the
+  next action of an optimal solver, and it developed the same threshold
+  parameter as the RL agents. In fact it was the cleanest of the four to
+  intervene on.</p>
+  <p>We note an interesting parallel to Dennett’s definition of
+  goal-directedness introduced in <a class="xref" href="#background">Section 2</a>. We said a system is
+  goal-directed to the extent that a goal-model is a compact predictor
+  of its behaviour. In a parallel way behaviour cloning essentially
+  directly optimises for and builds a compact predictor of behaviour.
+  Predictors internalising the latent variables of whatever generated
+  their data has precedent, a board state from move sequences (<a
   href="https://arxiv.org/abs/2210.13382">Li et al., 2023</a>), other
   agents’ preferences and beliefs from their trajectories (<a
   href="https://arxiv.org/abs/1802.07740">Rabinowitz et al., 2018</a>),
   and, it has been argued, the intentions of authors from their text (<a
-  href="https://arxiv.org/abs/2212.01681">Andreas, 2022</a>); humans
+  href="https://arxiv.org/abs/2212.01681">Andreas, 2022</a>). Humans
   appear to infer goals the same way, by inverting a planner (<a
   href="https://doi.org/10.1016/j.cognition.2009.07.005">Baker et al.,
   2009</a>). What is new here is that the latent is a goal with a
   ground-truth value, and that it is stored as a single weight direction
   rather than inferred per input, because the demonstrator’s goal never
-  changed.</p>
-  <p>We state the general claim as a hypothesis. The goal-and-planner
-  decomposition is the short description of goal-directed behaviour,
-  optimisation finds short descriptions, so any system trained to
-  produce or predict goal-directed behaviour should tend to grow a goal
-  circuit, and the better a goal model compresses the behaviour, the
-  cleaner the circuit.</p>
-  <h3 id="limitations">Limitations</h3>
-  <p><strong>This is not a full reverse-engineering.</strong> The
-  explanation above is inferred from what the axis does, not read from
-  the circuit. A messier implementation, say the axis modulating a
-  tangle of navigation heuristics inside the planner, could in theory
-  yield an equally clean steerable direction without a separate
-  valuation stage.</p>
-  <p><strong>Small agents on one task.</strong> On the order of millions
-  of parameters on 11×11 mazes.</p>
-  <p><strong>The valuation step is close to as simple as
-  possible.</strong> One scalar sets a binary choice. It is not clear
-  how the decomposition would evolve as tasks got more complicated.</p>
-  <p><strong>The agents are not optimal, and this is reflected in the
-  axis.</strong> The RL agents’ thresholds sit at 5 to 9 extra steps
-  against an optimum of 10, and their exchange rates are off the task’s
-  (<a class="xref" href="#app-agents">Appendix B</a>). The axis is calibrated to what fine-tuning produces,
-  not to the optimum, so a write moves the threshold as far as the
-  corresponding fine-tune would, and no further.</p>
-  <p><strong>Measurement.</strong> The ViT is one seed. The residual is
-  35 to 62 percent of the weight change; we showed the axis is
-  sufficient to move the threshold but did not directly test that the
-  drift and residual are behaviourally inert. The two sweeps find
-  opposing axes cleanly only in the DRC and BC transformer. Measurable
-  <span class="math inline">\(\hat{\tau}\)</span> is capped by maze
-  size, so the axis above <span class="math inline">\(\alpha =
-  0.4\)</span> is untested. Every arm was fine-tuned for one duration at
-  one learning rate (see <a class="xref" href="#app-longer">Appendix D</a> for a small test of finetuning for
-  longer).</p>
+  changed. We state the general claim as a hypothesis: the
+  goal-and-planner decomposition is the short description of
+  goal-directed behaviour, optimisation finds short descriptions, so any
+  system trained to produce or predict goal-directed behaviour should
+  tend to grow a goal circuit, and the better a goal-model compresses
+  the behaviour, the cleaner the circuit.</p>
   <h2 id="conclusion">Conclusion</h2>
   <p>We set out to find the goal representation of an agent. One
   component of it, the decision threshold, turns out to be a single
   direction in the weights: fitted from a grid of fine-tunes, it moves
   the threshold as precisely as retraining, extrapolates past the fitted
   range, leaves navigation untouched, and appears in three RL
-  architectures and in a transformer trained only to imitate an optimal
-  solver. The parameter is separable from the planning it steers. The
-  direction we care about is the extent to which trained agents
-  decompose into recognisable components, planning, valuation and
-  choice, with goals as parameters of the valuation step, in the way
-  hand-built agents once did by design (<a
-  href="https://aima.cs.berkeley.edu/">Russell &amp; Norvig, 2020</a>,
-  §2.4.5).</p>
+  architectures and in a transformer trained to imitate an optimal
+  solver. The parameter is separable from the planning it steers.</p>
+  <p>We aim to understand how far trained agents decompose into the
+  recognisable components of planning, valuation and choice, with goals
+  as parameters of the valuation step, in the way hand-built agents once
+  did by design (<a href="https://aima.cs.berkeley.edu/">Russell &amp;
+  Norvig, 2020</a>, §2.4.5).</p>
   <h3 id="potential-next-steps">Potential next steps</h3>
   <p><strong>Build a clearer picture of the mechanisms implemented in
-  the agent’s weights.</strong> Observe each stage of the
-  planning-goal-action hierarchy directly.</p>
-  <p><strong>Make the valuation step harder.</strong> More goals,
-  nonlinear values, goals nested inside plans. How does this
-  decomposition evolve?</p>
-  <p><strong>Quantify how close the learnt computation is to the ideal
-  one.</strong> The agents’ thresholds and exchange rates are off the
-  optimum by amounts we can measure but cannot yet explain. A
-  theoretical account of what determines that gap would be a natural
-  complement to the empirical work here.</p>
+  the agent’s weights.</strong> See if we can observe each stage of the
+  hypothesised planning-goal-action hierarchy directly.</p>
+  <p><strong>Make the valuation step more complicated.</strong> More
+  goals, nonlinear values, goals nested inside plans. How does the
+  representation of goals evolve?</p>
+  <p><strong>Formalise and quantify what we observe.</strong> A
+  theoretical account of why we would expect to observe this parameter
+  in the weights would be a natural complement to the empirical work
+  here. Additionally, quantifying the extent to which we can retarget an
+  agent seems to cut at a core part of mechanistic
+  goal-directedness.</p>
   <h2 id="acknowledgements">Acknowledgements</h2>
   <p><a href="https://far.in.net">Matthew Farrugia-Roberts</a>
   supervised this work throughout and reviewed a draft of this post. The
   research was funded by the <a href="https://wittlab.ai">Witt Lab</a>.
-  Thanks also to Tom Bush for feedback along the way. This is work in
-  progress, and any mistakes are my own.</p>
+  Thanks also to <a href="https://tuphs28.github.io">Tom Bush</a> for
+  feedback along the way. This is work in progress, and any mistakes are
+  my own.</p>
   <h2 id="bibliography">Bibliography</h2>
   <ul>
   <li>Andreas, J. (2022). Language Models as Agent Models. <em>Findings
@@ -1299,8 +1269,8 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   <p>Second, fine-tuning concentrates its weight changes in the same few
   directions whatever the values trained toward. To control for this we
   fit axes on arms trained with shuffled value labels. The Null column
-  in the table below is the cos value of the 5th percentile cos value
-  (ordered by size).</p>
+  in the table below is the 5th percentile of the cosine under this
+  shuffled-label null.</p>
   <table>
   <caption>Whether the two sweeps are adjusting the weights along the
   same axis. Ranges are min to max over independent base agents. Each
@@ -1393,7 +1363,7 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   about 9 steps per unit of value at 100k to 14 at the standard budget
   and plateaus near 16 from 1M steps on, still short of the task’s
   optimal 20. Some of the undershoot in <a class="xref" href="#valueaxis-fig">Figure 3</a> is unfinished
-  learning; some of it seems to potentially be a stable gap.</p>
+  learning; some of it may be a stable gap.</p>
   <p>Panel (c) tracks two arms trained past parity, both asked for <span
   class="math inline">\(\tau^* = -4\)</span>. They still sit near <span
   class="math inline">\(\hat{\tau} = +1.5\)</span> at the standard
@@ -1437,7 +1407,6 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   three independent base agents and shading spans their range.</p></figcaption>
 </div>
 </figure>
-
   </details>
   <details class="wide" id="app-where">
   <summary>Appendix E: 
@@ -1516,7 +1485,6 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   the DRC, ResNet and BC transformer and one for the ViT.</p></figcaption>
 </div>
 </figure>
-
   <p>A tensor’s slice is linearly controllable. Writing it at half, one,
   two, four and eight times its own size moves the threshold in
   proportion, in every tensor that moves it at all (<a class="xref" href="#axis-dose-fig">Figure 6</a>).</p>
@@ -1548,7 +1516,6 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   Saturation bends below them.</p></figcaption>
 </div>
 </figure>
-
   </details>
   <details class="wide" id="app-tau">
   <summary>Appendix F: 
@@ -1602,12 +1569,11 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   into its weights at α = ±0.2 (α in units of the 0.5 goal’s value);
   raising that value (α = +0.2) shifts the curve left. These are two
   fixed doses along the write that <a class="xref" href="#valueaxis-fig">Figure 3</a>’s dashed ribbons
-  sweep continuously. Shading spans the three independent bases (is the
+  sweep continuously. Shading spans the three independent bases (the
   decode’s 95% interval for the ViT). Grey dashes: the task-optimal
   crossing at gap 10, identical in every panel.</p></figcaption>
 </div>
 </figure>
-
   </details>
   <details class="wide" id="app-far">
   <summary>Appendix G: 
@@ -1622,18 +1588,18 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   reverses its preference. None of these arms enter any axis fit.</p>
   <p>Fine-tuning works past <span class="math inline">\(\tau =
   0\)</span> in the ResNet, the ViT and the BC transformer. The DRC at
-  the standard 400k steps is the exception. Its arms stall just below
-  zero, and it reverses only under longer fine-tuning, crossing after
-  about 750k steps (<a class="xref" href="#arm-length-fig">Figure 4c</a>).</p>
+  the standard 400k steps is the exception. Its arms stall just above
+  zero, near <span class="math inline">\(\hat{\tau} = +2\)</span>, and
+  it reverses only under longer fine-tuning, crossing after about 750k
+  steps (<a class="xref" href="#arm-length-fig">Figure 4c</a>).</p>
   <p>The write does not work past <span class="math inline">\(\tau =
-  0\)</span>. Approaching the written threshold flattens away from the
-  fine-tuned line, and pushed further the written agent stops finishing
-  episodes at all.</p>
+  0\)</span>. Approaching it, the written threshold flattens away from
+  the fine-tuned line, and pushed further the written agent stops
+  finishing episodes at all.</p>
   <p>The failure is not a matter of distance from the base weights.
   Fitting a fresh axis to the far arms themselves fails even within the
   <span class="math inline">\(\tau &lt; 0\)</span> regime that those
-  arms occupy.
-  <!-- TODO: one quantitative line, e.g. cosine between far-fit sweeps or write error, to substantiate "fails" --></p>
+  arms occupy.</p>
   <figure class="fig-valueaxis wide" id="valueaxis-far-fig">
 <style>
   .fig-valueaxis {
@@ -1654,19 +1620,28 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
 </svg>
 <figcaption><p>The threshold as either goal’s value is carried far past the fitted
   window: <strong>(a)</strong> the DRC, <strong>(b)</strong> the ResNet,
-  <strong>(c)</strong> the ViT, <strong>(d)</strong> the BC transformer.
-  Solid, filled: fine-tuned arms, all held out of the axis fit. Dashed,
-  open: the frozen base agent with the axis written into its weights,
-  <span class="math inline">\(\theta + \alpha\,\mathbf{v}\)</span>, the
-  axis fitted only on the <span class="math inline">\(\pm0.4\)</span>
-  grid. Grey dashes: the task’s optimal exchange rate, crossing <span
-  class="math inline">\(\tau = 0\)</span> at parity. The written curve
-  flattens approaching the reversal and stops finishing episodes beyond
-  it.
-  <!-- TODO: check legend wording against the fragment and state seed counts --></p></figcaption>
+  <strong>(c)</strong> the ViT, <strong>(d)</strong> the BC transformer;
+  red moves the <span class="math inline">\(1.0\)</span> goal’s value,
+  blue the <span class="math inline">\(0.5\)</span> goal’s. Solid,
+  filled: fine-tuned arms; circles are the <span
+  class="math inline">\(\pm0.4\)</span> grid the axis was fitted from,
+  squares the arms beyond it, held out of every fit. Dashed, open: the
+  frozen base agent with the grid-fitted axis written into its weights,
+  <span class="math inline">\(\theta + \alpha\,\mathbf{v}\)</span>; the
+  cross marks the first dose at which the written agent stops finishing
+  episodes. The faint band is the fitted window. Grey dashes: each
+  sweep’s task-optimal exchange rate, crossing <span
+  class="math inline">\(\tau = 0\)</span> at parity. Markers are means
+  over three independent base agents (one for the ViT) and shading spans
+  their range (the decode’s 95% interval for the ViT). The fine-tuned
+  arms cross the reversal in every architecture but the DRC; the written
+  curve flattens short of it, near <span
+  class="math inline">\(\hat{\tau} = +1\)</span> to <span
+  class="math inline">\(+2\)</span> (<span
+  class="math inline">\(-1\)</span> in the ViT), and in the BC
+  transformer turns back.</p></figcaption>
 </div>
 </figure>
-
   </details>
   <footer>© 2026 Rahul Marchand</footer>
 </div>
