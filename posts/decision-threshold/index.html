@@ -26,11 +26,10 @@ type="text/javascript"></script>
   but our definitions and understanding of goal-directedness remain
   mostly behavioural. We want to know what inside a trained agent makes
   this goal-model predictive, and to build concepts of goal-directedness
-  that refer to mechanisms and implementations rather than behaviour:
-  the concepts and tools we need to differentiate between a look-up
-  table indexing goal-directed behaviour and a mesa-optimiser-style
-  utility maximiser. This post is an exploratory first step towards
-  this.</p>
+  that refer to mechanisms and implementations rather than behaviour: we
+  want to differentiate between a look-up table indexing goal-directed
+  behaviour and a mesa-optimiser-style utility maximiser. This post is
+  an exploratory first step towards this.</p>
   <p>We train agents to solve mazes with two goals of different value
   and a step cost. The optimal policy weighs each goal’s value against
   the distance to reach it, and the maximum number of extra steps an
@@ -122,7 +121,7 @@ type="text/javascript"></script>
   <strong>v</strong> in the agent’s weights that linearly encodes the
   decision threshold: moving the weights a distance α along
   <strong>v</strong> shifts the decision boundary in every maze as if
-  the 0.5 goal’s value were 0.5 + α, while trajectories remain
+  the 0.5 goal’s value were 0.5 + α, while trajectories remain
   shortest-path optimal. The dashed line marks the reward-optimal
   decision boundary. Hovering over a cell shows the agent’s trajectory
   (solid) and, where it differs, the reward-optimal trajectory
@@ -408,6 +407,7 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
 })();
 </script>
 </figure>
+
   <h2 id="motivation">Motivation</h2>
   <p>AI systems increasingly display goal-directed behaviour ranging
   from the simple “win the game” objective of a chess engine to the more
@@ -560,13 +560,14 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   extra recurrence passes over the frozen observation, scores each cell
   on whether the coming route will pass through it (purple); the
   overlaid line is the route the agent then took. Beneath each maze,
-  each goal’s utility (value − 0.05×distance), with the agent’s choice
+  each goal’s utility (value − 0.05×distance), with the agent’s choice
   in bold. Across held-out mazes the probe reads the route at 0.95 AUC
-  [0.93, 0.97] (0.92 with no extra passes), against 0.51 for the same
+  [0.93, 0.97] (0.92 with no extra passes), against 0.51 for the same
   probe on an untrained network and 0.59 reading the raw observation.
-  Probing follows Bush et al., adapted to route cells.</p></figcaption>
+  Probing follows Bush et al., adapted to route cells.</p></figcaption>
 </div>
 </figure>
+
   <p>We reproduced Bush et al.’s planning results on our new
   environment. We can read the agent’s plan from its activations
   (<a class="xref" href="#taskplan-fig">Figure 2b</a>) and writing plans in also works, though less
@@ -690,9 +691,15 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   to the frozen base weights: <span
   class="math inline">\(\theta_{\text{base}} +
   \alpha\,\mathbf{v}\)</span> (no drift component included).</p>
-  <p>How we estimate an agent’s learnt decision threshold, <span
-  class="math inline">\(\hat{\tau}\)</span>, from its behaviour is
-  described in <a class="xref" href="#app-tau">Appendix F</a>.</p>
+  <p>We read an agent’s learnt decision threshold, <span
+  class="math inline">\(\hat{\tau}\)</span>, from its behaviour: we roll
+  it out on held-out mazes, record for each episode how many steps
+  farther the <span class="math inline">\(1.0\)</span> goal was and
+  which goal it chose, and fit a logistic curve to the fraction choosing
+  the <span class="math inline">\(1.0\)</span> goal against that gap.
+  <span class="math inline">\(\hat{\tau}\)</span> is the gap at which
+  the agent is indifferent between the goals, the curve’s 0.5 crossing.
+  Details are in <a class="xref" href="#app-tau">Appendix F</a>.</p>
   <p><a class="xref" href="#valueaxis-fig">Figure 3</a> compares these estimated values of <span
   class="math inline">\(\hat{\tau}\)</span> across the different
   fine-tunes (filled circles) and the axis written agents (hollow
@@ -731,11 +738,12 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   Solid, filled: agents fine-tuned at the shifted value (circles: arms
   the axis was fitted from; squares: arms never included in the fit).
   Dashed, open: the frozen base agent with the fitted axis written into
-  its weights, θ + α · <strong>v</strong>. Grey dashes: the task’s
+  its weights, θ + α · <strong>v</strong>. Grey dashes: the task’s
   optimal exchange rate. Shading marks the range across the three seeds
   (<strong>(c)</strong>: one seed).</p></figcaption>
 </div>
 </figure>
+
   <p>The write reproduces the held-out arm’s threshold, as seen in
   <a class="xref" href="#valueaxis-fig">Figure 3</a>: to 0.4 [0.3, 0.5] steps in the DRC, 0.5 [0.2, 0.8] in
   the ResNet, 0.2 in the ViT and 0.9 [0.7, 1.1] in the BC transformer. A
@@ -1407,6 +1415,7 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   three independent base agents and shading spans their range.</p></figcaption>
 </div>
 </figure>
+
   </details>
   <details class="wide" id="app-where">
   <summary>Appendix E: 
@@ -1485,6 +1494,7 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   the DRC, ResNet and BC transformer and one for the ViT.</p></figcaption>
 </div>
 </figure>
+
   <p>A tensor’s slice is linearly controllable. Writing it at half, one,
   two, four and eight times its own size moves the threshold in
   proportion, in every tensor that moves it at all (<a class="xref" href="#axis-dose-fig">Figure 6</a>).</p>
@@ -1516,6 +1526,7 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   Saturation bends below them.</p></figcaption>
 </div>
 </figure>
+
   </details>
   <details class="wide" id="app-tau">
   <summary>Appendix F: 
@@ -1574,6 +1585,7 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   crossing at gap 10, identical in every panel.</p></figcaption>
 </div>
 </figure>
+
   </details>
   <details class="wide" id="app-far">
   <summary>Appendix G: 
@@ -1642,6 +1654,7 @@ const DATA = {"agent":"novalue11.s1234","sweep":"o1","baseValues":[1.0,0.5],"ste
   transformer turns back.</p></figcaption>
 </div>
 </figure>
+
   </details>
   <footer>© 2026 Rahul Marchand</footer>
 </div>
